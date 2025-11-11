@@ -27,14 +27,17 @@
       "@/": [
         "src/"
       ],
-      "@/components/": [
-        "src/components/"
+      "@/components/*": [
+        "src/components/*"
       ],
-      "@/lib/": [
-        "src/lib/"
+      "@/lib/*": [
+        "src/lib/*"
       ],
-      "@/types/": [
-        "src/types/"
+      "@/types/*": [
+        "src/types/*"
+      ],
+      "@/styles/*": [
+        "src/styles/*"
       ]
     }
   },
