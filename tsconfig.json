@@ -22,9 +22,10 @@
         "name": "next"
       }
     ],
+    // 👇 Added alias support
     "baseUrl": ".",
     "paths": {
-      "@/": [
+      "@/*": [
         "src/"
       ],
       "@/components/*": [
