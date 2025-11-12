@@ -24,10 +24,12 @@
     ],
     "baseUrl": "src",
     "paths": {
-      "@/*": [
-        "*"
-      ]
-    }
+      "@/*": ["src/*" ],
+      "@/components/*": ["src/components/*"],
+      "@/lib/*": ["src/lib/*"],
+      "@/types/*": ["src/types/*"]
+    },
+     "plugins": [{ "name": "next" }]
   },
   "include": [
     "*/.ts",

@@ -1,19 +1,11 @@
-import type { User } from '@/types/user'
-
-
-const user: User = {
-  id: '1',
-  name: 'Anirva',
-  email: 'anirva@example.com',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
+// src/app/page.tsx (or wherever your page component is)
+import type { User } from '../types/user'
 
 export default function Home() {
   const user: User = {
     id: '1',
-    name: 'Anirva',
-    email: 'anirva@example.com',
+    name: 'Aiswarya',
+    email: 'aiswarya@example.com',
     createdAt: new Date(),
     updatedAt: new Date(),
   }
