@@ -3,8 +3,8 @@ import type { User } from '@/types/user'
 
 const user: User = {
   id: '1',
-  name: 'Anirva',
-  email: 'anirva@example.com',
+  name: 'Eldhose',
+  email: 'eldhose@gmail.com',
   createdAt: new Date(),
   updatedAt: new Date(),
 }
@@ -12,8 +12,8 @@ const user: User = {
 export default function Home() {
   const user: User = {
     id: '1',
-    name: 'Anirva',
-    email: 'anirva@example.com',
+    name: 'Eldhose',
+    email: 'eldhose@gmail.com',
     createdAt: new Date(),
     updatedAt: new Date(),
   }
