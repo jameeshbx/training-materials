@@ -1,21 +1,12 @@
-"use client"; // tells Next.js this is a client component
-
 export default function Navbar() {
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-lg p-4">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        {/* Left side - logo or title */}
-        <h1 className="text-2xl font-bold tracking-wide">My Next App</h1>
-
-        {/* Right side - links */}
-        <ul className="flex space-x-6 text-lg">
-          <li>
-            <a href="/" className="hover:text-yellow-300 transition-colors">
-              Home
-            </a>
-          </li>
+    <nav className="w-full bg-white/70 backdrop-blur-md shadow-sm border-b border-gray-200">
+      <div className="max-w-6xl mx-auto px-6 py-3 flex justify-between items-center">
+        <h1 className="font-bold text-lg text-blue-600">Next JS</h1>
+        <div className="space-x-4">
+          <a href="#" className="text-gray-700 hover:text-blue-600">Home</a>
           
-        </ul>
+        </div>
       </div>
     </nav>
   );
