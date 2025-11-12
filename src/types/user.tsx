@@ -7,3 +7,11 @@ export interface User {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface ServiceCard{
+  id:number;
+  title:string;
+  description:string;
+  imageUrl:string;
+
+}
