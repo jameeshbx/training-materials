@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 import { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/footer";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
@@ -10,6 +11,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <main className="flex flex-col items-center justify-center min-h-[80vh] max-w-5xl mx-auto px-6 text-center">
           {children}
         </main>
+        <Footer />
       </body>
     </html>
   );
