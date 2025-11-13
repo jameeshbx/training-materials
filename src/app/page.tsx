@@ -1,39 +1,50 @@
-import type { User } from '@/types/user'
 
-
-const user: User = {
-  id: '1',
-  name: 'Anirva',
-  email: 'anirva@example.com',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
+import type { User } from "@/types/user";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const user: User = {
-    id: '1',
-    name: 'Anirva',
-    email: 'anirva@example.com',
+    id: "1",
+    name: "Gokul",
+    email: "gokul@example.com",
     createdAt: new Date(),
     updatedAt: new Date(),
-  }
+  };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center">
-      <h1 className="text-3xl font-bold text-blue-600">
-        Welcome, {user.name}! 👋
-      </h1>
-      <p className="mt-2 text-gray-600">
-        Your email: {user.email}
-      </p>
-      <p className="text-gray-400 text-sm">
-        Member since: {user.createdAt.toDateString()}
-      </p>
-    </div>
-  )
+    <main className="min-h-screen flex items-center justify-center bg-gray-100">
+      <Card className="w-full max-w-md shadow-lg">
+        <CardHeader>
+          <CardTitle className="text-center text-2xl font-semibold text-blue-600">
+            Welcome, {user.name}! 👋
+          </CardTitle>
+        </CardHeader>
+
+        <CardContent className="space-y-4">
+          <p className="text-gray-500 text-center">
+            Your email: {user.email}
+          </p>
+
+          {/* Input fields */}
+          <Input placeholder="Enter your name" />
+          <Input type="email" placeholder="Enter your email" />
+
+          {/* Buttons */}
+          <div className="flex justify-between mt-4">
+            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+              Submit
+            </Button>
+            <Button
+              variant="secondary"
+              className="bg-gray-200 hover:bg-gray-300 text-gray-800"
+            >
+              Cancel
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </main>
+  );
 }
-
-
-
-
-
