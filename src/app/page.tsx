@@ -1,39 +1,10 @@
-import type { User } from '@/types/user'
+import Home from "@/components/Home/Home";
+export default function UserHome() {
 
-
-const user: User = {
-  id: '1',
-  name: 'Eldhose',
-  email: 'eldhose@gmail.com',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
-
-export default function Home() {
-  const user: User = {
-    id: '1',
-    name: 'Eldhose',
-    email: 'eldhose@gmail.com',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center">
-      <h1 className="text-3xl font-bold text-blue-600">
-        Welcome, {user.name}! 👋
-      </h1>
-      <p className="mt-2 text-gray-600">
-        Your email: {user.email}
-      </p>
-      <p className="text-gray-400 text-sm">
-        Member since: {user.createdAt.toDateString()}
-      </p>
-    </div>
-  )
+   <div>
+    <Home />
+   </div>
+  );
 }
-
-
-
-
-
