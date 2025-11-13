@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -6,7 +7,10 @@ import { Input } from "@/components/ui/input";
 
 export default function Home() {
   return (
-    <main className="w-full flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
+    // <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+    // <div className="flex items-center justify-center min-h-[calc(100vh-80px)] w-full">
+    <div className="flex items-center justify-center w-full">
+
       <Card
         title="Sign In"
         className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
@@ -22,11 +26,11 @@ export default function Home() {
             type="password"
             className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
           />
-          <Button
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
-          >
+
+          <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold">
             Login
           </Button>
+
           <Button
             variant="secondary"
             className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold"
@@ -35,6 +39,6 @@ export default function Home() {
           </Button>
         </div>
       </Card>
-    </main>
+    </div>
   );
 }

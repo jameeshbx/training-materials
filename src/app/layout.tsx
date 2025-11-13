@@ -28,7 +28,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </header>
 
             {/* PAGE CONTENT */}
-            <main className="pt-20 px-6">
+            {/* <main className="pt-20 px-6"> */}
+            <main className="flex-1 flex items-center justify-center px-6 pt-40">
               {children}
             </main>
 
