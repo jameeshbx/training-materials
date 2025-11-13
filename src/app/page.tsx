@@ -1,39 +1,40 @@
-import type { User } from '@/types/user'
+"use client";
 
-
-const user: User = {
-  id: '1',
-  name: 'Anirva',
-  email: 'anirva@example.com',
-  createdAt: new Date(),
-  updatedAt: new Date(),
-}
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
-  const user: User = {
-    id: '1',
-    name: 'Anirva',
-    email: 'anirva@example.com',
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  }
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen text-center">
-      <h1 className="text-3xl font-bold text-blue-600">
-        Welcome, {user.name}! 👋
-      </h1>
-      <p className="mt-2 text-gray-600">
-        Your email: {user.email}
-      </p>
-      <p className="text-gray-400 text-sm">
-        Member since: {user.createdAt.toDateString()}
-      </p>
-    </div>
-  )
+    <main className="w-full flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
+      <Card
+        title="Sign In"
+        className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
+      >
+        <div className="space-y-5">
+          <Input
+            placeholder="Email"
+            type="email"
+            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+          />
+          <Input
+            placeholder="Password"
+            type="password"
+            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+          />
+          <Button
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+          >
+            Login
+          </Button>
+          <Button
+            variant="secondary"
+            className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold"
+          >
+            Register
+          </Button>
+        </div>
+      </Card>
+    </main>
+  );
 }
-
-
-
-
-
