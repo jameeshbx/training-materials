@@ -14,7 +14,7 @@ export default function Navbar() {
               Home
             </a>
           </li>
-          
+
         </ul>
       </div>
     </nav>
