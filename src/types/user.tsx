@@ -3,7 +3,7 @@ export interface User {
   id: string
   name: string
   email: string
-  avatarUrl?: string
+  imageUrl?: string
   createdAt: Date
   updatedAt: Date
 }
@@ -13,5 +13,21 @@ export interface ServiceCard{
   title:string;
   description:string;
   imageUrl:string;
+     
+}
+
+
+
+export interface Teammembers{
+  id:number;
+  name:string;
+  designation:string;
+  avatar?: string;
+}
+
+export interface Tasks{
+  id:number;
+  task:string;
+  desc:string;
 
 }
