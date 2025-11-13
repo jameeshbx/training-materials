@@ -10,7 +10,7 @@ export default function Sidebar() {
     ];
 
     return (
-        // <aside className="w-64 bg-white border-r border-gray-200 p-6 min-h-screen">
+
         <aside className="w-64 h-[calc(100vh-4rem)] bg-[#F7F8FA] border-r border-gray-200 fixed left-0 top-16 flex flex-col">
             <nav className="space-y-4">
                 {menuItems.map((item) => (

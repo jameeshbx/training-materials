@@ -6,24 +6,7 @@ import Sidebar from "../components/Sidebar";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    // <html lang="en">
-    //   <body className="min-h-screen bg-gray-50 text-gray-900 flex">
 
-
-    //     <Sidebar />
-    //     {/* Main wrapper */}
-    //     <div className="flex-1 flex flex-col">
-    //       <Header />
-    //       {/* Page content */}
-    //       <main className="max-w-5xl mx-auto p-6">
-    //         {/* <Navbar /> */}
-    //         {children}
-    //       </main>
-
-    //     </div>
-
-    //   </body>
-    // </html>
     <html lang="en">
       <body className="bg-[#060E25] text-white">
 
