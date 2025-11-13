@@ -27,13 +27,13 @@ export default function Home() {
 
   return (
     <>
-      <div className="py-10 mt-15">
+      <div className="py-10 ">
         <h2 className="text-center text-3xl font-bold mb-5">Our Services</h2>
 
      {/*  Search Bar */}
 <div className="w-full flex justify-center sm:justify-start mt-10 px-4 sm:px-8 md:px-16">
   <div className="relative w-full sm:w-[400px] max-w-[400px]">
-    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
     <Input
       placeholder="Search services..."
       className="pl-10 py-5 text-lg border border-gray-300 focus-visible:ring-blue-600 w-full"

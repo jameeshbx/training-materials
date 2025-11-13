@@ -1,18 +1,25 @@
 import Footer from "@/components/Footer/Footer";
 import Navbar from "@/components/Navbar/Navbar";
 import "@/styles/globals.css";
+
 import { ReactNode } from "react";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
-        <main className="">
-      <Navbar />
+      <body>
+        <Navbar />
+
+        {/* Add spacing equal to Navbar height */}
+        <main className="pt-20">
           {children}
-          <Footer/>
-          </main>
+        </main>
+
+        <Footer />
       </body>
     </html>
   );
 }
+
+
