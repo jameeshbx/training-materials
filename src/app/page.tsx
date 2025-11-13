@@ -1,40 +1,38 @@
-"use client";
-
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-
-export default function Home() {
+export default function HomePage() {
   return (
-    <main className="w-full flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
-      <Card
-        title="Sign In"
-        className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
-      >
-        <div className="space-y-5">
-          <Input
-            placeholder="Email"
+    <div className="flex justify-center ">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-lg p-8 rounded-xl shadow-xl border border-white/20">
+        <h2 className="text-2xl font-bold mb-6 text-white">Sign In</h2>
+
+        <form className="space-y-4">
+          <input
             type="email"
-            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+            placeholder="Email"
+            className="w-full p-3 rounded-md bg-gray-700/50 border border-gray-600 placeholder-gray-300 text-white focus:ring-2 focus:ring-blue-500"
           />
-          <Input
-            placeholder="Password"
+
+          <input
             type="password"
-            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+            placeholder="Password"
+            className="w-full p-3 rounded-md bg-gray-700/50 border border-gray-600 placeholder-gray-300 text-white focus:ring-2 focus:ring-blue-500"
           />
-          <Button
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
+
+          <button
+            type="submit"
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-md font-semibold"
           >
             Login
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold"
+          </button>
+
+          <button
+            type="button"
+            className="w-full bg-gray-200 hover:bg-gray-300 text-gray-900 py-3 rounded-md font-semibold"
           >
             Register
-          </Button>
-        </div>
-      </Card>
-    </main>
+          </button>
+        </form>
+
+      </div>
+    </div>
   );
 }
