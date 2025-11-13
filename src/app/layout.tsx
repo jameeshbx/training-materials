@@ -1,15 +1,31 @@
-import "../styles/globals.css";
-import { ReactNode } from "react";
-import '../components/navbar'
-import Navbar from "../components/navbar";
+import "@/styles/globals.css";
+import Navbar from "../components/Navbar";
+import Sidebar from "../components/Sidebar";
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export const metadata = {
+  title: "My Next App",
+  description: "Dashboard with sidebar & header",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
-        <main className="max-w-5xl mx-auto p-6">
-          <Navbar/>
-          {children}</main>
+      <body className="flex flex-col min-h-screen">
+        {/* Header */}
+        <Navbar />
+
+        {/* Body: Sidebar + Main content */}
+        <div className="flex flex-1">
+          <Sidebar />
+
+          <main className="flex-1 p-6 overflow-y-auto bg-white">
+            {children}
+          </main>
+        </div>
       </body>
     </html>
   );
