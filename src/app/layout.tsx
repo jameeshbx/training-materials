@@ -1,7 +1,6 @@
 import "@/styles/globals.css";
-import Navbar from "../components/Navbar";
-import Sidebar from "../components/Sidebar";
-
+import Navbar from "@/components/navbar";
+import Sidebar from "@/components/sidebar";
 export const metadata = {
   title: "My Next App",
   description: "Dashboard with sidebar & header",
