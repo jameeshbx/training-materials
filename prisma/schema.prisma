@@ -8,19 +8,47 @@ datasource db {
 }
 
 model User {
+  id          String      @id @default(cuid())
+  name        String
+  email       String      @unique
+  avatarUrl   String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tasks       Task[]      @relation("AssigneeTasks")
+  timeEntries TimeEntry[]
+  teams       Team[]      @relation("TeamMembers")
+}
+
+model Team {
   id        String   @id @default(cuid())
   name      String
-  email     String   @unique
-  tasks     Task[]
   createdAt DateTime @default(now())
+  tasks     Task[]
+  members   User[]   @relation("TeamMembers")
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  status      String   @default("pending")
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  status      String      @default("pending")
+  completed   Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  teamId      String?
+  assigneeId  String?
+  assignee    User?       @relation("AssigneeTasks", fields: [assigneeId], references: [id])
+  team        Team?       @relation(fields: [teamId], references: [id])
+  timeEntries TimeEntry[]
+}
+
+model TimeEntry {
+  id        String    @id @default(cuid())
+  userId    String
+  taskId    String
+  start     DateTime
+  end       DateTime?
+  createdAt DateTime  @default(now())
+  task      Task      @relation(fields: [taskId], references: [id])
+  user      User      @relation(fields: [userId], references: [id])
 }
