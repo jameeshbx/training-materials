@@ -1,7 +1,7 @@
 "use client";
 "use client";
 
-import Sidebar from "@/components/Sidebar/Sidebar";
+import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 
