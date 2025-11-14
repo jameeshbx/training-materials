@@ -333,7 +333,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@prisma/client@npm:^6.0.0":
+"@prisma/client@npm:^6.19.0":
   version: 6.19.0
   resolution: "@prisma/client@npm:6.19.0"
   peerDependencies:
@@ -1560,7 +1560,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "nextjs-fullstack-training-app@workspace:."
   dependencies:
-    "@prisma/client": "npm:^6.0.0"
+    "@prisma/client": "npm:^6.19.0"
     "@radix-ui/react-avatar": "npm:^1.1.11"
     "@radix-ui/react-dialog": "npm:^1.1.15"
     "@radix-ui/react-slot": "npm:^1.2.4"
@@ -1573,7 +1573,7 @@ __metadata:
     lucide-react: "npm:^0.553.0"
     next: "npm:15.0.0"
     postcss: "npm:^8.5.6"
-    prisma: "npm:^6.0.0"
+    prisma: "npm:^6.19.0"
     react: "npm:^18.3.0"
     react-dom: "npm:^18.3.0"
     tailwind-merge: "npm:^3.4.0"
@@ -1689,7 +1689,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prisma@npm:^6.0.0":
+"prisma@npm:^6.19.0":
   version: 6.19.0
   resolution: "prisma@npm:6.19.0"
   dependencies:

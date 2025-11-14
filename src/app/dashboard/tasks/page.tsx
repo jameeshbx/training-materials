@@ -1,4 +1,4 @@
-import Task from '@/components/Tasks/Task'
+import Task from '@/components/Task'
 import React from 'react'
 
 export default function Tasks() {
