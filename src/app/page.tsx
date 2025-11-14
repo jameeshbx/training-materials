@@ -1,50 +1,44 @@
 
-import type { User } from "@/types/user";
+"use client";
+
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 
 export default function Home() {
-  const user: User = {
-    id: "1",
-    name: "Gokul",
-    email: "gokul@example.com",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gray-100">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
-          <CardTitle className="text-center text-2xl font-semibold text-blue-600">
-            Welcome, {user.name}! 👋
-          </CardTitle>
-        </CardHeader>
+    // <div className="flex items-center justify-center min-h-[calc(100vh-4rem)]">
+    // <div className="flex items-center justify-center min-h-[calc(100vh-80px)] w-full">
+    <div className="flex items-center justify-center w-full">
 
-        <CardContent className="space-y-4">
-          <p className="text-gray-500 text-center">
-            Your email: {user.email}
-          </p>
+      <Card
+        title="Sign In"
+        className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
+      >
+        <div className="space-y-5">
+          <Input
+            placeholder="Email"
+            type="email"
+            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+          />
+          <Input
+            placeholder="Password"
+            type="password"
+            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
+          />
 
-          {/* Input fields */}
-          <Input placeholder="Enter your name" />
-          <Input type="email" placeholder="Enter your email" />
+          <Button className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold">
+            Login
+          </Button>
 
-          {/* Buttons */}
-          <div className="flex justify-between mt-4">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-              Submit
-            </Button>
-            <Button
-              variant="secondary"
-              className="bg-gray-200 hover:bg-gray-300 text-gray-800"
-            >
-              Cancel
-            </Button>
-          </div>
-        </CardContent>
+          <Button
+            variant="secondary"
+            className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold"
+          >
+            Register
+          </Button>
+        </div>
       </Card>
-    </main>
+    </div>
   );
 }

@@ -1,15 +1,44 @@
-import "@/styles/globals.css";
+
+import "../styles/globals.css";
 import { ReactNode } from "react";
-import Navbar from "@/components/Navbar";
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
+
     <html lang="en">
-      <body className="min-h-screen bg-gray-50 text-gray-900">
-        <main className="max-w-5xl mx-auto p-6">
-          <Navbar />
-          {children}</main>
+      <body className="bg-[#060E25] text-white">
+
+        {/* FIXED SIDEBAR */}
+        <div className="flex">
+
+
+          <aside className="w-64 h-screen fixed top-0 left-0 bg-[#F2F4F7] border-r border-gray-300 z-50">
+            <Sidebar />
+          </aside>
+
+
+          {/* MAIN WRAPPER */}
+          <div className="flex-1 ml-64">
+
+            {/* FIXED HEADER */}
+            <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md border-b border-gray-200 z-40 flex items-center px-6">
+              <Header />
+            </header>
+
+            {/* PAGE CONTENT */}
+            {/* <main className="pt-20 px-6"> */}
+            <main className="flex-1 flex items-center justify-center px-6 pt-40">
+              {children}
+            </main>
+
+          </div>
+        </div>
+
       </body>
     </html>
   );
 }
+
+
