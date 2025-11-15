@@ -1,7 +1,4 @@
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { taskController } from "@/controller/userController";
 
-export async function GET() {
-  const tasks = await prisma.task.findMany({ include: { user: true } });
-  return NextResponse.json(tasks);
-}
+export const GET = taskController.findAllTask;
+export const POST = taskController.createTask;
