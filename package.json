@@ -9,6 +9,9 @@
     "db:push": "prisma db push",
     "db:seed": "ts-node prisma/seed.ts"
   },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
     "@prisma/client": "^6.0.0",
@@ -28,9 +31,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "4.1.17",
-    "@types/node": "24.10.0",
+    "@types/node": "^24.10.1",
     "@types/react": "^19.2.3",
     "@types/react-dom": "^19.2.3",
-    "tailwindcss": "4.1.17"
+    "tailwindcss": "4.1.17",
+    "ts-node": "^10.9.2",
+    "tslib": "^2.8.1"
   }
 }

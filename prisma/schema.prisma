@@ -12,15 +12,46 @@ model User {
   name      String
   email     String   @unique
   tasks     Task[]
+  teamId   String?
+  team     Team?   @relation(fields: [teamId], references: [id])
+
   createdAt DateTime @default(now())
 }
 
 model Task {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  status      String   @default("pending")
+  status      String      @default("pending")
+
   userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  createdAt   DateTime @default(now())
+  user        User        @relation(fields: [userId], references: [id])
+
+  teamId      String?
+  team        Team?       @relation(fields: [teamId], references: [id])
+
+  timeEntries TimeEntry[]
+  createdAt   DateTime    @default(now())
 }
+
+
+model Team {
+  id      String  @id @default(cuid())
+  name    String
+
+  // A team has many users
+  users   User[]
+
+  // A team has many tasks
+  tasks   Task[]
+}
+model TimeEntry {
+  id        String   @id @default(cuid())
+  hours     Float
+
+  taskId    String
+  task      Task    @relation(fields: [taskId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
