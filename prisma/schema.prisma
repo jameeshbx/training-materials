@@ -8,14 +8,17 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(cuid())
+  id        Int       @id @default(autoincrement())
   name      String
-  email     String   @unique
-  tasks     Task[]
-  teamId   String?
-  team     Team?   @relation(fields: [teamId], references: [id])
+  email     String    @unique
 
-  createdAt DateTime @default(now())
+  teams     Team[]    @relation("UserTeams")
+  tasks     Task[]
+
+  teamId    String?
+  team      Team?     @relation(fields: [teamId], references: [id])
+
+  createdAt DateTime  @default(now())
 }
 
 model Task {
@@ -34,24 +37,20 @@ model Task {
   createdAt   DateTime    @default(now())
 }
 
-
 model Team {
-  id      String  @id @default(cuid())
-  name    String
+  id        String   @id @default(cuid())
+  name      String
 
-  // A team has many users
-  users   User[]
-
-  // A team has many tasks
-  tasks   Task[]
+  users     User[]
+  tasks     Task[]
 }
+
 model TimeEntry {
   id        String   @id @default(cuid())
   hours     Float
 
   taskId    String
-  task      Task    @relation(fields: [taskId], references: [id])
+  task      Task     @relation(fields: [taskId], references: [id])
 
   createdAt DateTime @default(now())
 }
-
