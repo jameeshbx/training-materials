@@ -26,7 +26,11 @@ export default function Sidebar() {
       <nav className="flex-1 px-2 py-4 space-y-1">
         {menu.map((item) => {
           const active =
-            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            item.href === "/"
+              ? pathname === "/"
+              : pathname
+              ? pathname.startsWith(item.href)
+              : false;
 
           return (
             <Link
