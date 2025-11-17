@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 type CreateUserData = {
   name: string;
   email: string;
+  password:string
 };
 
 export type CreateTeamdata = {
@@ -23,11 +24,15 @@ export const createUser = async (data: CreateUserData) => {
     }
 
     // Create user
-    const addUser = await prisma.user.create({
-      data: { name, email },
-    });
+//     const addUser = await prisma.user.create({
+//   // data: {
+//   //   name,
+//   //   email,
+   
+//   // },
+// });
 
-    return addUser;
+//     return addUser;
 
   } catch (error: any) {
     console.error("Service Error: createUser:", error);
