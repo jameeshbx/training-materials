@@ -8,38 +8,39 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
+  id        String   @id @default(cuid())
   name      String
-  email     String    @unique
-  teams     Team[]    @relation("UserTeams")
+  email     String   @unique
+  teamId    String?
+  createdAt DateTime @default(now())
   tasks     Task[]
-  createdAt DateTime  @default(now())
-}
-
-model Team {
-  id        Int       @id @default(autoincrement())
-  name      String
-  users     User[]    @relation("UserTeams")
-  tasks     Task[]
-  createdAt DateTime  @default(now())
+  team      Team?    @relation(fields: [teamId], references: [id])
 }
 
 model Task {
-  id          Int        @id @default(autoincrement())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  user        User?      @relation(fields: [userId], references: [id])
-  userId      Int?
-  team        Team?      @relation(fields: [teamId], references: [id])
-  teamId      Int?
+  status      String      @default("pending")
+  userId      String
+  teamId      String?
+  createdAt   DateTime    @default(now())
+  team        Team?       @relation(fields: [teamId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
   timeEntries TimeEntry[]
-  createdAt   DateTime   @default(now())
+}
+
+model Team {
+  id    String @id @default(cuid())
+  name  String
+  tasks Task[]
+  users User[]
 }
 
 model TimeEntry {
-  id        Int      @id @default(autoincrement())
-  task      Task     @relation(fields: [taskId], references: [id])
-  taskId    Int
-  duration  Int
+  id        String   @id @default(cuid())
+  hours     Float
+  taskId    String
   createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id])
 }
