@@ -25,14 +25,16 @@ export const authController = {
     
 const cookieStore = await cookies();
 
-      cookieStore.set("usertoken", user.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
-      });
+    cookieStore.set("usertoken", user.token, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production" ? true : false, 
+  sameSite: "lax",
+  path: "/",
+  maxAge: 60 * 60 * 24 * 7,
+});
 
+
+console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
 
      return NextResponse.json({
         success: true,
