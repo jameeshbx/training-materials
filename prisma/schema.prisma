@@ -33,13 +33,18 @@ model Task {
   team   Team[]
   userId Int
   user   User?  @relation("UserTasks", fields: [userId], references: [id])
+
+  // 👇 Add this line
+  timeEntries TimeEntry[]
 }
 
 model TimeEntry {
   id       Int      @id @default(autoincrement())
   userId   Int
   taskId   Int
-  user     User     @relation(fields: [userId], references: [id])
   duration Int
   workedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  task Task @relation(fields: [taskId], references: [id])
 }
