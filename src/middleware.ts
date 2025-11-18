@@ -3,13 +3,22 @@ import { NextResponse } from "next/server";
 
 export default withAuth(
   function middleware(req) {
-    // Middleware logic - just pass through if authenticated
+    const token = req.nextauth.token;
+    const pathname = req.nextUrl.pathname;
+
+    // 🔐 Block non-admin users from /admin
+    if (pathname.startsWith("/admin")) {
+      if (token?.role !== "ADMIN") {
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
+      }
+    }
+
     return NextResponse.next();
   },
   {
     callbacks: {
       authorized: ({ token }) => {
-        // Only allow if token exists (user is authenticated)
+        // Allow access only if logged in
         return !!token;
       },
     },
@@ -25,5 +34,6 @@ export const config = {
     "/tasks/:path*",
     "/reports/:path*",
     "/teams/:path*",
+    "/admin/:path*",
   ],
 };

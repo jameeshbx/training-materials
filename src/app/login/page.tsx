@@ -86,15 +86,7 @@ export default function LoginPage() {
             Login
           </button>
 
-          {/* Link */}
-          <div className="text-center mt-6">
-            <Link
-              href={"/dashboard"}
-              className="text-teal-700 font-medium text-sm hover:underline"
-            >
-              dashboard
-            </Link>
-          </div>
+  
         </form>
       </div>
     </div>

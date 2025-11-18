@@ -14,16 +14,16 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="flex">
-      <aside className="w-64 h-screen fixed top-0 left-0 bg-[#F2F4F7] border-r border-gray-300 z-50">
+      <aside className="w-6 h-screen fixed top-0 left-33 bg-[#F2F4F7] border-r border-gray-300 z-50">
         <Sidebar />
       </aside>
 
       <div className="flex-1 ml-64">
-        <header className="fixed top-0 left-64 right-0 h-16 bg-white shadow-md border-b border-gray-200 z-40 flex items-center px-6">
+        <header className="fixed top-0 left-37 right-0 h-7 bg-white shadow-md border-b border-gray-200 z-40 flex items-center px-6">
           <Header />
         </header>
 
-        <main className="pt-20 px-6">
+<main className="pt-24 px-6 min-h-[calc(100vh-4rem)]">
           {children}
         </main>
       </div>
