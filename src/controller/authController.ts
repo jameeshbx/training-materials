@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 export const authController = {
   signup: async (req: Request) => {
     try {
-      const { name, email, password } = await req.json();
-      const user = await authServices.signup({ name, email, password });
+      const { name, email, password,role } = await req.json();
+      const user = await authServices.signup({ name, email, password,role });
 
       return NextResponse.json(
         { message: "Signup successful", user },
@@ -17,30 +17,42 @@ export const authController = {
     }
   },
 
-  login: async (req: Request) => {
+login: async (req: Request) => {
   try {
     const { email, password } = await req.json();
     const user = await authServices.login({ email, password });
+console.log(user);
 
-    
-const cookieStore = await cookies();
+    const response = NextResponse.json({
+      success: true,
+      role: user.findemail.role,
+      message: "Login successful",
+    });
 
-    cookieStore.set("usertoken", user.token, {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === "production" ? true : false, 
-  sameSite: "lax",
-  path: "/",
-  maxAge: 60 * 60 * 24 * 7,
-});
+    // Clear both tokens first (important fix)
+    response.cookies.set("usertoken", "", { path: "/", expires: new Date(0) });
+    response.cookies.set("admintoken", "", { path: "/", expires: new Date(0) });
 
-
-console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-
-     return NextResponse.json({
-        success: true,
-        message: "Login successful",
-       
+    if (user.findemail.role === "ADMIN") {
+      response.cookies.set("admintoken", user.token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
       });
+    } else {
+      response.cookies.set("usertoken", user.token, {
+        httpOnly: true,
+        secure: false,
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+      });
+    }
+
+    return response;
+
   } catch (error: any) {
     return NextResponse.json(
       { success: false, message: error.message },
@@ -48,6 +60,8 @@ console.log("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
     );
   }
 }
+
+
 ,
 
   logout: async () => {

@@ -1,4 +1,6 @@
-
+"use client";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -7,6 +9,15 @@ import {
 } from "@/components/ui/card";
 
 export default function DashboardPage() {
+  const router = useRouter();
+  useEffect(() => {
+    const cookieString = document.cookie;
+    const isUser = cookieString.includes("usertoken=");
+
+    if (!isUser) {
+      router.replace("/login");
+    }
+  }, []);
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>

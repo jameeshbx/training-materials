@@ -6,6 +6,7 @@ export interface RegisterData {
   name: string;
   email: string;
   password: string;
+  role:string
 }
 
 export interface loginData {
@@ -16,7 +17,7 @@ export interface loginData {
 export const authServices={
     signup:async(data:RegisterData)=>{
           try {
-          const { name, email, password } = data;
+          const { name, email, password,role } = data;
           const existingUser =await prisma.user.findUnique({
             where:{email}
           })
@@ -29,7 +30,8 @@ export const authServices={
             data:{
                 name,
                 email,
-                password:hashpassword
+                password:hashpassword,
+                role:"USER"
             }
           })
 
@@ -57,7 +59,7 @@ login:async(data:loginData)=>{
             throw new Error("invalid email or password")
         }
          const secret = process.env.JWT_SECRET as string;
-        const token=jwt.sign({id:findemail.id},secret,{expiresIn:"10d"})
+        const token=jwt.sign({id:findemail.id,role:findemail.role},secret,{expiresIn:"10d"})
         return {message:"login success full",token,findemail}
         
     }  catch (error: any) {

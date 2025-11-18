@@ -41,13 +41,13 @@ export default function Login() {
 );
 
 if (response.data.success) {
-    console.log(response.data,"response.data");
-    
-    if (response.data.success) {
-  router.push("/dashboard");
+  if (response.data.role === "ADMIN") {
+    router.push("/admin");
+  } else {
+    router.push("/dashboard");
+  }
 }
 
-}
        else {
         setError(response.data.message || "Invalid credentials")
       }
