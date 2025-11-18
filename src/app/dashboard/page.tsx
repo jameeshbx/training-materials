@@ -1,8 +1,24 @@
+"use client";
+
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
 export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status]);
+
+  if (status === "loading") return <p className="text-black">Loading...</p>;
+
   return (
- <div className="text-black">
-      <h2 className="text-3xl font-semibold">Dashboard</h2>
-      <p>This is the dashboard route.</p>
-    </div>
+    <h1 className="text-black text-2xl font-semibold">
+      Dashboard - Welcome {session?.user?.name}
+    </h1>
   );
 }
