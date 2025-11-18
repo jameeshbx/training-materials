@@ -31,13 +31,14 @@ export const authOptions: NextAuthOptions = {
                     id: user.id,
                     name: user.name,
                     email: user.email,
+                    role: user.role,   // ⭐ ADDED: include role in returned user
                 };
             },
         }),
     ],
 
     session: {
-        strategy: "jwt", // <-- Valid in NextAuth v5
+        strategy: "jwt",
     },
 
     pages: {
@@ -48,11 +49,20 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            if (user) token.id = user.id;
+            // When user logs in for the first time
+            if (user) {
+                token.id = user.id;
+                token.role = user.role;  // ⭐ ADDED: store role in JWT token
+            }
+            console.log("🔥 TOKEN:", token);
             return token;
         },
+
         async session({ session, token }) {
-            if (session.user) (session.user as any).id = token.id;
+            if (session.user) {
+                (session.user as any).id = token.id;
+                (session.user as any).role = token.role;  // ⭐ ADDED: expose role in session
+            }
             return session;
         },
     },
@@ -61,3 +71,4 @@ export const authOptions: NextAuthOptions = {
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };
+

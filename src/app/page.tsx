@@ -76,7 +76,16 @@ export default function Home() {
       return;
     }
 
-    router.push("/dashboard");
+    // Fetch session to get user role
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    const role = session?.user?.role;
+
+    if (role === "admin") {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }
   }
 
   return (
