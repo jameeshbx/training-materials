@@ -17,6 +17,7 @@ async function main() {
     data: {
       name: "John Doe",
       email: "john@example.com",
+      password: "securepassword123",
       team: {
         connect: { id: team.id }, // connect the user to the team
       },

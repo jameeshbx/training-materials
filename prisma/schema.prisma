@@ -12,11 +12,10 @@ model User {
   name      String
   email     String   @unique
   password  String
-  tasks     Task[]
-  teamId   String?
-  team     Team?   @relation(fields: [teamId], references: [id])
-
   createdAt DateTime @default(now())
+  teamId    String?
+  tasks     Task[]
+  team      Team?    @relation(fields: [teamId], references: [id])
 }
 
 model Task {
@@ -24,34 +23,25 @@ model Task {
   title       String
   description String?
   status      String      @default("pending")
-
   userId      String
-  user        User        @relation(fields: [userId], references: [id])
-
   teamId      String?
-  team        Team?       @relation(fields: [teamId], references: [id])
-
-  timeEntries TimeEntry[]
   createdAt   DateTime    @default(now())
+  team        Team?       @relation(fields: [teamId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+  timeEntries TimeEntry[]
 }
-
 
 model Team {
-  id      String  @id @default(cuid())
-  name    String
-
-  // A team has many users
-  users   User[]
-
-  // A team has many tasks
-  tasks   Task[]
+  id    String @id @default(cuid())
+  name  String
+  tasks Task[]
+  users User[]
 }
+
 model TimeEntry {
   id        String   @id @default(cuid())
-  hours     Float
-
   taskId    String
-  task      Task    @relation(fields: [taskId], references: [id])
-
   createdAt DateTime @default(now())
+  hours     Float
+  task      Task     @relation(fields: [taskId], references: [id])
 }

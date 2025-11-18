@@ -99,7 +99,7 @@ export default function LoginPage() {
         marginTop: 8,
       }}
     >
-      Sign in
+      LOGIN
     </button>
 
     {err && (
