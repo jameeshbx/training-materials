@@ -1,77 +1,83 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import type { JWT } from "next-auth/jwt";
+import type { Session } from "next-auth";
 
-export const prisma = new PrismaClient();
+declare module "next-auth" {
+  interface User {
+    role?: string;
+  }
+  interface Session {
+    user: {
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+      role?: string;
+    };
+  }
+}
 
+declare module "next-auth/jwt" {
+  interface JWT {
+    role?: string;
+  }
+}
 
-export const authOptions: NextAuthOptions = {
-    providers: [
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: { label: "Email", type: "email" },
-                password: { label: "Password", type: "password" },
-            },
-            async authorize(credentials) {
-                if (!credentials?.email || !credentials?.password) return null;
+const handler = NextAuth({
+  session: {
+    strategy: "jwt",
+  },
 
+  providers: [
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
 
-                const user = await prisma.user.findUnique({
-                    where: { email: credentials.email },
-                });
+      async authorize(credentials) {
+        const email = credentials?.email?.trim();
+        const password = credentials?.password?.trim();
 
+        // 👉 TEMP DEMO LOGIN (You can replace with DB later)
+        if (email === "demo@demo.com" && password === "password123") {
+          return {
+            id: "1",
+            name: "Demo Admin",
+            email: email,
+            role: "admin", // 👈 IMPORTANT
+          };
+        }
 
-                if (!user || !user.password) return null;
+        // ❌ Invalid login
+        return null;
+      },
+    }),
+  ],
 
-
-                const isValid = await bcrypt.compare(
-                    credentials.password,
-                    user.password
-                );
-
-
-                if (!isValid) return null;
-
-
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email,
-                };
-            },
-        }),
-    ],
-
-
-    session: {
-        strategy: "jwt", // <-- Valid in NextAuth v5
+  callbacks: {
+    // 👉 Add role to JWT token
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role; // copy role from returned user
+      }
+      return token;
     },
 
-
-    pages: {
-        signIn: "/",
+    // 👉 Add role from token to session.user
+    async session({ session, token }) {
+      if (token && session.user) {
+        session.user.role = token.role; // make role available in frontend
+      }
+      return session;
     },
+  },
 
-
-    secret: process.env.NEXTAUTH_SECRET,
-
-
-    callbacks: {
-        async jwt({ token, user }) {
-            if (user) token.id = user.id;
-            return token;
-        },
-        async session({ session, token }) {
-            if (session.user) (session.user as any).id = token.id;
-            return session;
-        },
-    },
-};
-
-
-const handler = NextAuth(authOptions);
-
+  pages: {
+    signIn: "/login", // redirect unauth users to /login
+  },
+});
 
 export { handler as GET, handler as POST };
