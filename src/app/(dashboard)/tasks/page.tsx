@@ -2,11 +2,21 @@ import { db } from "@/lib/db";
 import { deleteTask } from "@/app/(dashboard)/tasks/delete/action";
 
 export default async function TaskPage() {
-  // 1️⃣ Fetch tasks from the database
-  const tasks = await db.task.findMany({
-    include: { user: true }, // get user info
-    orderBy: { createdAt: "desc" }, // newest first
-  });
+  // 1️⃣ Fetch tasks from the database (gracefully handle DB errors)
+  let tasks: any[] = [];
+  let dbError: string | null = null;
+
+  try {
+    tasks = await db.task.findMany({
+      include: { user: true }, // get user info
+      orderBy: { createdAt: "desc" }, // newest first
+    });
+  } catch (err: any) {
+    // Log error server-side and show a friendly message in UI
+    console.error("Error fetching tasks from DB:", err?.message ?? err);
+    dbError = err?.message ?? String(err);
+    tasks = [];
+  }
 
   // 2️⃣ Show tasks
   return (
@@ -25,10 +35,12 @@ export default async function TaskPage() {
         </a>
       </div>
 
-      {/* No tasks message */}
-      {tasks.length === 0 && (
+      {/* No tasks message or DB error */}
+      {dbError ? (
+        <p className="text-red-400">Unable to load tasks (database unreachable).</p>
+      ) : tasks.length === 0 ? (
         <p className="text-gray-400">No tasks found.</p>
-      )}
+      ) : null}
 
       {/* Task Cards */}
       <div className="space-y-4">
