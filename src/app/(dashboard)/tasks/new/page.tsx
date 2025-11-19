@@ -55,7 +55,7 @@ export default function NewTaskPage() {
         <div>
           <label className="block text-sm mb-1">Title</label>
           <input
-            className="w-full rounded-md px-3 py-2 text-white"
+            className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             required
@@ -65,7 +65,7 @@ export default function NewTaskPage() {
         <div>
           <label className="block text-sm mb-1">Description</label>
           <textarea
-            className="w-full rounded-md px-3 py-2 text-white"
+            className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -75,13 +75,13 @@ export default function NewTaskPage() {
         <div>
           <label className="block text-sm mb-1">Status</label>
           <select
-            className="w-full rounded-md px-3 py-2 text-white"
+            className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
-            <option value="pending">Pending</option>
-            <option value="in-progress">In progress</option>
-            <option value="done">Done</option>
+            <option className="text-black" value="pending">Pending</option>
+            <option className="text-black" value="in-progress">In progress</option>
+            <option className="text-black" value="done">Done</option>
           </select>
         </div>
 

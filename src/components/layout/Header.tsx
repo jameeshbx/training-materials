@@ -1,17 +1,21 @@
 "use client";
 
-import { BellIcon } from "@heroicons/react/24/outline";
+interface HeaderProps {
+  toggleSidebar: () => void;
+}
 
-export default function Header() {
+export default function Header({ toggleSidebar }: HeaderProps) {
   return (
-    <header>
-      
-      <h2 className="text-lg font-semibold text-gray-900">
-        header
-      </h2>
+    <div className="flex items-center justify-between w-full">
+      {/* Mobile toggle button */}
+      <button
+        className="lg:hidden text-2xl text-gray-700"
+        onClick={toggleSidebar}
+      >
+        ☰
+      </button>
 
-     
-
-    </header>
+      <h1 className="text-lg font-semibold text-gray-800">header</h1>
+    </div>
   );
 }

@@ -6,7 +6,7 @@ import { Role } from "@prisma/client";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password,role  } = await req.json();
 
     // Check if email exists
     const existingUser = await db.user.findUnique({
@@ -29,8 +29,8 @@ export async function POST(req: Request) {
         name,
         email,
         password: hashedPassword,
-        role: Role.USER,
-      },
+        role: role === "ADMIN" ? Role.ADMIN : Role.USER,
+              },
     });
 
     return NextResponse.json(
