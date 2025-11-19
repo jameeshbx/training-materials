@@ -15,7 +15,7 @@ export default function Sidebar() {
   ];
 
   return (
-     <aside className="w-64 h-screen bg-[#F7F8FA] border-r border-gray-200 fixed left-0 top-0 flex flex-col">
+     <aside className="w-33 h-screen bg-[#F7F8FA] border-r border-gray-200 fixed left-0 top-0 flex flex-col">
       
       {/* Title */}
       <div className="px-6 py-6 border-b">
@@ -26,7 +26,11 @@ export default function Sidebar() {
       <nav className="flex-1 px-2 py-4 space-y-1">
         {menu.map((item) => {
           const active =
-            item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+            item.href === "/"
+              ? pathname === "/"
+              : pathname
+              ? pathname.startsWith(item.href)
+              : false;
 
           return (
             <Link

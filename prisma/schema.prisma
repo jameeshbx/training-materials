@@ -11,11 +11,18 @@ model User {
   id        String   @id @default(cuid())
   name      String
   email     String   @unique
+  password  String   // ADD THIS
   teamId    String?
+  role      Role     @default(USER)
   createdAt DateTime @default(now())
   tasks     Task[]
-  team      Team?    @relation(fields: [teamId], references: [id])
+  team      Team? @relation(fields: [teamId], references: [id])
 }
+enum Role {
+  USER
+  ADMIN
+}
+
 
 model Task {
   id          String      @id @default(cuid())
