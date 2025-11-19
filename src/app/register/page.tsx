@@ -1,54 +1,12 @@
-// "use client";
-
-// import { Button } from "@/components/ui/button";
-// import { Card } from "@/components/ui/card";
-// import { Input } from "@/components/ui/input";
-// import Link from "next/link";
-
-// export default function RegisterPage() {
-//     return (
-//         <div className="flex items-center justify-center w-full min-h-screen">
-//             <Card className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-6">
-//                 <div className="space-y-5">
-//                     <Input
-//                         placeholder="Name"
-//                         type="text"
-//                         className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-//                     />
-//                     <Input
-//                         placeholder="Email"
-//                         type="email"
-//                         className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-//                     />
-//                     <Input
-//                         placeholder="Password"
-//                         type="password"
-//                         className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-//                     />
-
-//                     <Button className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold">
-//                         Register
-//                     </Button>
-
-//                     <p className="text-center text-gray-300">
-//                         Already have an account?{" "}
-//                         <Link href="/" className="text-blue-400 hover:underline">
-//                             Login
-//                         </Link>
-//                     </p>
-//                 </div>
-//             </Card>
-//         </div>
-//     );
-// }
 "use client";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -76,66 +34,73 @@ export default function RegisterPage() {
             return;
         }
 
-        // Success
         setMessage("User created successfully! Redirecting...");
         setTimeout(() => router.push("/"), 1500);
     }
 
     return (
-        <div className="flex items-center justify-center w-full min-h-screen">
-            <Card className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-6">
-                <div className="space-y-5">
+        <div className="flex items-center justify-center w-full min-h-screen px-4">
+            <Card className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-10 rounded-xl min-h-[420px]">
 
-                    <Input
-                        placeholder="Name"
-                        type="text"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-                    />
+                <div className="flex flex-col gap-6">
 
-                    <Input
-                        placeholder="Email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-                    />
+                    <div className="flex flex-col gap-5">
+                        <Input 
+                            placeholder="Name"
+                            type="text"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 h-12 px-4"
+                        />
 
-                    <Input
-                        placeholder="Password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="bg-white/20 text-white placeholder-gray-300 border border-white/30"
-                    />
+                        <Input
+                            placeholder="Email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 h-12 px-4"
+                        />
 
-                    {/* Error message */}
-                    {error && (
-                        <p className="text-red-400 text-center">{error}</p>
-                    )}
+                        <Input
+                            placeholder="Password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 h-12 px-4"
+                        />
+                    </div>
 
-                    {/* Success message */}
-                    {message && (
-                        <p className="text-green-400 text-center">{message}</p>
-                    )}
+                    <div className="min-h-6">
+                        {error && (
+                            <p className="text-red-400 text-center text-sm">{error}</p>
+                        )}
 
-                    <Button
-                        onClick={handleRegister}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
-                    >
-                        Register
-                    </Button>
+                        {message && (
+                            <p className="text-green-400 text-center text-sm">{message}</p>
+                        )}
+                    </div>
 
-                    <p className="text-center text-gray-300">
-                        Already have an account?{" "}
-                        <Link href="/" className="text-blue-400 hover:underline">
-                            Login
-                        </Link>
-                    </p>
+                    <div className="flex flex-col gap-4">
+                        <Button
+                            onClick={handleRegister}
+                            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-4 rounded-lg"
+                        >
+                            Register
+                        </Button>
+
+                        <p className="text-center text-gray-300 text-sm">
+                            Already have an account?{" "}
+                            <Link href="/" className="text-blue-400 hover:underline">
+                                Login
+                            </Link>
+                        </p>
+                    </div>
 
                 </div>
             </Card>
         </div>
     );
 }
+
+
+
