@@ -12,6 +12,7 @@ model User {
   name        String
   email       String      @unique
   password    String?
+  role        String      @default("user")   
   avatarUrl   String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
@@ -19,8 +20,6 @@ model User {
   timeEntries TimeEntry[]
   teams       Team[]      @relation("TeamMembers")
 }
-
-
 
 model Team {
   id        String   @id @default(cuid())
@@ -55,3 +54,4 @@ model TimeEntry {
   task      Task      @relation(fields: [taskId], references: [id])
   user      User      @relation(fields: [userId], references: [id])
 }
+
