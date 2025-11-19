@@ -1,6 +1,6 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -8,16 +8,13 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-export default function DashboardPage() {
-  const router = useRouter();
-  useEffect(() => {
-    const cookieString = document.cookie;
-    const isUser = cookieString.includes("usertoken=");
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
 
-    if (!isUser) {
-      router.replace("/login");
-    }
-  }, []);
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>

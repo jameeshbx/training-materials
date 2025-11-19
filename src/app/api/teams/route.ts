@@ -1,4 +1,4 @@
-import { teamController } from "@/controller/userController";
+// import { teamController } from "@/controller/userController";
 
-export const GET = teamController.findAllteams;
-export const POST = teamController.createTeam;
+// export const GET = teamController.findAllteams;
+// export const POST = teamController.createTeam;

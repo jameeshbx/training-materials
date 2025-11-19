@@ -1,3 +1,3 @@
-import { authController } from "@/controller/authController";
+import { signOut } from "next-auth/react";
 
-export const GET = authController.logout;
+signOut({ callbackUrl: "/login" });

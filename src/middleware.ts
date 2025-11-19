@@ -1,35 +1,27 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(req: NextRequest) {
-  const userToken = req.cookies.get("usertoken")?.value;
-  const adminToken = req.cookies.get("admintoken")?.value;
-  const currentUser = req.cookies.get("current_user")?.value;
-  const path = req.nextUrl.pathname;
+export async function middleware(req: any) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const pathname = req.nextUrl.pathname;
 
-  // Protect admin
-  if (path.startsWith("/admin")) {
-    if (!adminToken) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
+  console.log("🔥 TOKEN =>", token, " | PATH =>", pathname);
+
+  // 1️⃣ Not logged in → protect admin & dashboard
+  if (!token && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // Protect user dashboard
-  if (path.startsWith("/dashboard")) {
-    // Admin should not see user pages
-    if (adminToken) {
-      return NextResponse.redirect(new URL("/admin", req.url));
-    }
-
-    if (!userToken) {
-      return NextResponse.redirect(new URL("/login", req.url));
-    }
+  // 2️⃣ Logged-in USER trying to access admin → block
+  if (token && token.role === "USER" && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 
-
-  if (path === "/login") {
-    if (adminToken) return NextResponse.redirect(new URL("/admin", req.url));
-    if (userToken) return NextResponse.redirect(new URL("/dashboard", req.url));
+  // 3️⃣ Logged-in user/admin cannot visit login or signup again
+  if (token && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(
+      new URL(token.role === "ADMIN" ? "/admin" : "/dashboard", req.url)
+    );
   }
 
   return NextResponse.next();
@@ -37,10 +29,11 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/admin/:path*",
-    "/admin",
-    "/dashboard/:path*",
     "/dashboard",
+    "/dashboard/:path*",
+    "/admin",
+    "/admin/:path*",
     "/login",
+    "/signup",
   ],
 };

@@ -1,55 +1,100 @@
-"use client"
-import React from 'react'
+"use client";
+import { useEffect, useState } from "react";
+import { Tasks } from "@/types/user";
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
 } from "@/components/ui/card";
-import { Tasks } from '@/types/user';
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-export default function Teams() {
+import { Button } from "@/components/ui/button";
+import TaskForm from "@/app/dashboard/tasks/TaskForm";
 
+export default function TasksPage() {
+  const [tasks, setTasks] = useState<Tasks[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editTask, setEditTask] = useState<Tasks | null>(null);
 
-const Task: Tasks[] = [
-   {
-  id: 1,
-  task: "Make Tailwind UI",
-  desc: "Create responsive UI components using Tailwind CSS following project design guidelines.",
-},
-{
-  id: 2,
-  task: "Make Contact Page",
-  desc: "Design and develop a contact form page with input validations and UI styling.",
-},
-{
-  id: 3,
-  task: "Fix Server Side Error",
-  desc: "Identify and resolve backend server errors to ensure smooth API functionality.",
-},
+  // Fetch Tasks from Backend
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch("/api/tasks");
+      const data = await res.json();
+      setTasks(data.data);
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  ];
+  // Load on mount
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-
-
-
-
-
+  // Delete Task
+  const deleteTask = async (id: number) => {
+    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      setTasks(tasks.filter((t) => t.id !== id));
+    }
+  };
 
   return (
-   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {Task.map((task) => (
-        <Card key={task.id} className="shadow-xl">
-          <CardHeader>
-            
-            <CardTitle className="text-md mt-2">Task:{task.task}</CardTitle>
-          </CardHeader>
+    <div className="p-5">
+      <div className="flex justify-between items-center mb-5">
+        <h2 className="text-xl font-bold">Tasks</h2>
+        <Button onClick={() => setShowForm(true)}>➕ Add Task</Button>
+      </div>
 
-          <CardContent>
-            <p className="text-sm text-gray-600">{task.desc}</p>
-          </CardContent>
-        </Card>
-      ))}      
+      {loading ? (
+        <p>Loading tasks...</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {tasks.map((task) => (
+            <Card key={task.id} className="shadow-xl">
+              <CardHeader>
+                <CardTitle className="text-md">Task: {task.title}</CardTitle>
+              </CardHeader>
+
+              <CardContent>
+                <p className="text-sm text-gray-600">{task.description}</p>
+
+                <div className="flex gap-2 mt-4">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      setEditTask(task);
+                      setShowForm(true);
+                    }}
+                  >
+                    ✏ Edit
+                  </Button>
+
+                  <Button size="sm" variant="destructive" onClick={() => deleteTask(task.id)}>
+                    ❌ Delete
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Form Modal */}
+      {showForm && (
+        <TaskForm
+          task={editTask}
+          close={() => {
+            setShowForm(false);
+            setEditTask(null);
+          }}
+          refresh={fetchTasks}
+        />
+      )}
     </div>
-  )
+  );
 }

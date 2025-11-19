@@ -1,4 +1,4 @@
-import { timeEntryController } from "@/controller/userController";
+// import { timeEntryController } from "@/controller/userController";
 
-export const GET = timeEntryController.findAllEntry;
-export const POST = timeEntryController.createEntry;
+// export const GET = timeEntryController.findAllEntry;
+// export const POST = timeEntryController.createEntry;
