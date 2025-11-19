@@ -8,32 +8,10 @@ export default function Home() {
   return (
     <main className="w-full flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700">
       <Card
-        title="Sign In"
+        title="NEXT APP"
         className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
       >
-        <div className="space-y-5">
-          <Input
-            placeholder="Email"
-            type="email"
-            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
-          />
-          <Input
-            placeholder="Password"
-            type="password"
-            className="bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-blue-400"
-          />
-          <Button
-            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold"
-          >
-            Login
-          </Button>
-          <Button
-            variant="secondary"
-            className="w-full bg-gray-300 hover:bg-gray-400 text-gray-900 font-semibold"
-          >
-            Register
-          </Button>
-        </div>
+        <h1 >WELCOME.</h1>
       </Card>
     </main>
   );

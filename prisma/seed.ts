@@ -1,25 +1,26 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Role } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("Seeding database...");
 
-  // Create a team first (optional but recommended)
+  // Create a team
   const team = await prisma.team.create({
     data: {
       name: "Engineering Team",
     },
   });
 
-  // Create a user and connect to the team
+  // Create a user WITH ROLE + connect to the team
   const user = await prisma.user.create({
     data: {
       name: "John Doe",
       email: "john@example.com",
-      password: "securepassword123",
+      password: "securepassword123", // (Hash in production only)
+      role: Role.ADMIN,               // 👈 Added for today’s task
       team: {
-        connect: { id: team.id }, // connect the user to the team
+        connect: { id: team.id },
       },
     },
   });
