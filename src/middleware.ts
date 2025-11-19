@@ -19,6 +19,7 @@ export default withAuth({
                 return token.role === "user";
             }
 
+
             return true;
         }
     },
