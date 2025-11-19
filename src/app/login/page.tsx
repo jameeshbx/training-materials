@@ -28,8 +28,17 @@ export default function LoginPage() {
     }
 
     // successful sign in: navigate to dashboard
-    router.push("/dashboard");
-  };
+// Fetch session to get user role
+    const sessionRes = await fetch("/api/auth/session");
+    const session = await sessionRes.json();
+    const role = session?.user?.role;
+    console.log("User role:", role);
+
+    if (role === "ADMIN") {
+      router.push("/admin");
+    } else {
+      router.push("/dashboard");
+    }  };
 
   return (
     <div

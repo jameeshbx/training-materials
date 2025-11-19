@@ -1,83 +1,75 @@
-import NextAuth from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import type { JWT } from "next-auth/jwt";
-import type { Session } from "next-auth";
+import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
-declare module "next-auth" {
-  interface User {
-    role?: string;
-  }
-  interface Session {
-    user: {
-      id: string;
-      name?: string | null;
-      email?: string | null;
-      image?: string | null;
-      role?: string;
-    };
-  }
-}
+const prisma = new PrismaClient();
 
-declare module "next-auth/jwt" {
-  interface JWT {
-    role?: string;
-  }
-}
+export const authOptions: NextAuthOptions = {
+    providers: [
+        CredentialsProvider({
+            name: "Credentials",
+            credentials: {
+                email: { label: "Email", type: "email" },
+                password: { label: "Password", type: "password" },
+            },
+            async authorize(credentials) {
+                if (!credentials?.email || !credentials?.password) return null;
 
-const handler = NextAuth({
-  session: {
-    strategy: "jwt",
-  },
+                const user = await prisma.user.findUnique({
+                    where: { email: credentials.email },
+                });
 
-  providers: [
-    CredentialsProvider({
-      name: "Credentials",
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
-      },
+                if (!user || !user.password) return null;
 
-      async authorize(credentials) {
-        const email = credentials?.email?.trim();
-        const password = credentials?.password?.trim();
+                const isValid = await bcrypt.compare(
+                    credentials.password,
+                    user.password
+                );
 
-        // 👉 TEMP DEMO LOGIN (You can replace with DB later)
-        if (email === "demo@demo.com" && password === "password123") {
-          return {
-            id: "1",
-            name: "Demo Admin",
-            email: email,
-            role: "admin", // 👈 IMPORTANT
-          };
-        }
+                if (!isValid) return null;
 
-        // ❌ Invalid login
-        return null;
-      },
-    }),
-  ],
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,   // ⭐ ADDED: include role in returned user
+                };
+            },
+        }),
+    ],
 
-  callbacks: {
-    // 👉 Add role to JWT token
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role; // copy role from returned user
-      }
-      return token;
+    session: {
+        strategy: "jwt",
     },
 
-    // 👉 Add role from token to session.user
-    async session({ session, token }) {
-      if (token && session.user) {
-        session.user.role = token.role; // make role available in frontend
-      }
-      return session;
+    pages: {
+        signIn: "/",
     },
-  },
 
-  pages: {
-    signIn: "/login", // redirect unauth users to /login
-  },
-});
+    secret: process.env.NEXTAUTH_SECRET,
+
+    callbacks: {
+        async jwt({ token, user }) {
+            // When user logs in for the first time
+            if (user) {
+  token.id = (user as any).id;
+      token.role = (user as any).role; // ← add this                  // ⭐ ADDED: store role in JWT token
+            }
+            console.log("🔥 TOKEN:", token);
+            return token;
+        },
+
+        async session({ session, token }) {
+            if (session.user) {
+                (session.user as any).id = token.id;
+                (session.user as any).role = token.role;  // ⭐ ADDED: expose role in session
+            }
+            return session;
+        },
+    },
+};
+
+const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

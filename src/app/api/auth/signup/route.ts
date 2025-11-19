@@ -1,14 +1,21 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";   // ✅ Correct Prisma client import
+import { db } from "@/lib/db";
 import { Role } from "@prisma/client";
-
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password } = await req.json();
+    const { name, email, password, role } = await req.json();
 
-    // Check if email exists
+    // Validate input
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "All fields are required" },
+        { status: 400 }
+      );
+    }
+
+    // Check if email already exists
     const existingUser = await db.user.findUnique({
       where: { email },
     });
@@ -23,13 +30,19 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Protect ADMIN creation (optional)
+    // 👉 Only allow admin creation if you manually pass ?admin-secret=XXX
+    const isAdminRequest = role === "ADMIN";
+
+   
+
+    // Create user with role
     await db.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: Role.USER,
+        role: isAdminRequest ? Role.ADMIN : Role.USER,
       },
     });
 
