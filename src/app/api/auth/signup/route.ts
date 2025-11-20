@@ -1,12 +1,13 @@
+
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password } = await req.json();
+        const { name, email, password, role } = await req.json();
 
-        if (!name || !email || !password) {
+        if (!name || !email || !password || !role) {
             return NextResponse.json(
                 { message: "All fields are required" },
                 { status: 400 }
@@ -31,11 +32,13 @@ export async function POST(req: Request) {
                 name,
                 email,
                 password: hashedPassword,
+                role, // ⭐ SAVE THE ROLE HERE
             },
             select: {
                 id: true,
                 name: true,
                 email: true,
+                role: true, // ⭐ RETURN ROLE
             },
         });
 
