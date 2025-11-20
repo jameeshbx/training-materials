@@ -11,25 +11,36 @@ type Task = {
   createdAt: string;
 };
 
+type TimeEntry = {
+  id: string;
+  taskId: string;
+  userId: string;
+  startTime: string;
+  endTime?: string | null;
+};
+
 export default function TasksPage() {
   const { data: session } = useSession();
+
   const [tasks, setTasks] = useState<Task[]>([]);
 
+  // Create form
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-
-  // NEW: create-task status state
   const [createStatus, setCreateStatus] = useState("pending");
 
-  // DELETE modal state
+  // Delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
-  // EDIT modal state
+  // Edit modal
   const [showEditModal, setShowEditModal] = useState(false);
   const [editTask, setEditTask] = useState<Task | null>(null);
 
-  // Fetch all tasks
+  // Timer state
+  const [activeEntry, setActiveEntry] = useState<TimeEntry | null>(null);
+
+  // Fetch tasks
   const fetchTasks = async () => {
     const res = await fetch("/api/tasks");
     const data = await res.json();
@@ -40,7 +51,7 @@ export default function TasksPage() {
     fetchTasks();
   }, []);
 
-  // Create a new task
+  // Create new task
   const createTask = async (e: any) => {
     e.preventDefault();
     if (!session?.user || !(session.user as any).id) {
@@ -56,7 +67,7 @@ export default function TasksPage() {
       body: JSON.stringify({
         title,
         description,
-        status: createStatus, // NEW: include status
+        status: createStatus,
         userId,
       }),
     });
@@ -71,20 +82,28 @@ export default function TasksPage() {
     }
   };
 
-  // DELETE task
-  const deleteTask = async (id: string) => {
-    const res = await fetch("/api/tasks", {
+  // FIXED DELETE FUNCTION
+const deleteTask = async (taskId: string) => {
+  try {
+    const res = await fetch(`/api/tasks?id=${taskId}`, {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
     });
 
-    if (res.ok) {
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-    } else {
-      alert("Delete failed");
+    const result = await res.json();
+
+    if (!res.ok) {
+      alert(result.error || "Delete failed");
+      return;
     }
-  };
+
+    alert("Task deleted!");
+    window.location.reload();
+  } catch (err) {
+    alert("Something went wrong");
+  }
+};
+
+
 
   const confirmDelete = async () => {
     if (taskToDelete) {
@@ -99,13 +118,13 @@ export default function TasksPage() {
     setTaskToDelete(null);
   };
 
-  // OPEN edit modal
+  // Edit modal open
   const openEditModal = (task: Task) => {
     setEditTask({ ...task });
     setShowEditModal(true);
   };
 
-  // UPDATE task
+  // Update task
   const updateTask = async () => {
     if (!editTask) return;
 
@@ -124,15 +143,42 @@ export default function TasksPage() {
     }
   };
 
+  // Timer start
+  const startTimer = async (taskId: string) => {
+    if (!session?.user) return alert("Please login");
+    const userId = (session.user as any).id;
+
+    const res = await fetch("/api/time", {
+      method: "POST",
+      body: JSON.stringify({ taskId, userId }),
+    });
+
+    const json = await res.json();
+    if (json.success) setActiveEntry(json.data);
+  };
+
+  // Timer stop
+  const stopTimer = async () => {
+    if (!activeEntry) return;
+
+    const res = await fetch("/api/time", {
+      method: "PUT",
+      body: JSON.stringify({ entryId: activeEntry.id }),
+    });
+
+    const json = await res.json();
+    if (json.success) {
+      setActiveEntry(null);
+      fetchTasks();
+    }
+  };
+
   return (
-    <div className="max-w-2xl mx-auto py-10 text-black">
+<div className="max-w-2xl mx-auto py-10 text-black border border-gray-300 rounded-xl px-10">
       <h1 className="text-3xl font-bold mb-5 text-center">Task Manager</h1>
 
       {/* Create Task Form */}
-      <form
-        onSubmit={createTask}
-        className="bg-white shadow-md rounded p-5 mb-6"
-      >
+      <form onSubmit={createTask} className="bg-white shadow-md rounded p-5 mb-6 ">
         <h2 className="text-xl font-semibold mb-3">Create Task</h2>
 
         <input
@@ -151,7 +197,6 @@ export default function TasksPage() {
           className="w-full border p-2 rounded mb-3"
         />
 
-        {/* NEW: STATUS DROPDOWN */}
         <select
           value={createStatus}
           onChange={(e) => setCreateStatus(e.target.value)}
@@ -162,104 +207,100 @@ export default function TasksPage() {
           <option value="completed">Completed</option>
         </select>
 
-        <button
-          type="submit"
-          className="bg-black text-white py-2 px-4 rounded w-full"
-        >
+        <button type="submit" className="bg-black text-white py-2 px-4 rounded w-full">
           Create Task
         </button>
       </form>
 
-      {/* Task List */}
-  <div className="space-y-4">
-  {tasks.length === 0 && (
-    <div className="text-center py-10 bg-white rounded-xl shadow-sm border">
-      <p className="text-gray-500 text-lg">No tasks yet. Start by creating one!</p>
-    </div>
-  )}
+      {/* Tasks List */}
+      <div className="space-y-4">
+        {tasks.length === 0 && (
+          <div className="text-center py-10 bg-white rounded-xl shadow-sm border">
+            <p className="text-gray-500 text-lg">No tasks yet. Start by creating one!</p>
+          </div>
+        )}
 
-  {tasks.map((task) => (
-    <div
-      key={task.id}
-      className="bg-white border border-gray-200 rounded-xl shadow-md p-5 hover:shadow-lg transition-all duration-200"
-    >
-      {/* Title */}
-      <h3 className="text-xl font-bold text-gray-800 mb-1">
-        {task.title}
-      </h3>
+        {tasks.map((task) => (
+          <div
+            key={task.id}
+            className="bg-white border border-gray-200 rounded-xl shadow-md p-5 hover:shadow-lg transition-all duration-200"
+          >
+            <h3 className="text-xl font-bold text-gray-800 mb-1">{task.title}</h3>
+            <p className="text-gray-600 mb-3 font-semibold">{task.description}</p>
 
-      {/* Description */}
-<p className="text-gray-600 mb-3 font-semibold">{task.description}</p>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-semibold text-gray-700">Status:</span>
+              <span
+                className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
+                ${
+                  task.status === "pending"
+                    ? "bg-yellow-100 text-yellow-700"
+                    : task.status === "in_progress"
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-green-100 text-green-700"
+                }`}
+              >
+                {task.status.replace("_", " ")}
+              </span>
+            </div>
 
-      {/* Status */}
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-sm font-semibold text-gray-700">Status:</span>
-        <span
-          className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
-            ${
-              task.status === "pending"
-                ? "bg-yellow-100 text-yellow-700"
-                : task.status === "in_progress"
-                ? "bg-blue-100 text-blue-700"
-                : "bg-green-100 text-green-700"
-            }`}
-        >
-          {task.status.replace("_", " ")}
-        </span>
+            <div className="flex items-center justify-between mt-4">
+              {/* Edit */}
+              <button
+                onClick={() => openEditModal(task)}
+                className="text-black-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
+              >
+                Edit
+              </button>
+
+              {/* Timer */}
+              {activeEntry?.taskId === task.id ? (
+                <button
+                  onClick={stopTimer}
+                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                >
+                  Stop
+                </button>
+              ) : (
+                <button
+                  onClick={() => startTimer(task.id)}
+                  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-green-600"
+                >
+                  Start
+                </button>
+              )}
+
+              {/* Delete */}
+              <button
+                onClick={() => {
+                  setTaskToDelete(task.id);
+                  setShowDeleteModal(true);
+                }}
+                className="text-red-500 font-semibold hover:text-red-700 hover:underline transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+
+            <p className="text-xs text-gray-400 mt-4">
+              Created: {new Date(task.createdAt).toLocaleString()}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Buttons */}
-      <div className="flex items-center justify-between mt-4">
-        <button
-          onClick={() => openEditModal(task)}
-          className="text-blue-600 font-semibold hover:text-blue-800 hover:underline transition-colors"
-        >
-          Edit
-        </button>
-
-        <button
-          onClick={() => {
-            setTaskToDelete(task.id);
-            setShowDeleteModal(true);
-          }}
-          className="text-red-500 font-semibold hover:text-red-700 hover:underline transition-colors"
-        >
-          Delete
-        </button>
-      </div>
-
-      {/* Timestamp */}
-      <p className="text-xs text-gray-400 mt-4">
-        Created: {new Date(task.createdAt).toLocaleString()}
-      </p>
-    </div>
-  ))}
-</div>
-
-
-
-      {/* DELETE Modal */}
+      {/* DELETE MODAL */}
       {showDeleteModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
           <div className="bg-white p-6 rounded-lg shadow-lg w-80">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Confirm Delete
-            </h2>
-            <p className="text-gray-700 mb-6 text-center">
-              Are you sure you want to delete this task?
-            </p>
+            <h2 className="text-xl font-semibold mb-4 text-center">Confirm Delete</h2>
+            <p className="text-gray-700 mb-6 text-center">Are you sure you want to delete this task?</p>
 
             <div className="flex justify-between">
-              <button
-                onClick={cancelDelete}
-                className="px-4 py-2 rounded bg-gray-300"
-              >
+              <button onClick={cancelDelete} className="px-4 py-2 rounded bg-gray-300">
                 Cancel
               </button>
-              <button
-                onClick={confirmDelete}
-                className="px-4 py-2 rounded bg-red-600 text-white"
-              >
+              <button onClick={confirmDelete} className="px-4 py-2 rounded bg-red-600 text-white">
                 Delete
               </button>
             </div>
@@ -267,60 +308,69 @@ export default function TasksPage() {
         </div>
       )}
 
-      {/* EDIT Task Modal */}
+      {/* EDIT MODAL */}
       {showEditModal && editTask && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-xl font-semibold mb-4 text-center">
-              Edit Task
-            </h2>
+       <div className="fixed inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50 px-4">
+  <div className="bg-white px-8 py-5 rounded-xl shadow-xl w-full max-w-[600px] border border-gray-300">
+    <h2 className="text-xl font-semibold mb-4 text-center text-gray-800">
+      Edit Task
+    </h2>
 
-            <input
-              type="text"
-              value={editTask.title}
-              onChange={(e) =>
-                setEditTask((prev) => prev && { ...prev, title: e.target.value })
-              }
-              className="w-full border p-2 rounded mb-3"
-            />
+    {/* Title */}
+    <label className="block text-sm font-medium text-gray-600 mb-1">Title</label>
+    <input
+      type="text"
+      value={editTask.title}
+      onChange={(e) =>
+        setEditTask((prev) => prev && { ...prev, title: e.target.value })
+      }
+      className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none mb-3"
+    />
 
-            <textarea
-              value={editTask.description}
-              onChange={(e) =>
-                setEditTask((prev) => prev && { ...prev, description: e.target.value })
-              }
-              className="w-full border p-2 rounded mb-3"
-            />
+    {/* Description */}
+    <label className="block text-sm font-medium text-gray-600 mb-1">Description</label>
+    <textarea
+      value={editTask.description}
+      onChange={(e) =>
+        setEditTask((prev) => prev && { ...prev, description: e.target.value })
+      }
+      className="w-full border border-gray-300 p-2.5 rounded-lg h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none mb-3"
+    />
 
-            <select
-              value={editTask.status}
-              onChange={(e) =>
-                setEditTask((prev) => prev && { ...prev, status: e.target.value })
-              }
-              className="w-full border p-2 rounded mb-3"
-            >
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
-            </select>
+    {/* Status */}
+    <label className="block text-sm font-medium text-gray-600 mb-1">Status</label>
+    <select
+      value={editTask.status}
+      onChange={(e) =>
+        setEditTask((prev) => prev && { ...prev, status: e.target.value })
+      }
+      className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none mb-5"
+    >
+      <option value="pending">Pending</option>
+      <option value="in_progress">In Progress</option>
+      <option value="completed">Completed</option>
+    </select>
 
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="px-4 py-2 rounded bg-gray-300"
-              >
-                Cancel
-              </button>
+    {/* Buttons */}
+    <div className="flex justify-end gap-3">
+      <button
+        onClick={() => setShowEditModal(false)}
+        className="px-5 py-2 rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+      >
+        Cancel
+      </button>
 
-              <button
-                onClick={updateTask}
-                className="px-4 py-2 rounded bg-blue-600 text-white"
-              >
-                Save Changes
-              </button>
-            </div>
-          </div>
-        </div>
+      <button
+        onClick={updateTask}
+        className="px-5 py-2 rounded-lg bg-black text-white hover:bg-blue-700 transition"
+      >
+        Save
+      </button>
+    </div>
+  </div>
+</div>
+
+
       )}
     </div>
   );

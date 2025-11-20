@@ -9,7 +9,7 @@ type Route = {
 };
 
 const routes: Route[] = [
-  { href: "/", label: "Home" },
+  { href: "/home", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/teams", label: "Teams" },
   { href: "/task", label: "Tasks" },
