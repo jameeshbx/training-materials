@@ -7,13 +7,14 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from 'next/navigation';
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
+  const [role] = useState("user"); // keep default role (NO dropdown)
   const [error, setError] = useState("");
 
   async function handleLogin() {
@@ -44,15 +45,14 @@ export default function Home() {
 
   return (
     <div className="flex items-center justify-center w-full">
-      <Card
-        className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-8 rounded-xl"
-      >
+      <Card className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-8 rounded-xl">
         <h2 className="text-xl font-semibold text-center mb-8">Sign In</h2>
 
-        <div className="flex flex-col gap-4">
+        {/* All fields evenly spaced */}
+        <div className="flex flex-col gap-6">
 
           {/* EMAIL */}
-          <div className="space-y-1">
+          <div className="flex flex-col gap-2">
             <label className="text-sm text-gray-300">Email</label>
             <Input
               placeholder="Enter your email"
@@ -64,7 +64,7 @@ export default function Home() {
           </div>
 
           {/* PASSWORD */}
-          <div className="space-y-1">
+          <div className="flex flex-col gap-2">
             <label className="text-sm text-gray-300">Password</label>
             <Input
               placeholder="Enter your password"
@@ -73,19 +73,6 @@ export default function Home() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-          </div>
-
-          {/* ROLE DROPDOWN */}
-          <div className="space-y-1">
-            <label className="text-sm text-gray-300">Login As</label>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="w-full p-3 rounded bg-white/20 text-white border border-white/30 focus:ring-2 focus:ring-blue-400"
-            >
-              <option value="user" className="text-black">User</option>
-              <option value="admin" className="text-black">Admin</option>
-            </select>
           </div>
 
           {/* ERROR */}
@@ -99,7 +86,7 @@ export default function Home() {
             Login
           </Button>
 
-          {/* REGISTER LINK */}
+          {/* REGISTER BUTTON */}
           <Link href="/register" className="block">
             <Button
               variant="secondary"

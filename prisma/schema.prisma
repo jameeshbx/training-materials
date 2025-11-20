@@ -45,13 +45,18 @@ model Task {
 }
 
 model TimeEntry {
-  id        String    @id @default(cuid())
-  userId    String
-  taskId    String
-  start     DateTime
-  end       DateTime?
-  createdAt DateTime  @default(now())
-  task      Task      @relation(fields: [taskId], references: [id])
-  user      User      @relation(fields: [userId], references: [id])
+  id         String    @id @default(cuid())
+  userId     String
+  taskId     String?
+  startAt    DateTime
+  endAt      DateTime?
+  duration   Int?
+  notes      String?    @db.Text
+
+  createdAt  DateTime  @default(now())
+
+  user       User      @relation(fields: [userId], references: [id])
+  task       Task?     @relation(fields: [taskId], references: [id])
 }
+
 

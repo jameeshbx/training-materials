@@ -1,0 +1,101 @@
+"use client";
+
+import { useState, useEffect, useRef } from "react";
+
+export default function Timer({ taskId }: { taskId: string }) {
+    const [activeEntryId, setActiveEntryId] = useState<string | null>(null);
+    const [running, setRunning] = useState(false);
+    const [elapsed, setElapsed] = useState(0);
+    const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+    // Update timer every second
+    useEffect(() => {
+        if (running) {
+            timerRef.current = setInterval(() => {
+                setElapsed((prev) => prev + 1);
+            }, 1000);
+        } else {
+            if (timerRef.current) {
+                clearInterval(timerRef.current);
+                timerRef.current = null;
+            }
+        }
+        return () => {
+            if (timerRef.current) clearInterval(timerRef.current);
+        };
+    }, [running]);
+
+    // Format seconds to HH:MM:SS
+    const format = (seconds: number) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, "0")}:${m
+            .toString()
+            .padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    };
+
+    // Start timer
+    const startTimer = async () => {
+        const res = await fetch("/api/time-entries", {
+            method: "POST",
+            body: JSON.stringify({ taskId }), // IMPORTANT
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error);
+            return;
+        }
+
+        setActiveEntryId(data.id);
+        setElapsed(0);
+        setRunning(true);
+    };
+
+    // Stop timer
+    const stopTimer = async () => {
+        if (!activeEntryId) return;
+
+        const res = await fetch("/api/time-entries", {
+            method: "PATCH",
+            body: JSON.stringify({ id: activeEntryId }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert(data.error);
+            return;
+        }
+
+        setRunning(false);
+        setActiveEntryId(null);
+    };
+
+    return (
+        <div className="p-4 border rounded-md bg-gray w-full">
+            <h2 className="text-lg font-semibold mb-2">Task Timer</h2>
+
+            <div className="text-3xl font-mono mb-4">{format(elapsed)}</div>
+
+            {!running ? (
+                <button
+                    onClick={startTimer}
+                    className="px-4 py-2 bg-green-600 text-white rounded-md w-full"
+                >
+                    Start Timer
+                </button>
+            ) : (
+                <button
+                    onClick={stopTimer}
+                    className="px-4 py-2 bg-red-600 text-white rounded-md w-full"
+                >
+                    Stop Timer
+                </button>
+            )}
+        </div>
+    );
+}
+

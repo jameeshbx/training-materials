@@ -1,10 +1,10 @@
-
 "use client";
 
 import { useEffect, useState } from "react";
 import { getTasks, deleteTask } from "@/lib/services/taskservice";
 import TaskForm from "@/components/task/taskForm";
 import TaskEditForm from "@/components/task/taskEditForm";
+import Timer from "@/components/task/timer"; // ⭐ IMPORT TIMER
 
 export default function TasksPage() {
     const [tasks, setTasks] = useState([]);
@@ -16,6 +16,8 @@ export default function TasksPage() {
     }
 
     async function handleDelete(id: string) {
+        const ok = confirm("Are you sure you want to delete this task?");
+        if (!ok) return;
         await deleteTask(id);
         loadTasks();
     }
@@ -40,29 +42,37 @@ export default function TasksPage() {
                 {tasks.map((task: any) => (
                     <div
                         key={task.id}
-                        className="border p-4 rounded-md flex justify-between items-center"
+                        className="border p-4 rounded-md space-y-4"
                     >
-                        <div>
-                            <h2 className="font-bold">{task.title}</h2>
-                            <p className="text-sm text-gray-600">{task.description}</p>
+                        {/* Task Info */}
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h2 className="font-bold">{task.title}</h2>
+                                <p className="text-sm text-gray-600">{task.description}</p>
+                            </div>
+
+                            <div className="flex items-center gap-4">
+                                {/* Edit Button */}
+                                <button
+                                    onClick={() => setEditingTask(task)}
+                                    className="text-blue-500 hover:underline"
+                                >
+                                    Edit
+                                </button>
+
+                                {/* Delete Button */}
+                                <button
+                                    onClick={() => handleDelete(task.id)}
+                                    className="text-red-500 hover:underline"
+                                >
+                                    Delete
+                                </button>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-4">
-                            {/* Edit Button */}
-                            <button
-                                onClick={() => setEditingTask(task)}
-                                className="text-blue-500 hover:underline"
-                            >
-                                Edit
-                            </button>
-
-                            {/* Delete Button */}
-                            <button
-                                onClick={() => handleDelete(task.id)}
-                                className="text-red-500 hover:underline"
-                            >
-                                Delete
-                            </button>
+                        {/* ⭐ TIMER FOR THIS TASK */}
+                        <div>
+                            <Timer taskId={task.id} />
                         </div>
                     </div>
                 ))}
@@ -82,5 +92,7 @@ export default function TasksPage() {
         </div>
     );
 }
+
+
 
 
