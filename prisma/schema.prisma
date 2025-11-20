@@ -50,4 +50,6 @@ model TimeEntry {
   taskId    String
   createdAt DateTime @default(now())
   task      Task     @relation(fields: [taskId], references: [id])
+  startedAt DateTime @default(now())
+  endedAt   DateTime @default(now())
 }

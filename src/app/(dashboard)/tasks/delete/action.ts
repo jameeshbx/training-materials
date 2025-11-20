@@ -1,16 +1,18 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-export async function deleteTask(formData: FormData) {
-  const id = formData.get("id") as string;
+export async function deleteTask(id: string) {
+  // 1️⃣ Delete all related time entries first
+  await db.timeEntry.deleteMany({
+    where: { taskId: id },
+  });
 
-  if (!id) return;
-
+  // 2️⃣ Now delete the task
   await db.task.delete({
     where: { id },
   });
 
-  redirect("/tasks");
+  revalidatePath("/tasks");
 }
