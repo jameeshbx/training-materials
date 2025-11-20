@@ -1,24 +1,5 @@
-import NextAuth from "next-auth";
+/// <reference types="next" />
+/// <reference types="next/image-types/global" />
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      role: string;
-      name?: string | null;
-    };
-  }
-
-  interface User {
-    id: string;
-    role: string;
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    id?: string;
-    role?: string;
-  }
-}
+// NOTE: This file should not be edited
+// see https://nextjs.org/docs/app/building-your-application/configuring/typescript for more information.

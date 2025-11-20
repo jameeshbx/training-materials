@@ -12,9 +12,11 @@ const updateTaskSchema = z.object({
 });
 
 
-export async function GET(req: NextRequest, { params }: any) {
-  const parsedId = idSchema.safeParse(params.id);
+// ---------- GET SINGLE TASK ----------
+export async function GET(req: NextRequest, context: any) {
+  const { id } = await context.params;  // 👈 FIX
 
+  const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
     return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
   }
@@ -27,9 +29,12 @@ export async function GET(req: NextRequest, { params }: any) {
 }
 
 
-export async function PUT(req: NextRequest, { params }: any) {
-  const parsedId = idSchema.safeParse(params.id);
 
+// ---------- UPDATE TASK ----------
+export async function PUT(req: NextRequest, context: any) {
+  const { id } = await context.params; // 👈 FIX
+
+  const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
     return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
   }
@@ -53,9 +58,12 @@ export async function PUT(req: NextRequest, { params }: any) {
 }
 
 
-export async function DELETE(req: NextRequest, { params }: any) {
-  const parsedId = idSchema.safeParse(params.id);
 
+// ---------- DELETE TASK ----------
+export async function DELETE(req: NextRequest, context: any) {
+  const { id } = await context.params;  // 👈 FIX
+
+  const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
     return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
   }

@@ -44,12 +44,16 @@ model Task {
 }
 
 model TimeEntry {
-  id       Int      @id @default(autoincrement())
-  userId   Int
-  taskId   Int
-  duration Int
-  workedAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime?
 
-  user User @relation(fields: [userId], references: [id])
-  task Task @relation(fields: [taskId], references: [id])
+  // relations
+  taskId Int
+  task   Task   @relation(fields: [taskId], references: [id])
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
 }
