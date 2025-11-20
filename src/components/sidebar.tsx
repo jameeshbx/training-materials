@@ -12,7 +12,7 @@ const routes: Route[] = [
   { href: "/", label: "Home" },
   { href: "/dashboard", label: "Dashboard" },
   { href: "/teams", label: "Teams" },
-  { href: "/tasks", label: "Tasks" },
+  { href: "/task", label: "Tasks" },
   { href: "/reports", label: "Reports" },
 ];
 
