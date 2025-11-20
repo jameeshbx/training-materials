@@ -9,6 +9,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [role, setRole] = useState("USER");     // 👈 ADD THIS
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSignup(e: React.FormEvent) {
@@ -18,7 +19,7 @@ export default function SignupPage() {
     const res = await fetch("/api/auth/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
+      body: JSON.stringify({ name, email, password, role }),  // 👈 SEND ROLE
     });
 
     const data = await res.json();
@@ -28,7 +29,7 @@ export default function SignupPage() {
       return;
     }
 
-    router.push("/login");
+    router.push("/auth/login"); // redirect to login
   }
 
   return (
@@ -74,6 +75,21 @@ export default function SignupPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 text-gray-700"
             />
+          </div>
+
+          {/* ROLE DROPDOWN (moved BEFORE submit button) */}
+          <div className="flex flex-col gap-1">
+            <label className="text-sm text-gray-700">Role</label>
+            <select
+              name="role"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}    // 👈 STORE ROLE
+              className="w-full p-2 border rounded bg-white text-black"
+              required
+            >
+              <option value="USER">USER</option>
+              <option value="ADMIN">ADMIN</option>
+            </select>
           </div>
 
           {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
