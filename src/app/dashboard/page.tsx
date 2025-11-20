@@ -1,4 +1,6 @@
-
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { redirect } from "next/navigation";
 import {
   Card,
   CardHeader,
@@ -6,7 +8,13 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       <Card>

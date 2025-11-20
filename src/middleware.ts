@@ -1,22 +1,39 @@
 import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import jwt from "jsonwebtoken";
+import { getToken } from "next-auth/jwt";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("usertoken")?.value;
-  const url = req.nextUrl.pathname;
+export async function middleware(req: any) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const pathname = req.nextUrl.pathname;
 
-  if (!token && url.startsWith("/dashboard")) {
+  console.log("🔥 TOKEN =>", token, " | PATH =>", pathname);
+
+  // 1️⃣ Not logged in → protect admin & dashboard
+  if (!token && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  if (token && (url === "/login" || url === "/register")) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+  // 2️⃣ Logged-in USER trying to access admin → block
+  if (token && token.role === "USER" && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
+  // 3️⃣ Logged-in user/admin cannot visit login or signup again
+  if (token && (pathname === "/login" || pathname === "/signup")) {
+    return NextResponse.redirect(
+      new URL(token.role === "ADMIN" ? "/admin" : "/dashboard", req.url)
+    );
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/login", "/register"],
+  matcher: [
+    "/dashboard",
+    "/dashboard/:path*",
+    "/admin",
+    "/admin/:path*",
+    "/login",
+    "/signup",
+  ],
 };

@@ -3,7 +3,7 @@ import { Home, Users, ClipboardList, FileBarChart } from "lucide-react";
 
 export default function Sidebar() {
   return (
-    <div className="w-60 h-screen bg-green-300 shadow-xl p-5">
+    <div className="w-60 h-auto bg-green-300 shadow-xl p-5">
       <h2 className="text-xl font-bold mb-6">Dashboard</h2>
 
       <nav className="space-y-3">

@@ -6,7 +6,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
-
+enum Role{
+  USER
+  ADMIN
+}
 model User {
   id          Int         @id @default(autoincrement())
   name        String
@@ -14,6 +17,7 @@ model User {
   password    String
   tasks       Task[]      @relation("UserTasks")
   timeEntries TimeEntry[]
+  role Role @default(USER)
   createdAt   DateTime    @default(now())
 }
 
@@ -40,12 +44,16 @@ model Task {
 }
 
 model TimeEntry {
-  id       Int      @id @default(autoincrement())
-  userId   Int
-  taskId   Int
-  duration Int
-  workedAt DateTime @default(now())
+  id        Int      @id @default(autoincrement())
+  startTime DateTime
+  endTime   DateTime?
 
-  user User @relation(fields: [userId], references: [id])
-  task Task @relation(fields: [taskId], references: [id])
+  // relations
+  taskId Int
+  task   Task   @relation(fields: [taskId], references: [id])
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
 }

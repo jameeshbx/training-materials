@@ -3,6 +3,7 @@
 import Sidebar from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 
 export default function DashboardLayout({
   children,
@@ -12,11 +13,8 @@ export default function DashboardLayout({
 
   const pathname = usePathname();
 
-  // 🔥 Logout function
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "GET" });
-    window.location.href = "/login"; // redirect after logout
-  };
+ 
+  
 
   return (
     <div className="flex min-h-screen mt-2">
@@ -32,7 +30,7 @@ export default function DashboardLayout({
           </h1>
 
           {/* Logout Button */}
-          <Button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white">
+          <Button onClick={() => signOut({ callbackUrl: "/login" })}className="bg-red-500 hover:bg-red-600 text-white">
             Logout
           </Button>
         </div>

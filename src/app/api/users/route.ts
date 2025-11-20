@@ -1,5 +1,5 @@
 
-import { userController } from "@/controller/userController";
+// import { userController } from "@/controller/userController";
 
-export const GET = userController.findAll;
-export const POST = userController.create;
+// export const GET = userController.findAll;
+// export const POST = userController.create;

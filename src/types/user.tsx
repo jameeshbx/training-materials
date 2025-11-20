@@ -25,9 +25,9 @@ export interface Teammembers{
   avatar?: string;
 }
 
-export interface Tasks{
-  id:number;
-  task:string;
-  desc:string;
-
+export interface Tasks {
+  id: number;
+  title: string;
+  description?: string;
+  status?: string;
 }
