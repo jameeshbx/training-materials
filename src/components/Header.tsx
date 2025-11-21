@@ -1,12 +1,8 @@
-
 export default function Header() {
     return (
-        <header>
-
-            <h2 className="text-lg font-semibold text-gray-900">
-                header
-            </h2>
-
-        </header>
+        <div className="w-full h-16 bg-white shadow flex items-center px-6">
+            <h1 className="text-xl font-semibold text-gray-800">Header</h1>
+        </div>
     );
 }
+

@@ -1,3 +1,4 @@
+
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/db";
@@ -31,7 +32,7 @@ export const authOptions: NextAuthOptions = {
                     id: user.id,
                     name: user.name,
                     email: user.email,
-                    role: user.role,   // ⭐ ADDED: include role in returned user
+                    role: user.role,  // ⭐ return role
                 };
             },
         }),
@@ -49,19 +50,23 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            // When user logs in for the first time
+            // ⭐ Only set token values on first login
             if (user) {
                 token.id = user.id;
-                token.role = user.role;  // ⭐ ADDED: store role in JWT token
+                token.role = user.role;
             }
-            console.log("🔥 TOKEN:", token);
+
+            // ⭐ Ensure role never becomes undefined after refresh
+            if (!token.role) token.role = "user";
+
+            console.log("🔥 TOKEN IN JWT CALLBACK:", token);
             return token;
         },
 
         async session({ session, token }) {
             if (session.user) {
                 (session.user as any).id = token.id;
-                (session.user as any).role = token.role;  // ⭐ ADDED: expose role in session
+                (session.user as any).role = token.role; // ⭐ expose role to client
             }
             return session;
         },
