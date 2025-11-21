@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
-  status: z.enum(["pending", "in_progress", "completed"]).default("pending"),
+  status: z.enum(["pending", "progress", "completed"]).default("pending"),
 });
 
 

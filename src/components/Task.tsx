@@ -21,7 +21,7 @@ export default function TasksPage() {
       const data = await res.json();
       setTasks(data.data);
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("❌ Error fetching tasks:", error);
       toast.error("Failed to load tasks");
     } finally {
       setLoading(false);
@@ -32,22 +32,20 @@ export default function TasksPage() {
     fetchTasks();
   }, []);
 
-  // Delete 
+  // Delete Task
   const deleteTask = async (id: number) => {
-    const confirmDelete = confirm("⚠️ Are you sure you want to delete this task?");
+    const confirmDelete = confirm("⚠️ Delete this task?");
     if (!confirmDelete) return;
 
     const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
 
     if (res.ok) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Task deleted successfully 🗑️");
-    } else {
-      toast.error("Failed to delete task");
-    }
+      toast.success("Task deleted 🗑️");
+    } else toast.error("Failed to delete task");
   };
 
-  // Update status 
+  // Update Status
   const updateStatus = async (id: number, status: string) => {
     const res = await fetch(`/api/tasks/${id}`, {
       method: "PUT",
@@ -57,14 +55,8 @@ export default function TasksPage() {
 
     if (res.ok) {
       fetchTasks();
-      toast.success(`Task updated → ${status.replace("_", " ")}`);
-
-      // Sync Timer
-      const timerBtn = document.querySelector(`#timer-${id}`) as HTMLButtonElement;
-      if (timerBtn) timerBtn.click();
-    } else {
-      toast.error("Failed to update status");
-    }
+      toast.success(`Task → ${status.replace("_", " ")}`);
+    } else toast.error("Failed to update status");
   };
 
   const filteredTasks = tasks.filter((t) =>
@@ -73,7 +65,7 @@ export default function TasksPage() {
 
   const statusColor = (status: string) => ({
     pending: "bg-yellow-100 text-yellow-700",
-    in_progress: "bg-blue-100 text-blue-700",
+    progress: "bg-blue-100 text-blue-700",
     completed: "bg-green-100 text-green-700",
   }[status] || "bg-gray-100 text-gray-600");
 
@@ -85,7 +77,7 @@ export default function TasksPage() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
-            <p className="text-gray-500">Track time and manage tasks</p>
+            <p className="text-gray-500">Track time & manage productivity</p>
           </div>
 
           <button
@@ -110,18 +102,17 @@ export default function TasksPage() {
 
         {/* Task Grid */}
         {loading ? (
-          <p className="text-center py-10 text-gray-600">Loading...</p>
+          <p className="text-center text-gray-600 py-10">Loading...</p>
         ) : filteredTasks.length === 0 ? (
-          <p className="text-center py-10 text-gray-600">No tasks found</p>
+          <p className="text-center text-gray-600 py-10">No tasks found</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-white rounded-xl shadow hover:shadow-lg border transition overflow-hidden"
+                className="bg-white border rounded-xl shadow hover:shadow-lg transition overflow-hidden"
               >
-                {/* Timer */}
-                <TaskTimer taskId={task.id} />
+                <TaskTimer taskId={task.id} status={task.status} />
 
                 {/* Body */}
                 <div className="p-6 space-y-3">
@@ -130,7 +121,7 @@ export default function TasksPage() {
                       task.status || "pending"
                     )}`}
                   >
-                    {task.status?.replace("_", " ") || "pending"}
+                    {task.status.replace("_", " ") || "Pending"}
                   </span>
 
                   <h2 className="text-lg font-semibold text-gray-800">{task.title}</h2>
@@ -139,38 +130,46 @@ export default function TasksPage() {
 
                 {/* Controls */}
                 <div className="px-6 pb-4 flex gap-2">
-                  {task.status === "in_progress" ? (
+
+                  {task.status === "completed" ? (
+                    <button disabled className="flex-1 bg-gray-400 text-white text-xs py-2 px-3 rounded-md cursor-not-allowed">
+                      Completed ✔
+                    </button>
+                  ) : task.status === "progress" ? (
                     <button
                       onClick={() => updateStatus(task.id, "completed")}
                       className="flex-1 bg-purple-600 text-white text-xs py-2 px-3 rounded-md hover:bg-purple-700"
                     >
-                      Stop & Complete
+                      Complete
                     </button>
                   ) : (
                     <button
-                      onClick={() => updateStatus(task.id, "in_progress")}
+                      onClick={() => updateStatus(task.id, "progress")}
                       className="flex-1 bg-green-600 text-white text-xs py-2 px-3 rounded-md hover:bg-green-700"
                     >
                       Start Task
                     </button>
                   )}
 
+                  {/* Edit */}
                   <button
                     onClick={() => {
                       setEditTask(task);
                       setShowForm(true);
                     }}
-                    className="flex-1 flex justify-center items-center gap-1 border text-xs py-2 px-3 rounded-md"
+                    className="flex-1 border text-xs py-2 px-3 rounded-md flex items-center justify-center gap-1"
                   >
                     <Edit size={14} /> Edit
                   </button>
 
+                  {/* Delete */}
                   <button
                     onClick={() => deleteTask(task.id)}
                     className="flex-1 bg-red-600 text-white text-xs py-2 px-3 rounded-md hover:bg-red-700"
                   >
                     <Trash2 size={14} /> Delete
                   </button>
+
                 </div>
               </div>
             ))}

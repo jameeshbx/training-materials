@@ -1,116 +1,124 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { z } from "zod";
 
-// -------- Validation Schemas ---------
-const startSchema = z.object({
-  taskId: z.number().positive(),
+// --------- Zod Schema ----------
+
+const timeEntrySchema = z.object({
+  taskId: z.number().int().positive(),
+  startTime: z.number().or(z.string()), // Date.now() (number) or ISO string
+  endTime: z.number().or(z.string()),   // same here
+  // duration optional aanel:
+  duration: z.number().int().nonnegative().optional(),
 });
 
-const stopSchema = z.object({
-  id: z.number().positive(),
-});
+// --------- POST /api/time-entries ----------
 
-// -------- GET Running Timer --------
-// GET /api/time-entries?taskId=10
-export async function GET(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
-    const taskId = Number(searchParams.get("taskId"));
-
-    if (!taskId) {
-      return NextResponse.json({ success: false, error: "Task ID required" }, { status: 400 });
-    }
-
-    const entry = await prisma.timeEntry.findFirst({
-      where: { taskId, endTime: null },
-      orderBy: { startTime: "desc" },
-    });
-
-    return NextResponse.json({ success: true, data: entry || null });
-
-  } catch (err) {
-    console.error("Timer GET Error:", err);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
-  }
-}
-
-
-// -------- START TIMER  --------
-export async function POST(req: NextRequest) {
-  try {
+    // 1) Auth check
     const session = await getServerSession(authOptions);
-
-    if (!session) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!session || !session.user?.id) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+    const userId = Number(session.user.id); // make sure id is number
 
-    const body = await req.json();
-    const parsed = startSchema.safeParse(body);
+    // 2) Body parse + validate
+    const json = await req.json();
+    const parsed = timeEntrySchema.safeParse(json);
 
     if (!parsed.success) {
       return NextResponse.json(
-        { success: false, error: "Invalid data", details: parsed.error.issues },
+        {
+          message: "Validation failed",
+          errors: parsed.error.flatten(),
+        },
         { status: 400 }
       );
     }
 
-    const { taskId } = parsed.data;
-    const userId = Number(session?.user?.id);
+    const { taskId, startTime, endTime, duration } = parsed.data;
 
-    const existing = await prisma.timeEntry.findFirst({
-      where: { taskId, userId, endTime: null },
-    });
+    // 3) Convert start/end to Date
+    const start = new Date(startTime);
+    const end = new Date(endTime);
 
-    if (existing) return NextResponse.json({ success: true, data: existing });
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return NextResponse.json(
+        { message: "Invalid date values" },
+        { status: 400 }
+      );
+    }
 
-    const entry = await prisma.timeEntry.create({
+    // 4) Create time entry in DB
+    const timeEntry = await prisma.timeEntry.create({
       data: {
         taskId,
         userId,
-        startTime: new Date(),
+        startTime: start,
+        endTime: end,
+        // duration DB-il field illa enkil idu ignore cheyyam
+        // later add field vannal use cheyyam
       },
     });
 
-    return NextResponse.json({ success: true, data: entry }, { status: 201 });
-
-  } catch (err) {
-    console.error("Timer POST Error:", err);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+    return NextResponse.json(
+      {
+        message: "Time entry saved successfully",
+        timeEntry,
+      },
+      { status: 201 }
+    );
+  } catch (error: any) {
+    console.error("❌ Error creating time entry:", error);
+    return NextResponse.json(
+      {
+        message: "Server error",
+        error: error?.message || "Unknown error",
+      },
+      { status: 500 }
+    );
   }
 }
 
+// --------- (Optional) GET /api/time-entries ----------
 
-
-// -------- STOP TIMER (PATCH) --------
-export async function PATCH(req: NextRequest) {
+export async function GET(req: Request) {
   try {
-    const body = await req.json();
-    const parsed = stopSchema.safeParse(body);
+    const { searchParams } = new URL(req.url);
+    const taskId = searchParams.get("taskId");
 
-    if (!parsed.success) {
-      return NextResponse.json(
-        { success: false, error: "Invalid ID", details: parsed.error.issues },
-        { status: 400 }
-      );
+    let entries;
+
+    if (taskId) {
+      // Filter by task
+      entries = await prisma.timeEntry.findMany({
+        where: { taskId: Number(taskId) },
+        include: {
+          task: true,
+          user: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+    } else {
+      // return all
+      entries = await prisma.timeEntry.findMany({
+        include: {
+          task: true,
+          user: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
     }
 
-    const { id } = parsed.data;
+    return NextResponse.json(entries, { status: 200 });
 
-    const entry = await prisma.timeEntry.update({
-      where: { id },
-      data: { endTime: new Date() },
-    });
-
-    return NextResponse.json({ success: true, data: entry });
-
-  } catch (err) {
-    console.error("Timer PATCH Error:", err);
-    return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
+  } catch (error: any) {
+    return NextResponse.json(
+      { message: "Error fetching time entries", error: error.message },
+      { status: 500 }
+    );
   }
 }
