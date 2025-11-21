@@ -1,4 +1,6 @@
 "use client";
+import LogoutButton from "@/components/LogoutButton";
+
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -16,6 +18,11 @@ export default function Header({ toggleSidebar }: HeaderProps) {
       </button>
 
       <h1 className="text-lg font-semibold text-gray-800">header</h1>
+
+
+       <div>
+        <LogoutButton />
+      </div>
     </div>
   );
 }
