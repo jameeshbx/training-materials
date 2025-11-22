@@ -4,9 +4,12 @@ import { NextRequest, NextResponse } from "next/server";
 // =============================
 // GET ALL TASKS
 // =============================
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const userId = req.nextUrl.searchParams.get("userId");
+
     const tasks = await prisma.task.findMany({
+      where: userId ? { userId } : undefined,
       orderBy: { createdAt: "desc" },
       include: { timeEntries: true },
     });
