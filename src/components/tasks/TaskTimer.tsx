@@ -9,6 +9,8 @@ export default function TaskTimer({ taskId }: { taskId: string }) {
   const [entryId, setEntryId] = useState<string | null>(null);
   const [startTime, setStartTime] = useState<Date | null>(null);
 
+  
+
   // Timer counter
   useEffect(() => {
     if (!isRunning) return;

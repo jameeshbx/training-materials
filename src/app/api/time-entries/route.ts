@@ -17,7 +17,38 @@ const StopSchema = z.object({
 });
 
 // ------------------------
-// POST  → START TIMER
+// 🔹 GET → Fetch all entries for one task
+// ------------------------
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const taskId = searchParams.get("taskId");
+
+  if (!taskId) {
+    return NextResponse.json(
+      { error: "taskId is required" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    const entries = await db.timeEntry.findMany({
+      where: { taskId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(entries);
+  } catch (error) {
+    console.error("Fetch Error:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch time entries" },
+      { status: 500 }
+    );
+  }
+}
+
+// ------------------------
+// 🔹 POST → START TIMER
 // ------------------------
 
 export async function POST(req: Request) {
@@ -34,7 +65,6 @@ export async function POST(req: Request) {
 
     const { taskId, startedAt } = parsed.data;
 
-    // Create a new time entry (endedAt = startedAt temporarily)
     const entry = await db.timeEntry.create({
       data: {
         taskId,
@@ -45,6 +75,7 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(entry, { status: 201 });
+
   } catch (err) {
     console.error("Timer Start Error:", err);
     return NextResponse.json(
@@ -55,7 +86,7 @@ export async function POST(req: Request) {
 }
 
 // ------------------------
-// PUT  → STOP TIMER
+// 🔹 PUT → STOP TIMER
 // ------------------------
 
 export async function PUT(req: Request) {
@@ -72,7 +103,6 @@ export async function PUT(req: Request) {
 
     const { entryId, endedAt } = parsed.data;
 
-    // 1️⃣ Find the existing entry
     const entry = await db.timeEntry.findUnique({
       where: { id: entryId },
     });
@@ -84,7 +114,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    // 2️⃣ Calculate hours
     const start = new Date(entry.startedAt);
     const end = new Date(endedAt);
 
@@ -98,7 +127,6 @@ export async function PUT(req: Request) {
       );
     }
 
-    // 3️⃣ Update entry with final timestamp + hours
     const updated = await db.timeEntry.update({
       where: { id: entryId },
       data: {
@@ -108,6 +136,7 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json(updated);
+
   } catch (err) {
     console.error("Timer Stop Error:", err);
     return NextResponse.json(
