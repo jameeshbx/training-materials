@@ -1,15 +1,22 @@
+
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/validators/task";
 
 // -------------------------------------------------------
-// GET → Fetch all tasks with relations
+// GET → Fetch all tasks with relations + latest time entry
 // -------------------------------------------------------
 export async function GET() {
   const tasks = await prisma.task.findMany({
     include: {
       assignee: true,
       team: true,
+
+      // ⭐ ADDED: Include only the latest time entry (for start/end time in UI)
+      timeEntries: {
+        orderBy: { startAt: "desc" },
+        take: 1,
+      },
     },
     orderBy: { createdAt: "desc" },
   });
@@ -71,52 +78,14 @@ export async function PUT(req: Request) {
 }
 
 // -------------------------------------------------------
-// DELETE → Delete task
+// DELETE → Delete task + related time entries
 // -------------------------------------------------------
-// export async function DELETE(req: Request) {
-//   try {
-//     const { searchParams } = new URL(req.url);
-//     const id = searchParams.get("id");
-
-//     if (!id) {
-//       return NextResponse.json(
-//         { error: "Task ID is required" },
-//         { status: 400 }
-//       );
-//     }
-
-//     // 1. Delete all time entries related to this task
-//     await prisma.timeEntry.deleteMany({
-//       where: { taskId: id }
-//     });
-
-//     // 2. Now delete the task safely. Use deleteMany to avoid throwing
-//     // if the task was already removed by another process.
-//     const deleted = await prisma.task.deleteMany({
-//       where: { id },
-//     });
-
-//     if (deleted.count === 0) {
-//       return NextResponse.json(
-//         { error: "Task not found" },
-//         { status: 404 }
-//       );
-//     }
-
-//     return NextResponse.json({ message: "Task deleted" });
-//   } catch (error: any) {
-//     return NextResponse.json(
-//       { error: error.message },
-//       { status: 400 }
-//     );
-//   }
-// }
 export async function DELETE(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");
 
-    // Fallback: allow id in JSON body for clients that send it in the body
+    // Fallback: allow id from body
     if (!id) {
       try {
         const body = await req.json();
@@ -131,27 +100,23 @@ export async function DELETE(req: NextRequest) {
     }
 
     const rawId = id;
-    // Trim whitespace
-    id = id.trim();
-    // Remove surrounding quotes if the client sent the id with quotes (e.g. "id" or 'id')
-    id = id.replace(/^['"]|['"]$/g, "");
+    id = id.trim().replace(/^['"]|['"]$/g, "");
 
     console.log("API: DELETE /api/tasks rawId=", rawId, "-> sanitized id=", id);
 
-    // Ensure task exists first
+    // Ensure task exists
     const existing = await prisma.task.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Task not found", id }, { status: 404 });
     }
 
-    // Delete related time entries and the task in a transaction to keep things consistent
+    // Delete related entries + task
     const [_, deleted] = await prisma.$transaction([
       prisma.timeEntry.deleteMany({ where: { taskId: id } }),
       prisma.task.deleteMany({ where: { id } }),
     ]);
 
     if (deleted.count === 0) {
-      // If nothing deleted, return 404 and include id for debugging
       return NextResponse.json({ error: "Task not found", id }, { status: 404 });
     }
 

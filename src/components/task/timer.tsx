@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -39,7 +40,7 @@ export default function Timer({ taskId }: { taskId: string }) {
     const startTimer = async () => {
         const res = await fetch("/api/time-entries", {
             method: "POST",
-            body: JSON.stringify({ taskId }), // IMPORTANT
+            body: JSON.stringify({ taskId }),
         });
 
         const data = await res.json();
@@ -75,22 +76,24 @@ export default function Timer({ taskId }: { taskId: string }) {
     };
 
     return (
-        <div className="p-4 border rounded-md bg-gray w-full">
-            <h2 className="text-lg font-semibold mb-2">Task Timer</h2>
+        <div className="p-5 rounded-lg bg-gray-900 text-white shadow-lg border border-gray-700">
+            <h2 className="text-xl font-semibold mb-3">Task Timer</h2>
 
-            <div className="text-3xl font-mono mb-4">{format(elapsed)}</div>
+            <div className="text-4xl font-mono font-bold mb-6 text-center">
+                {format(elapsed)}
+            </div>
 
             {!running ? (
                 <button
                     onClick={startTimer}
-                    className="px-4 py-2 bg-green-600 text-white rounded-md w-full"
+                    className="px-4 py-3 bg-green-600 text-white rounded-md w-full hover:bg-green-700 transition"
                 >
                     Start Timer
                 </button>
             ) : (
                 <button
                     onClick={stopTimer}
-                    className="px-4 py-2 bg-red-600 text-white rounded-md w-full"
+                    className="px-4 py-3 bg-red-600 text-white rounded-md w-full hover:bg-red-700 transition"
                 >
                     Stop Timer
                 </button>
