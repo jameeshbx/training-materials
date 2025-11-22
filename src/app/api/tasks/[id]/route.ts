@@ -8,7 +8,7 @@ const idSchema = z.coerce.number().int().positive();
 const updateTaskSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
-  status: z.enum(["pending", "in_progress", "completed"]).optional(),
+  status: z.enum(["pending", "progress", "completed"]).optional(),
 });
 
 
@@ -61,14 +61,40 @@ export async function PUT(req: NextRequest, context: any) {
 
 // ---------- DELETE TASK ----------
 export async function DELETE(req: NextRequest, context: any) {
-  const { id } = await context.params;  // 👈 FIX
+  const { id } = await context.params;
 
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
-    return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "Invalid ID" },
+      { status: 400 }
+    );
   }
 
-  await prisma.task.delete({ where: { id: parsedId.data } });
+  const taskId = parsedId.data;
 
-  return NextResponse.json({ success: true, message: "Task deleted" });
+  try {
+    // First delete related time entries
+    await prisma.timeEntry.deleteMany({
+      where: { taskId }
+    });
+
+    // Then delete task
+    await prisma.task.delete({
+      where: { id: taskId }
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Task and related time entries deleted"
+    });
+
+  } catch (error: any) {
+    console.error("❌ Error deleting:", error);
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
+  }
 }
+
