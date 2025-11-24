@@ -3,45 +3,48 @@
 import { useEffect, useState } from "react";
 import { Tasks } from "@/types/user";
 import TaskForm from "@/components/TaskForm";
-import { Plus, Edit, Trash2, Search } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Divide } from "lucide-react";
 import TaskTimer from "@/components/TaskTimer";
 import toast from "react-hot-toast";
+import { usePathname } from "next/navigation";   // <-- ADD THIS
 
 export default function TasksPage() {
+    const pathname = usePathname();
   const [tasks, setTasks] = useState<Tasks[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Tasks | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const today = new Date().toISOString().split("T")[0];
+const [selectedDate, setSelectedDate] = useState<string>(today);
 
-  // Fetch Tasks
-  const fetchTasks = async () => {
-    try {
-      const res = await fetch("/api/tasks");
-      const data = await res.json();
-      setTasks(data.data);
-    } catch (error) {
-      console.error("❌ Error fetching tasks:", error);
-      toast.error("Failed to load tasks");
-    } finally {
-      setLoading(false);
-    }
-  };
+// Fetch Tasks
+const fetchTasks = async () => {
+  try {
+    const res = await fetch(`/api/tasks?date=${selectedDate}`);
+    const data = await res.json();
+    setTasks(data.data);
+  } catch (error) {
+    toast.error("Failed to load tasks");
+  } finally {
+    setLoading(false);
+  }
+};
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+useEffect(() => {
+  fetchTasks();
+}, [selectedDate]);
 
   // Delete Task
   const deleteTask = async (id: number) => {
-    const confirmDelete = confirm("⚠️ Delete this task?");
+    const confirmDelete = confirm("Delete this task?");
     if (!confirmDelete) return;
 
     const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
 
     if (res.ok) {
       setTasks((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Task deleted 🗑️");
+      toast.success("Task deleted");
     } else toast.error("Failed to delete task");
   };
 
@@ -54,14 +57,16 @@ export default function TasksPage() {
     });
 
     if (res.ok) {
-      fetchTasks();
-      toast.success(`Task → ${status.replace("_", " ")}`);
-    } else toast.error("Failed to update status");
+  fetchTasks();
+  toast.success(`Task → ${status.replace("_", " ")}`);
+}
   };
 
-  const filteredTasks = tasks.filter((t) =>
-    (t.title + t.description).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredTasks = tasks.filter((t) =>
+  (t.title + (t.description || "")).toLowerCase().includes(searchTerm.toLowerCase())
+);
+
+
 
   const statusColor = (status: string) => ({
     pending: "bg-yellow-100 text-yellow-700",
@@ -74,31 +79,67 @@ export default function TasksPage() {
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
-            <p className="text-gray-500">Track time & manage productivity</p>
-          </div>
+       {/* Header */}
+<div className="flex justify-between items-center mb-8">
+  <div>
+    {pathname === "/dashboard" ? (
+      <>
+        <h1 className="text-3xl font-bold text-gray-900">Today Task</h1>
+        <p className="text-gray-500">Track time & manage productivity</p>
+      </>
+    ) : (
+      <>
+        <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
+        <p className="text-gray-500">Track time & manage productivity</p>
+      </>
+    )}
+  </div>
+<div>
 
-          <button
-            onClick={() => setShowForm(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md"
-          >
-            <Plus size={18} /> Add Task
-          </button>
-        </div>
+{pathname!=="/dashboard"?(
+<button
+    onClick={() => setShowForm(true)}
+    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md"
+  >
+    <Plus size={18} /> Add Task
+  </button>
+):(
+  <div>
 
-        {/* Search */}
-        <div className="bg-white rounded-md shadow p-4 mb-6 flex items-center gap-3">
-          <Search className="text-gray-400" size={20} />
-          <input
-            type="text"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full outline-none"
-          />
-        </div>
+  </div>
+)}
+  
+  </div>
+</div>
+
+
+<div>
+{pathname=="/dashboard"?(
+  <div></div>
+):(<div className="bg-white rounded-md shadow p-4 mb-6 flex items-center gap-3">
+  <Search className="text-gray-400" size={20} />
+  <input
+    type="text"
+    placeholder="Search tasks..."
+    value={searchTerm}
+    onChange={(e) => setSearchTerm(e.target.value)}
+    className="w-full outline-none"
+  />
+
+  {/* Date Filter */}
+ <input
+  type="date"
+  value={selectedDate}
+  onChange={(e) => setSelectedDate(e.target.value)}
+  className="border px-2 py-1 rounded-md text-sm"
+/>
+
+</div>)}
+
+      
+
+</div>
+
 
         {/* Task Grid */}
         {loading ? (
@@ -110,14 +151,14 @@ export default function TasksPage() {
             {filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-white border rounded-xl shadow hover:shadow-lg transition overflow-hidden"
+                className="bg-white  rounded-xl shadow-2xl transition overflow-hidden"
               >
                 <TaskTimer taskId={task.id} status={task.status} />
 
                 {/* Body */}
-                <div className="p-6 space-y-3">
+                <div className="p-7 space-y-3">
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${statusColor(
+                    className={`px-1 py-1 rounded-full text-xs font-semibold ${statusColor(
                       task.status || "pending"
                     )}`}
                   >
@@ -145,7 +186,7 @@ export default function TasksPage() {
                   ) : (
                     <button
                       onClick={() => updateStatus(task.id, "progress")}
-                      className="flex-1 bg-green-600 text-white text-xs py-2 px-3 rounded-md hover:bg-green-700"
+                      className="flex-1 bg-sky-300 text-black text-xs py-2 px-3 rounded-md hover:bg-green-700"
                     >
                       Start Task
                     </button>

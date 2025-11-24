@@ -1,5 +1,23 @@
+import {NextResponse} from 'next/server'
+import { prisma } from '@/lib/prisma'
 
-// import { userController } from "@/controller/userController";
 
-// export const GET = userController.findAll;
-// export const POST = userController.create;
+export async function GET() {
+    try {
+         const finduser=await prisma.user.findMany({
+        where:{
+            role:"USER"
+        }
+    })
+   return NextResponse.json({
+  success: true,
+  users: finduser
+});
+    } catch (error:any) {
+        return NextResponse.json(
+      { message: "Error fetching time entries", error: error.message },
+      { status: 500 }
+    );
+    }
+   
+}

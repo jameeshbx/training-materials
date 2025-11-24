@@ -96,20 +96,20 @@ export default function TaskTimer({ taskId, status }: TaskTimerProps) {
       {status === "pending" || status === "progress" ? (
         <div className="mt-3 ml-2 flex items-center gap-4">
           {/* Timer Live Display */}
-          <div className="bg-gray-900 text-white px-4 py-2 rounded-lg shadow-md text-lg font-mono border border-gray-700">
+          <div className="bg-gray-900 text-white px-4 py-2 rounded-sm shadow-md text-lg font-mono border ">
             {formatTime(running)}
           </div>
 
           {/* Start/Stop Button */}
           <button
             onClick={handleToggle}
-            className={`px-5 py-2 rounded-lg text-white font-semibold shadow-md transition-all duration-300 ${
+            className={`px-5 py-2 rounded-sm text-white font-semibold shadow-md transition-all duration-300 ${
               buttonStatus
                 ? "bg-red-600 hover:bg-red-700"
-                : "bg-green-600 hover:bg-green-700"
+                : "bg-blue-600 hover:bg-black"
             }`}
           >
-            {buttonStatus ? "■ Stop" : "▶ Start"}
+            {buttonStatus ? "■ Stop" : " Start"}
           </button>
         </div>
       ) : (
