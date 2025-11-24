@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
 // =============================
 export async function POST(req: NextRequest) {
   try {
-    const { title, description, status = "pending", userId } = await req.json();
+    const { title, description, status = "pending", userId, dueDate } =
+      await req.json();
 
     if (!title || !userId) {
       return NextResponse.json(
@@ -36,13 +37,22 @@ export async function POST(req: NextRequest) {
     }
 
     const task = await prisma.task.create({
-      data: { title, description, status, userId },
+      data: {
+        title,
+        description,
+        status,
+        userId,
+        dueDate: dueDate ? new Date(dueDate) : null, // 👈 NEW
+      },
     });
 
     return NextResponse.json({ data: task }, { status: 201 });
   } catch (error) {
     console.error("POST /api/tasks error", error);
-    return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create task" },
+      { status: 500 }
+    );
   }
 }
 
@@ -51,7 +61,7 @@ export async function POST(req: NextRequest) {
 // =============================
 export async function PUT(req: NextRequest) {
   try {
-    const { id, title, description, status } = await req.json();
+    const { id, title, description, status, dueDate } = await req.json();
 
     if (!id) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });
@@ -63,18 +73,22 @@ export async function PUT(req: NextRequest) {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(status !== undefined && { status }),
+        ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }), // 👈 NEW
       },
     });
 
     return NextResponse.json({ data: updatedTask });
   } catch (error) {
     console.error("PUT /api/tasks error", error);
-    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update task" },
+      { status: 500 }
+    );
   }
 }
 
 // =============================
-// DELETE TASK (supports JSON body OR query param)
+// DELETE TASK
 // =============================
 export async function DELETE(req: NextRequest) {
   try {
@@ -104,5 +118,3 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
-
-

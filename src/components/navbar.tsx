@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Menu } from "lucide-react";
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
 
 export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   return (
@@ -10,8 +12,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
 
         {/* LEFT SECTION */}
         <div className="flex items-center gap-4">
-
-          {/* Sidebar Toggle Button */}
+          {/* Sidebar Toggle */}
           <button
             onClick={onToggleSidebar}
             className="p-2 bg-gray-700 hover:bg-gray-600 rounded-md transition"
@@ -25,23 +26,46 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           </h1>
         </div>
 
-        {/* SIGNUP BUTTON */}
-        <Link
-          href="/signup"
-          className="
-            bg-blue-600 
-            text-white 
-            px-4 
-            py-2 
-            rounded-lg 
-            hover:bg-blue-700 
-            transition-all 
-            duration-200 
-            shadow-md
-          "
-        >
-          Sign Up
-        </Link>
+        {/* RIGHT SECTION */}
+        <div className="flex items-center ">
+
+          {/* SIGN UP BUTTON */}
+          <Link
+            href="/signup"
+            className="
+              bg-white
+              text-black
+              px-4 
+              py-2 
+              rounded-lg 
+              hover:bg-blue-700 
+              transition-all 
+              duration-200 
+              shadow-md
+            "
+          >
+            Sign Up
+          </Link>
+
+          {/* SIGN OUT BUTTON */}
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="
+              bg-grey-200
+              text-white 
+              px-4 
+              py-2 
+              rounded-lg 
+              hover:bg-red-700 
+              transition-all 
+              duration-200 
+              shadow-md
+            "
+          >
+            Sign Out
+          </button>
+
+        </div>
 
       </div>
     </nav>

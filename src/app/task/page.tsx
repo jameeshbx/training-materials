@@ -9,6 +9,7 @@ type Task = {
   description?: string;
   status: string;
   createdAt: string;
+  dueDate?: string | null;
 };
 
 type TimeEntry = {
@@ -29,6 +30,7 @@ export default function TasksPage() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [createStatus, setCreateStatus] = useState("pending");
+  const [dueDate, setDueDate] = useState("");
 
   // Delete modal
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -114,7 +116,7 @@ export default function TasksPage() {
     const res = await fetch("/api/tasks", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, status: createStatus, userId }),
+      body: JSON.stringify({ title, description, status: createStatus, userId,dueDate }),
     });
 
     if (res.ok) {
@@ -272,6 +274,16 @@ export default function TasksPage() {
           className="w-full border p-2 rounded mb-3"
         />
 
+        {/* Due Date */}
+
+
+        <input
+          type="date"
+          placeholder="Due date"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+          className="w-full border p-2 rounded mb-3"
+        />
         <select
           value={createStatus}
           onChange={(e) => setCreateStatus(e.target.value)}
@@ -316,6 +328,11 @@ export default function TasksPage() {
             >
               <h3 className="text-xl font-bold text-gray-800">{task.title}</h3>
               <p className="text-gray-600 font-semibold">{task.description}</p>
+              {task.dueDate && (
+  <p className="text-sm text-gray-600 font-semibold">
+    Due: {new Date(task.dueDate).toLocaleDateString()}
+  </p>
+)}
 
               <div className="flex items-center gap-2 mb-1">
                 <span className="text-sm font-semibold text-gray-700">Status:</span>
@@ -466,6 +483,23 @@ export default function TasksPage() {
               }
               className="w-full border border-gray-300 p-2.5 rounded-lg h-24 resize-none focus:ring-2 focus:ring-blue-500 focus:outline-none mb-3"
             />
+            {/* Due Date */}
+<label className="block text-sm font-medium text-gray-600 mb-1">
+  Due Date
+</label>
+<input
+  type="date"
+  value={
+    editTask.dueDate
+      ? new Date(editTask.dueDate).toISOString().slice(0, 10)
+      : ""
+  }
+  onChange={(e) =>
+    setEditTask((prev) => prev && { ...prev, dueDate: e.target.value })
+  }
+  className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none mb-5"
+/>
+
 
             {/* Status */}
             <label className="block text-sm font-medium text-gray-600 mb-1">
