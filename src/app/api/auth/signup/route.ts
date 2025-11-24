@@ -32,13 +32,13 @@ export async function POST(req: Request) {
                 name,
                 email,
                 password: hashedPassword,
-                role, // ⭐ SAVE THE ROLE HERE
+                role,
             },
             select: {
                 id: true,
                 name: true,
                 email: true,
-                role: true, // ⭐ RETURN ROLE
+                role: true,
             },
         });
 

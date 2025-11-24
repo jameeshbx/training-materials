@@ -7,6 +7,7 @@ import { updateTask } from "@/lib/services/taskservice";
 export default function TaskEditForm({ task, onClose, onSuccess }: any) {
     const [title, setTitle] = useState(task.title);
     const [description, setDescription] = useState(task.description || "");
+    const [dueDate, setDueDate] = useState(task.dueDate ? task.dueDate.split("T")[0] : "");
 
     async function handleUpdate(e: any) {
         e.preventDefault();
@@ -15,6 +16,7 @@ export default function TaskEditForm({ task, onClose, onSuccess }: any) {
             id: task.id,
             title,
             description,
+            dueDate,  // ⭐ SEND DUE DATE TO BACKEND
             status: task.status,
         });
 
@@ -24,7 +26,6 @@ export default function TaskEditForm({ task, onClose, onSuccess }: any) {
     return (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/40 flex items-center justify-center z-50">
             <div className="bg-[#1b1c1f] w-full max-w-md rounded-xl shadow-xl p-6 space-y-5 border border-gray-700 text-white">
-
 
                 {/* Header */}
                 <div className="flex justify-between items-center">
@@ -62,6 +63,19 @@ export default function TaskEditForm({ task, onClose, onSuccess }: any) {
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Enter task description"
+                        />
+                    </div>
+
+                    {/* ⭐ NEW: DUE DATE FIELD */}
+                    <div>
+                        <label className="block text-sm text-gray-600 dark:text-gray-300 mb-1">
+                            Due Date
+                        </label>
+                        <input
+                            type="date"
+                            className="w-full p-3 rounded-lg border dark:border-gray-700 dark:bg-[#2b2b2b] dark:text-white focus:ring-2 focus:ring-blue-500 outline-none"
+                            value={dueDate}
+                            onChange={(e) => setDueDate(e.target.value)}
                         />
                     </div>
 

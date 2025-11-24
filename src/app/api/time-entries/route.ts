@@ -4,11 +4,27 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/db";
 
 // --------------------------------------
-// START TIMER (POST)
+// GET → Active timer for logged-in user
+// --------------------------------------
+export async function GET() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ active: null });
+  }
+
+  const active = await prisma.timeEntry.findFirst({
+    where: { userId: session.user.id, endAt: null },
+    include: { task: true },
+  });
+
+  return NextResponse.json({ active });
+}
+
+// --------------------------------------
+// POST → START TIMER
 // --------------------------------------
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
@@ -40,11 +56,10 @@ export async function POST(req: Request) {
 }
 
 // --------------------------------------
-// STOP TIMER (PATCH)
+// PATCH → STOP TIMER
 // --------------------------------------
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
-
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
@@ -79,46 +94,5 @@ export async function PATCH(req: Request) {
   });
 
   return NextResponse.json(updated);
-}
-
-// --------------------------------------
-// DELETE (OPTIONAL AUTH)
-// --------------------------------------
-export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
-  }
-
-  try {
-    const { searchParams } = new URL(req.url);
-    const id = searchParams.get("id");
-
-    if (!id) {
-      return NextResponse.json({ error: "TimeEntry ID is required" }, { status: 400 });
-    }
-
-    const timeEntry = await prisma.timeEntry.findUnique({ where: { id } });
-
-    if (!timeEntry) {
-      return NextResponse.json({ error: "TimeEntry not found" }, { status: 404 });
-    }
-
-    await prisma.timeEntry.delete({ where: { id } });
-
-    const remaining = await prisma.timeEntry.count({
-      where: { taskId: timeEntry.taskId },
-    });
-
-    if (remaining === 0) {
-      await prisma.task.delete({ where: { id: timeEntry.taskId! } });
-      return NextResponse.json({ message: "TimeEntry deleted. Task removed." });
-    }
-
-    return NextResponse.json({ message: "TimeEntry deleted." });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
-  }
 }
 
