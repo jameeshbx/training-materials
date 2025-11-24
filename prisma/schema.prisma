@@ -9,20 +9,15 @@ datasource db {
 
 model User {
   id          String      @id @default(cuid())
-  name        String
   email       String      @unique
-  password    String // ADD THIS
-  teamId      String?
-  role        Role        @default(USER)
+  name        String
   createdAt   DateTime    @default(now())
+  teamId      String?
+  password    String
+  role        Role        @default(USER)
   tasks       Task[]
-  team        Team?       @relation(fields: [teamId], references: [id])
   timeEntries TimeEntry[]
-}
-
-enum Role {
-  USER
-  ADMIN
+  team        Team?       @relation(fields: [teamId], references: [id])
 }
 
 model Task {
@@ -30,6 +25,7 @@ model Task {
   title       String
   description String?
   status      String      @default("pending")
+  dueDate     DateTime?
   userId      String
   teamId      String?
   createdAt   DateTime    @default(now())
@@ -48,11 +44,15 @@ model Team {
 model TimeEntry {
   id        String    @id @default(cuid())
   taskId    String
-  userId    String
-  startTime DateTime
-  endTime   DateTime?
   createdAt DateTime  @default(now())
+  endTime   DateTime?
+  startTime DateTime
+  userId    String
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+}
 
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+enum Role {
+  USER
+  ADMIN
 }
