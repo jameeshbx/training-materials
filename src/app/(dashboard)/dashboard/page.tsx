@@ -1,30 +1,56 @@
-"use client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { db } from "@/lib/db";
+import DashboardClient from "./DashboardClient";
+import { Task } from "@prisma/client";
 
-import { useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+export default async function DashboardPage() {
+  const session = await getServerSession(authOptions);
 
-export default function DashboardPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
+  // @ts-ignore
+  const userId = session?.user?.id;
+  // @ts-ignore
+  const role = session?.user?.role;
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    }
-  }, [status, router]);
-
-  if (status === "loading" || !session) {
-    return (
-      <div className="flex items-start justify-center h-full pt-10">
-        <p className="text-white">Checking authentication...</p>
-      </div>
-    );
+  if (!userId) {
+    return <p className="text-red-500 p-10">Not authenticated</p>;
   }
 
-  return (
-    <div className="flex items-start justify-center h-full pt-10">
-      <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-    </div>
-  );
+  // Prepare date range for "today"
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  let todaysTasks: Task[] = [];
+
+  if (role === "ADMIN") {
+    // ADMIN sees ALL USERS' tasks due today
+    todaysTasks = await db.task.findMany({
+      where: {
+        dueDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } else {
+    // USER sees only their tasks
+    todaysTasks = await db.task.findMany({
+      where: {
+        userId,
+        dueDate: {
+          gte: today,
+          lt: tomorrow,
+        },
+      },
+      include: { user: true },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
+  return <DashboardClient todaysTasks={todaysTasks} role={role} />;
 }

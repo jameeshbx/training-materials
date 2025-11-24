@@ -47,6 +47,12 @@ export default async function TaskPage() {
             <div className="flex justify-between mt-3 text-sm text-gray-400">
               <span>Status: {task.status}</span>
             </div>
+            {task.dueDate && (
+  <p className="text-yellow-400 text-sm mt-1">
+    Due Date: {new Date(task.dueDate).toLocaleDateString()}
+  </p>
+)}
+
 
             <TaskTimer taskId={task.id} />
             <TimeEntryList taskId={task.id} />

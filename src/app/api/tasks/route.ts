@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
       status: data.status ?? "pending",
       userId: userId,          // 🔥 ALWAYS current logged-in user
       teamId: data.teamId ?? null,
+      dueDate: data.dueDate ? new Date(data.dueDate) : null, 
     },
   });
 
