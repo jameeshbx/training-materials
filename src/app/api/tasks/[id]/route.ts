@@ -9,6 +9,8 @@ const updateTaskSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   status: z.enum(["pending", "progress", "completed"]).optional(),
+      dueDate: z.string().optional(), // 👈 Add this
+
 });
 
 

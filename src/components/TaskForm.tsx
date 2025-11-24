@@ -6,6 +6,7 @@ export default function TaskForm({ task, close, refresh }: any) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [loading, setLoading] = useState(false);
+const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -19,7 +20,7 @@ export default function TaskForm({ task, close, refresh }: any) {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, description }),
+body: JSON.stringify({ title, description, dueDate }),
       });
 
       if (res.ok) {
@@ -82,6 +83,21 @@ export default function TaskForm({ task, close, refresh }: any) {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
             />
           </div>
+<div className="space-y-2">
+  <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+    Due Date *
+  </label>
+
+  <input
+    id="dueDate"
+    type="date"
+    value={dueDate}
+    onChange={(e) => setDueDate(e.target.value)}
+    min={new Date().toISOString().split("T")[0]} // Disable past dates
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    required
+  />
+</div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">

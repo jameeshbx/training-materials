@@ -1,8 +1,10 @@
 
 "use client";
 import { signOut } from "next-auth/react";
-
+import { useRouter } from "next/navigation";
 export default function AdminClientPage({ session }: any) {
+
+  const router=useRouter()
   return (
     <div className="p-10">
       <h1 className="text-3xl font-bold">👑 Admin Dashboard</h1>
@@ -18,10 +20,14 @@ export default function AdminClientPage({ session }: any) {
       </button>
 
       <div className="mt-6 grid grid-cols-3 gap-4">
-        <div className="border rounded p-4 shadow hover:bg-gray-100 cursor-pointer">
-          <h2 className="font-semibold">📌 Manage Users</h2>
-          <p className="text-sm text-gray-500">View, edit and delete users</p>
-        </div>
+        <div
+  className="border rounded p-4 shadow hover:bg-gray-100 cursor-pointer transition"
+  onClick={() => router.push('/admin/userlist')}
+>
+  <h2 className="font-semibold">Manage Users</h2>
+  <p className="text-sm text-gray-500">View, edit and delete users</p>
+</div>
+
 
         <div className="border rounded p-4 shadow hover:bg-gray-100 cursor-pointer">
           <h2 className="font-semibold">📊 Reports</h2>

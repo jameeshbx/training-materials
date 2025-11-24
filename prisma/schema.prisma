@@ -33,15 +33,16 @@ model Task {
   title       String
   description String?
   createdAt   DateTime @default(now())
+  dueDate     DateTime? // 👈 date picker value here
   status      String   @default("pending")
 
-  team   Team[]
-  userId Int
-  user   User?  @relation("UserTasks", fields: [userId], references: [id])
+  team        Team[]
+  userId      Int
+  user        User?  @relation("UserTasks", fields: [userId], references: [id])
 
-  // 👇 Add this line
   timeEntries TimeEntry[]
 }
+
 
 model TimeEntry {
   id        Int      @id @default(autoincrement())
