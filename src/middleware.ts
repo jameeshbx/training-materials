@@ -10,17 +10,17 @@ export default withAuth({
 
             const pathname = req.nextUrl.pathname;
 
-            // ⭐ Existing Feature: Admin-only routes
+            //  Admin-only routes
             if (pathname.startsWith("/admin")) {
                 return token.role === "admin";
             }
 
-            // ⭐ Existing Feature: Dashboard - admin cannot access
+            //  Dashboard - admin cannot access
             if (pathname.startsWith("/dashboard")) {
                 return token.role === "user";
             }
 
-            // ⭐ NEW FEATURE: Block admin from tasks, reports, teams
+            //  Block admin from tasks, reports, teams
             const adminBlockedRoutes = ["/tasks", "/reports", "/teams"];
 
             if (token.role === "admin") {
@@ -38,13 +38,13 @@ export default withAuth({
     },
 });
 
-// ⭐ Add new pages to matcher
+
 export const config = {
     matcher: [
         "/dashboard/:path*",
         "/admin/:path*",
-        "/tasks/:path*",    // NEW
-        "/reports/:path*",  // NEW
-        "/teams/:path*",    // NEW
+        "/tasks/:path*",
+        "/reports/:path*",
+        "/teams/:path*",
     ],
 };

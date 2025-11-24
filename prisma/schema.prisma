@@ -35,6 +35,7 @@ model Task {
   description String?
   status      String      @default("pending")
   completed   Boolean     @default(false)
+  dueDate     DateTime?   // ⭐ NEW FIELD
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
   teamId      String?
@@ -43,6 +44,7 @@ model Task {
   team        Team?       @relation(fields: [teamId], references: [id])
   timeEntries TimeEntry[]
 }
+
 
 model TimeEntry {
   id         String    @id @default(cuid())

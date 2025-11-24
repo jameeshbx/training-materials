@@ -13,7 +13,7 @@ export default function Home() {
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role] = useState("user") // keep default role (NO dropdown)
+  const [role] = useState("user")
   const [error, setError] = useState("")
 
   async function handleLogin() {
