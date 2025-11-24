@@ -11,6 +11,8 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
   const [status, setStatus] = useState("pending");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [dueDate, setDueDate] = useState("");
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -26,6 +28,7 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
           description,
           status,
           userId, // ← REAL LOGGED-IN USER ID
+          dueDate, 
         }),
       });
 
@@ -78,6 +81,19 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
           <option className="text-black" value="done">Done</option>
         </select>
       </div>
+
+      <div>
+  <label className="block text-sm mb-1">Due Date</label>
+  <input
+    type="date"
+    className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+    value={dueDate}
+    onChange={(e) => setDueDate(e.target.value)}
+    required
+  />
+</div>
+
+      
 
       {error && <p className="text-red-400 text-sm">{error}</p>}
 
