@@ -3,9 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { prisma } from "@/lib/db";
 
-// --------------------------------------
-// GET → Active timer for logged-in user
-// --------------------------------------
+
 export async function GET() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -20,9 +18,7 @@ export async function GET() {
   return NextResponse.json({ active });
 }
 
-// --------------------------------------
-// POST → START TIMER
-// --------------------------------------
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -55,9 +51,7 @@ export async function POST(req: Request) {
   return NextResponse.json(entry, { status: 201 });
 }
 
-// --------------------------------------
-// PATCH → STOP TIMER
-// --------------------------------------
+
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {

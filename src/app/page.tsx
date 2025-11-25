@@ -47,9 +47,9 @@ export default function Home() {
       <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-6 sm:p-8 rounded-lg sm:rounded-xl">
         <h2 className="text-lg sm:text-xl font-semibold text-center mb-6 sm:mb-8">Sign In</h2>
 
-        {/* All fields evenly spaced */}
+       
         <div className="flex flex-col gap-4 sm:gap-5">
-          {/* EMAIL */}
+         
           <div className="flex flex-col gap-2">
             <label className="text-xs sm:text-sm text-gray-300">Email</label>
             <Input
@@ -61,7 +61,7 @@ export default function Home() {
             />
           </div>
 
-          {/* PASSWORD */}
+          
           <div className="flex flex-col gap-2">
             <label className="text-xs sm:text-sm text-gray-300">Password</label>
             <Input
@@ -73,10 +73,10 @@ export default function Home() {
             />
           </div>
 
-          {/* ERROR */}
+       
           {error && <p className="text-red-300 text-xs sm:text-sm">{error}</p>}
 
-          {/* LOGIN BUTTON */}
+         
           <Button
             className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 sm:py-3 text-sm sm:text-base"
             onClick={handleLogin}
@@ -84,7 +84,7 @@ export default function Home() {
             Login
           </Button>
 
-          {/* REGISTER BUTTON */}
+          
           <Link href="/register" className="block">
             <Button
               variant="secondary"

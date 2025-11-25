@@ -29,7 +29,7 @@ export default function TasksPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4 sm:space-y-6">
-      {/* PAGE HEADER */}
+     
       <div className="flex justify-between items-center">
         <h1 className="text-2xl sm:text-3xl font-bold">Tasks</h1>
 
@@ -41,7 +41,7 @@ export default function TasksPage() {
         </Link>
       </div>
 
-      {/* TASKS GRID */}
+     
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-3">
         {tasks.length === 0 && (
           <p className="text-gray-500 text-center py-8 border rounded-lg col-span-full text-sm">
@@ -57,7 +57,7 @@ export default function TasksPage() {
               key={task.id}
               className="border border-gray-200 bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 flex flex-col h-full"
             >
-              {/* TITLE + DESCRIPTION */}
+             
               <div className="flex-1 min-h-0 mb-3 overflow-hidden">
                 <h2 className="text-base font-semibold text-gray-800 truncate">
                   {task.title}
@@ -66,7 +66,7 @@ export default function TasksPage() {
                   {task.description || "No description"}
                 </p>
 
-                {/* ⭐ DUE DATE */}
+                
                 {task.dueDate && (
                   <p className="text-xs text-red-600 mt-2 font-medium">
                     <strong>Due:</strong>{" "}
@@ -75,7 +75,7 @@ export default function TasksPage() {
                 )}
               </div>
 
-              {/* TIMER LAST ENTRY */}
+            
               {latestEntry && (
                 <div className="bg-gray-50 p-2 rounded border border-gray-100 text-xs mb-3">
                   {latestEntry.startAt && (
@@ -93,12 +93,12 @@ export default function TasksPage() {
                 </div>
               )}
 
-              {/* TIMER */}
+             
               <div className="bg-gray-50 p-2 rounded border border-gray-100 text-xs mb-3">
                 <Timer taskId={task.id} />
               </div>
 
-              {/* ACTION BUTTONS */}
+              
               <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
                 <button
                   onClick={() => setEditingTask(task)}

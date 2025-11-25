@@ -43,7 +43,7 @@ export default function RegisterPage() {
         <div className="flex items-center justify-center w-full min-h-screen px-4 sm:px-6">
             <Card className="w-full max-w-xs sm:max-w-sm md:max-w-md bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl p-6 sm:p-8 md:p-10 rounded-lg sm:rounded-xl">
                 <div className="flex flex-col gap-5 sm:gap-6">
-                    {/* Input fields section - responsive spacing */}
+                  
                     <div className="flex flex-col gap-4 sm:gap-5">
                         <Input
                             placeholder="Name"
@@ -78,14 +78,14 @@ export default function RegisterPage() {
                         </select>
                     </div>
 
-                    {/* Error/Success message section */}
+                  
                     <div className="min-h-6">
                         {error && <p className="text-red-400 text-center text-xs sm:text-sm">{error}</p>}
 
                         {message && <p className="text-green-400 text-center text-xs sm:text-sm">{message}</p>}
                     </div>
 
-                    {/* Button section - responsive sizing and spacing */}
+                 
                     <div className="flex flex-col gap-3 sm:gap-4">
                         <Button
                             onClick={handleRegister}

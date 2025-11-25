@@ -50,13 +50,13 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            //  Only set token values on first login
+           
             if (user) {
                 token.id = user.id;
                 token.role = user.role;
             }
 
-            //  Ensure role never becomes undefined after refresh
+            
             if (!token.role) token.role = "user";
 
             console.log("🔥 TOKEN IN JWT CALLBACK:", token);
@@ -66,7 +66,7 @@ export const authOptions: NextAuthOptions = {
         async session({ session, token }) {
             if (session.user) {
                 (session.user as any).id = token.id;
-                (session.user as any).role = token.role; // expose role to client
+                (session.user as any).role = token.role; 
             }
             return session;
         },

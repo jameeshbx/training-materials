@@ -17,25 +17,25 @@ export default async function DashboardPage() {
 
     const userId = session.user.id;
 
-    // 1️⃣ Active Timer
+    
     const activeTimer = await prisma.timeEntry.findFirst({
         where: { userId, endAt: null },
         include: { task: true },
     });
 
-    // 2️⃣ Today’s Tasks — SORT BY EARLIEST DUE DATE
+    
     const todaysTasks = await prisma.task.findMany({
         where: {
             assigneeId: userId,
             dueDate: { not: null },
         },
         orderBy: {
-            dueDate: "asc", // ⭐ earliest due date first
+            dueDate: "asc", 
         },
         take: 5,
     });
 
-    // 3️⃣ Weekly Hours
+    
     const startOfWeek = new Date();
     startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
     startOfWeek.setHours(0, 0, 0, 0);
@@ -51,20 +51,20 @@ export default async function DashboardPage() {
     const weeklySeconds = weekEntries.reduce((sum, entry) => sum + (entry.duration || 0), 0);
     const weeklyHours = (weeklySeconds / 3600).toFixed(1);
 
-    // UI
+   
     return (
         <div className="px-6 py-10 text-white space-y-10 max-w-6xl mx-auto">
 
-            {/* HEADER */}
+           
             <div>
                 <h1 className="text-3xl font-bold">Dashboard</h1>
                 <p className="text-gray-300">Welcome back, {session.user?.name} 👋</p>
             </div>
 
-            {/* WIDGETS */}
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                {/* ACTIVE TIMER */}
+              
                 <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-2">⏱ Active Timer</h2>
                     {activeTimer ? (
@@ -79,7 +79,7 @@ export default async function DashboardPage() {
                     )}
                 </div>
 
-                {/* TODAY'S TASKS — Sorted by Due Date */}
+               
                 <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-3">📅 Today’s Tasks</h2>
 
@@ -102,7 +102,7 @@ export default async function DashboardPage() {
                     )}
                 </div>
 
-                {/* WEEKLY HOURS */}
+               
                 <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
                     <h2 className="text-lg font-semibold mb-3">⏳ Weekly Hours</h2>
                     <p className="text-3xl font-bold text-blue-400">{weeklyHours}h</p>
