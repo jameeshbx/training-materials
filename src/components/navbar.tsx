@@ -3,12 +3,11 @@
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
 
 export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => void }) {
   return (
     <nav className="w-full bg-gray-800 text-white shadow-md py-3">
-      <div className="max-w-6xl mx-auto px-4 flex justify-between items-center">
+      <div className="max-w-6xl mx-auto px-4 flex items-center justify-between flex-wrap gap-4">
 
         {/* LEFT SECTION */}
         <div className="flex items-center gap-4">
@@ -21,15 +20,15 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
           </button>
 
           {/* App Name */}
-          <h1 className="text-2xl font-semibold tracking-wide">
+          <h1 className="text-xl md:text-2xl font-semibold tracking-wide">
             My Next App
           </h1>
         </div>
 
         {/* RIGHT SECTION */}
-        <div className="flex items-center ">
+        <div className="flex items-center gap-3">
 
-          {/* SIGN UP BUTTON */}
+          {/* SIGN UP */}
           <Link
             href="/signup"
             className="
@@ -39,19 +38,21 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
               py-2 
               rounded-lg 
               hover:bg-blue-700 
+              hover:text-white
               transition-all 
               duration-200 
               shadow-md
+              text-sm md:text-base
             "
           >
             Sign Up
           </Link>
 
-          {/* SIGN OUT BUTTON */}
+          {/* SIGN OUT */}
           <button
             onClick={() => signOut({ callbackUrl: "/" })}
             className="
-              bg-grey-200
+              bg-red-600
               text-white 
               px-4 
               py-2 
@@ -60,6 +61,7 @@ export default function Navbar({ onToggleSidebar }: { onToggleSidebar?: () => vo
               transition-all 
               duration-200 
               shadow-md
+              text-sm md:text-base
             "
           >
             Sign Out

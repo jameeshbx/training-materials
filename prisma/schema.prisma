@@ -21,17 +21,18 @@ model User {
 }
 
 model Task {
-  id          String      @id @default(cuid())
-  title       String
-  description String?
-  status      String      @default("pending")
-  dueDate     DateTime?
-  userId      String
-  teamId      String?
-  createdAt   DateTime    @default(now())
-  team        Team?       @relation(fields: [teamId], references: [id])
-  user        User        @relation(fields: [userId], references: [id])
-  timeEntries TimeEntry[]
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  status        String      @default("pending")
+  userId        String
+  teamId        String?
+  createdAt     DateTime    @default(now())
+  dueDate       DateTime?
+  attachmentUrl String?
+  team          Team?       @relation(fields: [teamId], references: [id])
+  user          User        @relation(fields: [userId], references: [id])
+  timeEntries   TimeEntry[]
 }
 
 model Team {
@@ -50,6 +51,14 @@ model TimeEntry {
   userId    String
   task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   user      User      @relation(fields: [userId], references: [id])
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  fileName  String
+  fileUrl   String
+  fileType  String
+  createdAt DateTime @default(now())
 }
 
 enum Role {
