@@ -3,49 +3,60 @@
 import { useEffect, useState } from "react";
 import { Tasks } from "@/types/user";
 import TaskForm from "@/components/TaskForm";
-import { Plus, Edit, Trash2, Search, Divide } from "lucide-react";
+import { Plus, Edit, Trash2, Search, Clock, Calendar, Target, X } from "lucide-react";
 import TaskTimer from "@/components/TaskTimer";
 import toast from "react-hot-toast";
-import { usePathname } from "next/navigation";   // <-- ADD THIS
+import { usePathname } from "next/navigation";
 
 export default function TasksPage() {
-    const pathname = usePathname();
+  const pathname = usePathname();
   const [tasks, setTasks] = useState<Tasks[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Tasks | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const today = new Date().toISOString().split("T")[0];
-const [selectedDate, setSelectedDate] = useState<string>(today);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; task: Tasks | null }>({
+    show: false,
+    task: null,
+  });
 
-// Fetch Tasks
-const fetchTasks = async () => {
-  try {
-    const res = await fetch(`/api/tasks?date=${selectedDate}`);
-    const data = await res.json();
-    setTasks(data.data);
-  } catch (error) {
-    toast.error("Failed to load tasks");
-  } finally {
-    setLoading(false);
-  }
-};
+  // Fetch Tasks
+  const fetchTasks = async () => {
+    try {
+      const res = await fetch(`/api/tasks?date=${selectedDate}`);
+      const data = await res.json();
+      setTasks(data.data);
+    } catch (error) {
+      toast.error("Failed to load tasks");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-useEffect(() => {
-  fetchTasks();
-}, [selectedDate]);
+  useEffect(() => {
+    fetchTasks();
+  }, [selectedDate]);
+
+  // Delete Task Confirmation
+  const confirmDelete = (task: Tasks) => {
+    setDeleteConfirm({ show: true, task });
+  };
 
   // Delete Task
-  const deleteTask = async (id: number) => {
-    const confirmDelete = confirm("Delete this task?");
-    if (!confirmDelete) return;
+  const deleteTask = async () => {
+    if (!deleteConfirm.task) return;
 
-    const res = await fetch(`/api/tasks/${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/tasks/${deleteConfirm.task.id}`, { method: "DELETE" });
 
     if (res.ok) {
-      setTasks((prev) => prev.filter((t) => t.id !== id));
-      toast.success("Task deleted");
-    } else toast.error("Failed to delete task");
+      setTasks((prev) => prev.filter((t) => t.id !== deleteConfirm.task?.id));
+      toast.success("Task deleted successfully");
+      setDeleteConfirm({ show: false, task: null });
+    } else {
+      toast.error("Failed to delete task");
+      setDeleteConfirm({ show: false, task: null });
+    }
   };
 
   // Update Status
@@ -57,136 +68,181 @@ useEffect(() => {
     });
 
     if (res.ok) {
-  fetchTasks();
-  toast.success(`Task → ${status.replace("_", " ")}`);
-}
+      fetchTasks();
+      toast.success(`Task → ${status.replace("_", " ")}`);
+    }
   };
 
-const filteredTasks = tasks.filter((t) =>
-  (t.title + (t.description || "")).toLowerCase().includes(searchTerm.toLowerCase())
-);
-
-
+  const filteredTasks = tasks.filter((t) =>
+    (t.title + (t.description || "")).toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const statusColor = (status: string) => ({
-    pending: "bg-yellow-100 text-yellow-700",
-    progress: "bg-blue-100 text-blue-700",
-    completed: "bg-green-100 text-green-700",
-  }[status] || "bg-gray-100 text-gray-600");
+    pending: "bg-amber-50 text-amber-700 border-amber-200",
+    progress: "bg-blue-50 text-blue-700 border-blue-200",
+    completed: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  }[status] || "bg-gray-50 text-gray-600 border-gray-200");
+
+  const statusIcon = (status: string) => {
+    switch (status) {
+      case "pending": return <Clock size={14} />;
+      case "progress": return <Target size={14} />;
+      case "completed": return <div className="w-3 h-3 rounded-full bg-current" />;
+      default: return <Clock size={14} />;
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto">
 
         {/* Header */}
-       {/* Header */}
-<div className="flex justify-between items-center mb-8">
-  <div>
-    {pathname === "/dashboard" ? (
-      <>
-        <h1 className="text-3xl font-bold text-gray-900">Today Task</h1>
-        <p className="text-gray-500">Track time & manage productivity</p>
-      </>
-    ) : (
-      <>
-        <h1 className="text-3xl font-bold text-gray-900">Task Manager</h1>
-        <p className="text-gray-500">Track time & manage productivity</p>
-      </>
-    )}
-  </div>
-<div>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            {pathname === "/dashboard" ? (
+              <>
+                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Today's Tasks
+                </h1>
+                <p className="text-gray-500 mt-2 flex items-center gap-2">
+                  <Clock size={16} />
+                  Track time & boost productivity
+                </p>
+              </>
+            ) : (
+              <>
+                <h1 className="text-3xl font-bold text-gray-900 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                  Task Manager
+                </h1>
+                <p className="text-gray-500 mt-2 flex items-center gap-2">
+                  <Target size={16} />
+                  Organize, track, and complete your tasks efficiently
+                </p>
+              </>
+            )}
+          </div>
+          
+          <div>
+            {pathname !== "/dashboard" && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="flex items-center gap-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 font-medium"
+              >
+                <Plus size={20} /> Add New Task
+              </button>
+            )}
+          </div>
+        </div>
 
-{pathname!=="/dashboard"?(
-<button
-    onClick={() => setShowForm(true)}
-    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md"
-  >
-    <Plus size={18} /> Add Task
-  </button>
-):(
-  <div>
+        {/* Search and Filters */}
+        {pathname !== "/dashboard" && (
+          <div className="bg-white rounded-2xl shadow-md border border-gray-100 p-6 mb-8">
+            <div className="flex flex-col sm:flex-row gap-4 items-center">
+              <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 flex-1 w-full">
+                <Search className="text-gray-400" size={20} />
+                <input
+                  type="text"
+                  placeholder="Search tasks by title or description..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full outline-none bg-transparent placeholder-gray-400 text-gray-700"
+                />
+              </div>
 
-  </div>
-)}
-  
-  </div>
-</div>
-
-
-<div>
-{pathname=="/dashboard"?(
-  <div></div>
-):(<div className="bg-white rounded-md shadow p-4 mb-6 flex items-center gap-3">
-  <Search className="text-gray-400" size={20} />
-  <input
-    type="text"
-    placeholder="Search tasks..."
-    value={searchTerm}
-    onChange={(e) => setSearchTerm(e.target.value)}
-    className="w-full outline-none"
-  />
-
-  {/* Date Filter */}
- <input
-  type="date"
-  value={selectedDate}
-  onChange={(e) => setSelectedDate(e.target.value)}
-  className="border px-2 py-1 rounded-md text-sm"
-/>
-
-</div>)}
-
-      
-
-</div>
-
+              <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
+                <Calendar size={18} className="text-gray-400" />
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-transparent outline-none text-gray-700 font-medium"
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Task Grid */}
         {loading ? (
-          <p className="text-center text-gray-600 py-10">Loading...</p>
+          <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          </div>
         ) : filteredTasks.length === 0 ? (
-          <p className="text-center text-gray-600 py-10">No tasks found</p>
+          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+              <Target size={40} className="text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">No tasks found</h3>
+            <p className="text-gray-500 max-w-sm mx-auto">
+              {searchTerm || selectedDate !== new Date().toISOString().split("T")[0] 
+                ? "Try adjusting your search or date filter" 
+                : "Get started by creating your first task"}
+            </p>
+            {pathname !== "/dashboard" && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors"
+              >
+                <Plus size={18} /> Create Task
+              </button>
+            )}
+          </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8 ">
             {filteredTasks.map((task) => (
               <div
                 key={task.id}
-                className="bg-white  rounded-xl shadow-2xl transition overflow-hidden"
+                className="bg-white rounded-2xl shadow-2xl hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
               >
-                <TaskTimer taskId={task.id} status={task.status} />
+                {/* Timer Section */}
+                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+                  <TaskTimer taskId={task.id} status={task.status} />
+                </div>
 
                 {/* Body */}
-                <div className="p-7 space-y-3">
-                  <span
-                    className={`px-1 py-1 rounded-full text-xs font-semibold ${statusColor(
-                      task.status || "pending"
-                    )}`}
-                  >
-                    {task.status.replace("_", " ") || "Pending"}
-                  </span>
+                <div className="p-8 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${statusColor(
+                        task.status || "pending"
+                      )}`}
+                    >
+                      {statusIcon(task.status || "pending")}
+                      {task.status?.replace("_", " ") || "Pending"}
+                    </span>
+                  </div>
 
-                  <h2 className="text-lg font-semibold text-gray-800">{task.title}</h2>
-                  <p className="text-gray-600 text-sm">{task.description || "No description"}</p>
+                  <h2 className="text-2xl font-bold text-gray-900 leading-tight">
+                    {task.title}
+                  </h2>
+                  
+                  <p className="text-gray-600 leading-relaxed text-lg">
+                    {task.description || "No description provided"}
+                  </p>
                 </div>
 
                 {/* Controls */}
-                <div className="px-6 pb-4 flex gap-2">
-
+                <div className="px-8 pb-8 flex gap-3">
+                  {/* Action Button */}
                   {task.status === "completed" ? (
-                    <button disabled className="flex-1 bg-gray-400 text-white text-xs py-2 px-3 rounded-md cursor-not-allowed">
-                      Completed ✔
+                    <button 
+                      disabled 
+                      className="flex-1 bg-emerald-100 text-emerald-700 text-sm font-semibold py-4 px-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      Completed
                     </button>
                   ) : task.status === "progress" ? (
                     <button
                       onClick={() => updateStatus(task.id, "completed")}
-                      className="flex-1 bg-purple-600 text-white text-xs py-2 px-3 rounded-md hover:bg-purple-700"
+                      className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                     >
-                      Complete
+                      Mark Complete
                     </button>
                   ) : (
                     <button
                       onClick={() => updateStatus(task.id, "progress")}
-                      className="flex-1 bg-sky-300 text-black text-xs py-2 px-3 rounded-md hover:bg-green-700"
+                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       Start Task
                     </button>
@@ -198,19 +254,18 @@ const filteredTasks = tasks.filter((t) =>
                       setEditTask(task);
                       setShowForm(true);
                     }}
-                    className="flex-1 border text-xs py-2 px-3 rounded-md flex items-center justify-center gap-1"
+                    className="flex-1 border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 text-sm font-medium py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                   >
-                    <Edit size={14} /> Edit
+                    <Edit size={16} /> Edit
                   </button>
 
                   {/* Delete */}
                   <button
-                    onClick={() => deleteTask(task.id)}
-                    className="flex-1 bg-red-600 text-white text-xs py-2 px-3 rounded-md hover:bg-red-700"
+                    onClick={() => confirmDelete(task)}
+                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
                   >
-                    <Trash2 size={14} /> Delete
+                    <Trash2 size={16} /> Delete
                   </button>
-
                 </div>
               </div>
             ))}
@@ -227,6 +282,53 @@ const filteredTasks = tasks.filter((t) =>
             }}
             refresh={fetchTasks}
           />
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {deleteConfirm.show && (
+          <div className="fixed inset-0 bg-white bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-in fade-in duration-200">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Delete Task</h3>
+                <button
+                  onClick={() => setDeleteConfirm({ show: false, task: null })}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              
+              <div className="mb-6">
+                <p className="text-gray-600 mb-2">
+                  Are you sure you want to delete this task?
+                </p>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800 font-medium">{deleteConfirm.task?.title}</p>
+                  {deleteConfirm.task?.description && (
+                    <p className="text-red-600 text-sm mt-1">{deleteConfirm.task.description}</p>
+                  )}
+                </div>
+                <p className="text-red-600 text-sm mt-3 font-medium">
+                  This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDeleteConfirm({ show: false, task: null })}
+                  className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-xl transition-all duration-200 font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={deleteTask}
+                  className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-4 rounded-xl transition-all duration-200 font-medium flex items-center justify-center gap-2"
+                >
+                  <Trash2 size={16} /> Delete
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
