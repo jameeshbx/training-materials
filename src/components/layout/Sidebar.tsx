@@ -17,6 +17,7 @@ export default function Sidebar({ isOpen, closeSidebar }: SidebarProps) {
     { label: "Teams", href: "/teams" },
     { label: "Tasks", href: "/tasks" },
     { label: "Reports", href: "/reports" },
+    { label: "Documents", href: "/documents" },
   ];
 
   return (
