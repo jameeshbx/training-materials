@@ -41,14 +41,11 @@ function UploadButton({ onUploaded }: UploadButtonProps) {
     });
 
     setUploading(false);
-
-    if (res.ok) {
-      onUploaded();
-    }
+    if (res.ok) onUploaded();
   }
 
   return (
-    <label className="cursor-pointer px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 inline-block">
+    <label className="cursor-pointer px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
       {uploading ? "Uploading..." : "Upload File"}
       <input type="file" className="hidden" onChange={handleChange} />
     </label>
@@ -67,20 +64,6 @@ export default function FilesPage() {
     loadFiles();
   }, []);
 
-  async function saveToDB(url: string, name: string, type: string) {
-    await fetch("/api/files", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        fileName: name,
-        fileUrl: url,
-        fileType: type,
-      }),
-    });
-
-    loadFiles();
-  }
-
   async function deleteFile(id: string) {
     if (!confirm("Delete this file?")) return;
 
@@ -94,48 +77,55 @@ export default function FilesPage() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-8">
-      {/* Upload Box */}
-      <div className="bg-black text-white shadow-lg rounded-xl p-6 border">
-        <h2 className="text-2xl font-semibold mb-3">Upload Your Documents</h2>
-        <p className="text-gray-300 mb-4">Select a file to upload.</p>
-        <UploadButton onUploaded={loadFiles} />
-      </div>
+    <div className="min-h-screen bg-[#0e0e0e] text-white p-5 flex justify-center">
+      <div className="w-full max-w-5xl space-y-6">
 
-      {/* Uploaded Files */}
-      <div className="bg-white shadow-lg rounded-xl p-6 border text-black">
-        <h2 className="text-xl font-semibold mb-5">Uploaded Files</h2>
+        {/* Upload Card */}
+        <div className="bg-[#171717] border border-gray-800/70 shadow-xl rounded-xl p-6 backdrop-blur-md">
+          <h2 className="text-xl font-semibold">Upload Documents</h2>
+          <p className="text-gray-400 text-sm mt-1 mb-4">
+            Select a file to upload.
+          </p>
+          <UploadButton onUploaded={loadFiles} />
+        </div>
 
-        <div className="space-y-4">
-          {files.map((file) => (
-            <div
-              key={file.id}
-              className="flex items-center justify-between p-4 bg-gray-50 border rounded-lg"
-            >
-              <div className="flex items-center gap-4">
-                <span className="text-3xl">{getIcon(file.fileType)}</span>
+        {/* Files Section */}
+        <div className="bg-[#171717] border border-gray-600/70 shadow-xl rounded-xl p-5">
+          <h2 className="text-lg font-semibold mb-4">Uploaded Files</h2>
 
-                <div>
-                  <p className="font-medium">{file.fileName}</p>
-
-                  {file.fileType.includes("image") && (
-                    <img
-                      src={file.fileUrl}
-                      alt="preview"
-                      className="w-24 h-24 rounded object-cover mt-2 border"
-                    />
-                  )}
-                </div>
-              </div>
-
-              <button
-                onClick={() => deleteFile(file.id)}
-                className="px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {files.map((file) => (
+              <div
+                key={file.id}
+                className="bg-[#1e1e1e] border border-gray-800 rounded-xl p-4 shadow-md hover:shadow-lg transition flex flex-col"
               >
-                Delete
-              </button>
-            </div>
-          ))}
+                {/* File Row */}
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{getIcon(file.fileType)}</span>
+                  <p className="font-medium text-sm text-gray-200 truncate">
+                    {file.fileName}
+                  </p>
+                </div>
+
+                {/* Image Preview */}
+                {file.fileType.includes("image") && (
+                  <img
+                    src={file.fileUrl}
+                    alt="preview"
+                    className="w-full h-40 object-cover rounded-lg border border-gray-700 mt-3"
+                  />
+                )}
+
+                {/* Delete Button */}
+                <button
+                  onClick={() => deleteFile(file.id)}
+                  className="mt-3 w-max px-3 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
