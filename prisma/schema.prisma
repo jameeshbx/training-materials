@@ -19,6 +19,7 @@ model User {
   tasks       Task[]      @relation("AssigneeTasks")
   timeEntries TimeEntry[]
   teams       Team[]      @relation("TeamMembers")
+  files       FileUpload[]
 }
 
 model Team {
@@ -71,6 +72,8 @@ model FileUpload {
   mimeType    String?
   size        Int?
   createdAt   DateTime @default(now())
+  userId        String    
+  user          User       @relation(fields: [userId], references: [id])
 }
 
 

@@ -1,11 +1,14 @@
+
 import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/validators/task";
 
-
-export async function GET() {
+/* ============================================================
+   🔹 GET — Fetch Tasks (Search + Pagination + Optimized)
+   ============================================================ */
+export async function GET(req: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session || !session.user) {
@@ -14,25 +17,62 @@ export async function GET() {
 
   const userId = session.user.id;
 
-  const tasks = await prisma.task.findMany({
-    where: {
-      assigneeId: userId,
-    },
-    include: {
-      assignee: true,
-      team: true,
-      timeEntries: {
-        orderBy: { startAt: "desc" },
-        take: 1,
-      },
-    },
-    orderBy: { createdAt: "desc" },
-  });
+  const { searchParams } = new URL(req.url);
 
-  return NextResponse.json({ tasks });
+  const search = searchParams.get("search") || "";
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 10;
+
+  const skip = (page - 1) * limit;
+
+  // Optimized multi-query using Prisma transaction
+  const [tasks, total] = await prisma.$transaction([
+    prisma.task.findMany({
+      where: {
+        assigneeId: userId,
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ],
+      },
+      include: {
+        assignee: true,
+        team: true,
+        timeEntries: {
+          orderBy: { startAt: "desc" },
+          take: 1,
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+
+    prisma.task.count({
+      where: {
+        assigneeId: userId,
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { description: { contains: search, mode: "insensitive" } },
+        ],
+      },
+    }),
+  ]);
+
+  return NextResponse.json({
+    tasks,
+    pagination: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    },
+  });
 }
 
-
+/* ============================================================
+   🔹 POST — Create New Task
+   ============================================================ */
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -48,7 +88,7 @@ export async function POST(req: Request) {
     const task = await prisma.task.create({
       data: {
         ...(data as any),
-        dueDate: data.dueDate ? new Date(data.dueDate) : null, 
+        dueDate: data.dueDate ? new Date(data.dueDate) : null,
         assigneeId: userId,
       } as any,
       include: {
@@ -59,14 +99,13 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ task });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
-
+/* ============================================================
+   🔹 PUT — Update Task
+   ============================================================ */
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -105,14 +144,13 @@ export async function PUT(req: Request) {
 
     return NextResponse.json({ task });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
 
-
+/* ============================================================
+   🔹 DELETE — Delete Task
+   ============================================================ */
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
