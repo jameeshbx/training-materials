@@ -32,7 +32,7 @@ export default function TaskForm({ onSuccess }: any) {
         >
             <h2 className="font-semibold text-gray-800">Create New Task</h2>
 
-            {/* TITLE */}
+            
             <input
                 className="border w-full p-2 rounded"
                 placeholder="Task title"
@@ -41,7 +41,7 @@ export default function TaskForm({ onSuccess }: any) {
                 required
             />
 
-            {/* DESCRIPTION */}
+            
             <textarea
                 className="border w-full p-2 rounded"
                 placeholder="Description"
@@ -49,7 +49,7 @@ export default function TaskForm({ onSuccess }: any) {
                 onChange={(e) => setDescription(e.target.value)}
             />
 
-            {/* DUE DATE */}
+           
             <div>
                 <label className="block mb-1 text-gray-700 font-medium">Due Date</label>
                 <input

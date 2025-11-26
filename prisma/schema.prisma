@@ -61,4 +61,16 @@ model TimeEntry {
   task       Task?     @relation(fields: [taskId], references: [id])
 }
 
+model FileUpload {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  url         String
+  thumbnailUrl String?
+  fileName    String
+  mimeType    String?
+  size        Int?
+  createdAt   DateTime @default(now())
+}
+
 

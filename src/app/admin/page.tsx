@@ -11,7 +11,7 @@ export default function AdminDashboard() {
     const res = await fetch("/api/admin/users");
     const data = await res.json();
 
-    console.log("ADMIN API RESPONSE:", data); // <—— ADD THIS
+    console.log("ADMIN API RESPONSE:", data); 
 
     if (!res.ok) {
       console.error("Admin API error:", data);
@@ -21,7 +21,7 @@ export default function AdminDashboard() {
     } else if (data && Array.isArray((data as any).users)) {
       setUsers((data as any).users);
     } else {
-      // Unexpected shape — fallback to empty list
+      
       console.warn("Admin API returned unexpected shape, expected array.", data);
       setUsers([]);
     }
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
             key={user.id}
             className="border rounded-xl p-5 bg-white shadow hover:shadow-lg transition"
           >
-            {/* User Details */}
+           
             <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
             <p className="text-gray-600 mb-3">{user.email}</p>
 
@@ -66,7 +66,7 @@ export default function AdminDashboard() {
               </span>
             </div>
 
-            {/* Task List */}
+          
             <h3 className="text-lg font-semibold mb-2">Tasks:</h3>
 
             {user.tasks.length === 0 ? (

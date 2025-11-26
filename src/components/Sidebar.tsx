@@ -7,6 +7,7 @@ export default function Sidebar() {
         { label: "Teams", href: "/teams" },
         { label: "Tasks", href: "/tasks" },
         { label: "Reports", href: "/reports" },
+        { label: "Files", href: "/files" },
     ];
 
     return (

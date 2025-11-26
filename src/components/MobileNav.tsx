@@ -19,9 +19,9 @@ export default function MobileNav() {
 
             {isOpen && (
                 <>
-                    {/* Overlay backdrop */}
+                    
                     <div className="fixed inset-0 bg-black/50 lg:hidden z-40" onClick={() => setIsOpen(false)} />
-                    {/* Sidebar drawer */}
+                    
                     <aside className="fixed left-0 top-16 h-[calc(100vh-4rem)] w-64 bg-[#F7F8FA] border-r border-gray-200 z-50 shadow-lg lg:hidden">
                         <Sidebar />
                     </aside>

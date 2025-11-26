@@ -2,12 +2,9 @@ import { NextResponse, NextRequest } from "next/server";
 import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/validators/task";
 
-// --------------------------------------------------------------------
-// GET → Fetch only user's tasks
-// --------------------------------------------------------------------
+
 export async function GET() {
   const session = await getServerSession(authOptions);
 
@@ -35,9 +32,7 @@ export async function GET() {
   return NextResponse.json({ tasks });
 }
 
-// --------------------------------------------------------------------
-// POST → Create task FOR LOGGED-IN USER ONLY
-// --------------------------------------------------------------------
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -53,7 +48,7 @@ export async function POST(req: Request) {
     const task = await prisma.task.create({
       data: {
         ...(data as any),
-        dueDate: data.dueDate ? new Date(data.dueDate) : null, // ⭐ save dueDate properly
+        dueDate: data.dueDate ? new Date(data.dueDate) : null, 
         assigneeId: userId,
       } as any,
       include: {
@@ -71,9 +66,7 @@ export async function POST(req: Request) {
   }
 }
 
-// --------------------------------------------------------------------
-// PUT → Update task (must belong to logged-in user)
-// --------------------------------------------------------------------
+
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -102,7 +95,7 @@ export async function PUT(req: Request) {
       where: { id },
       data: {
         ...(updates as any),
-        dueDate: updates.dueDate ? new Date(updates.dueDate) : existing.dueDate, // ⭐ update dueDate correctly
+        dueDate: updates.dueDate ? new Date(updates.dueDate) : existing.dueDate,
       } as any,
       include: {
         assignee: true,
@@ -119,9 +112,7 @@ export async function PUT(req: Request) {
   }
 }
 
-// --------------------------------------------------------------------
-// DELETE → User can delete only their own tasks
-// --------------------------------------------------------------------
+
 export async function DELETE(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
