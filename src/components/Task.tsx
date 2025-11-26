@@ -7,6 +7,8 @@ import { Plus, Edit, Trash2, Search, Clock, Calendar, Target, X } from "lucide-r
 import TaskTimer from "@/components/TaskTimer";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
+import { socket } from "@/lib/socket";
+import { timeAgo } from "@/lib/timeAgo";
 
 export default function TasksPage() {
   const pathname = usePathname();
@@ -15,6 +17,8 @@ export default function TasksPage() {
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Tasks | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; task: Tasks | null }>({
     show: false,
@@ -24,9 +28,11 @@ export default function TasksPage() {
   // Fetch Tasks
   const fetchTasks = async () => {
     try {
-      const res = await fetch(`/api/tasks?date=${selectedDate}`);
+      const res = await fetch(`/api/tasks?date=${selectedDate}&search=${searchTerm}&page=${page}&limit=4`);
       const data = await res.json();
       setTasks(data.data);
+            setTotalPages(data?.pagination?.totalPages || 1);
+
     } catch (error) {
       toast.error("Failed to load tasks");
     } finally {
@@ -36,7 +42,7 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, [selectedDate]);
+  }, [selectedDate,searchTerm, page]);
 
   // Delete Task Confirmation
   const confirmDelete = (task: Tasks) => {
@@ -92,6 +98,14 @@ export default function TasksPage() {
     }
   };
 
+
+
+
+ 
+
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 ">
       <div className="max-w-7xl mx-auto">
@@ -140,24 +154,41 @@ export default function TasksPage() {
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 flex-1 w-full">
                 <Search className="text-gray-400" size={20} />
-                <input
+               <input
                   type="text"
-                  placeholder="Search tasks by title or description..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full outline-none bg-transparent placeholder-gray-400 text-gray-700"
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchTerm(e.target.value);
+                  }}
+                  placeholder="Search tasks..."
+                  className="bg-transparent w-full outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
                 <Calendar size={18} className="text-gray-400" />
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-transparent outline-none text-gray-700 font-medium"
-                />
+               <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setPage(1);
+                }}
+                className="border px-4 py-3 rounded-xl"
+              />
+
               </div>
+               <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedDate("all");
+                  setPage(1);
+                }}
+                className="px-5 py-3 border rounded-xl"
+              >
+                Show All
+              </button>
             </div>
           </div>
         )}
@@ -220,6 +251,9 @@ export default function TasksPage() {
                     {task.description || "No description provided"}
                   </p>
                 </div>
+<p className="text-sm text-gray-500">
+  <b>{task?.user?.name}</b> created this task · {timeAgo(task.createdAt)}
+</p>
 
                 {/* Controls */}
                 <div className="px-8 pb-8 flex gap-3">
@@ -249,6 +283,10 @@ export default function TasksPage() {
                   )}
 
                   {/* Edit */}
+
+                  {task.status === "pending"?(
+
+                 
                   <button
                     onClick={() => {
                       setEditTask(task);
@@ -258,6 +296,7 @@ export default function TasksPage() {
                   >
                     <Edit size={16} /> Edit
                   </button>
+                   ):''}
 
                   {/* Delete */}
                   <button
@@ -269,6 +308,21 @@ export default function TasksPage() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+ {/* 📍 Pagination */}
+
+         {totalPages > 1 && (
+          <div className="flex justify-center gap-4 mt-6">
+            <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-4 py-2 border rounded disabled:opacity-50">
+              Prev
+            </button>
+
+            <span className="font-semibold">Page {page} / {totalPages}</span>
+
+            <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-4 py-2 border rounded disabled:opacity-50">
+              Next
+            </button>
           </div>
         )}
 
