@@ -1,59 +1,42 @@
 "use client";
 import { useState } from "react";
 import { X, Save } from "lucide-react";
-import { getSocket } from "@/lib/socket"; // <-- FIXED IMPORT
 
 export default function TaskForm({ task, close, refresh }: any) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [loading, setLoading] = useState(false);
-  const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
+const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
 
-  // TaskForm.tsx - FIXED
-const handleSubmit = async (e: any) => {
-  e.preventDefault();
-  if (!title.trim()) return;
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    if (!title.trim()) return;
 
-  setLoading(true);
+    setLoading(true);
+    const method = task ? "PUT" : "POST";
+    const url = task ? `/api/tasks/${task.id}` : "/api/tasks";
 
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, description, dueDate }),
-    });
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ title, description, dueDate }),
+      });
 
-    if (res.ok) {
-      const json = await res.json(); 
-
-      // 🔥 Socket emit with error handling
-      if (!task) {
-        try {
-          const socket = getSocket();
-          if (socket.connected) {
-            socket.emit("taskCreated", json.data);
-          } else {
-            console.log("Socket not connected, reconnecting...");
-            socket.connect();
-            socket.emit("taskCreated", json.data);
-          }
-        } catch (socketError) {
-          console.error("Socket emit error:", socketError);
-        }
+      if (res.ok) {
+        refresh();
+        close();
       }
-
-      refresh();
-      close();
+    } catch (error) {
+      console.error("Error saving task:", error);
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error saving task:", error);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center p-4 z-50">
-      <div
+      <div 
         className="bg-white rounded-2xl shadow-2xl w-full max-w-md"
         onClick={(e) => e.stopPropagation()}
       >
@@ -72,8 +55,69 @@ const handleSubmit = async (e: any) => {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* fields */}
-          {/* ... keep same */}
+          <div className="space-y-2">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+              Task Title *
+            </label>
+            <input
+              id="title"
+              type="text"
+              placeholder="Enter task title..."
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              Description
+            </label>
+            <textarea
+              id="description"
+              placeholder="Describe your task..."
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+            />
+          </div>
+<div className="space-y-2">
+  <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+    Due Date *
+  </label>
+
+  <input
+    id="dueDate"
+    type="date"
+    value={dueDate}
+    onChange={(e) => setDueDate(e.target.value)}
+    min={new Date().toISOString().split("T")[0]} // Disable past dates
+    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    required
+  />
+</div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="submit"
+              disabled={loading || !title.trim()}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {loading ? "Saving..." : (task ? "Update Task" : "Create Task")}
+            </button>
+            <button
+              type="button"
+              onClick={close}
+              disabled={loading}
+              className="flex-1 border border-gray-300 hover:bg-gray-50 py-2 px-4 rounded-md transition-colors"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>

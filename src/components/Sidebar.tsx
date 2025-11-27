@@ -58,7 +58,7 @@ export default function Sidebar() {
             >
               {isOpen ? <X size={24} className="text-white" /> : <Menu size={24} className="text-white" />}
             </button>
-            <h1 className="text-xl font-bold text-white">Dashboard</h1>
+          
             <div className="w-10"></div> {/* Spacer for balance */}
           </div>
         </div>
@@ -89,7 +89,7 @@ export default function Sidebar() {
         {/* Desktop Header */}
         {!isMobile && (
           <div className="p-6 border-b border-green-400/30">
-            <h2 className="text-2xl font-bold text-white text-center">Dashboard</h2>
+            {/* <h2 className="text-2xl font-bold text-white text-center">Dashboard</h2> */}
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-md hover:bg-white/10 transition-colors md:hidden"
@@ -101,7 +101,7 @@ export default function Sidebar() {
         )}
 
         {/* Navigation */}
-        <nav className="p-4 space-y-2 mt-4">
+        <nav className="p-4 space-y-2 mt-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;

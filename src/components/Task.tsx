@@ -7,8 +7,10 @@ import { Plus, Edit, Trash2, Search, Clock, Calendar, Target, X } from "lucide-r
 import TaskTimer from "@/components/TaskTimer";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
-import { socket } from "@/lib/socket";
 import { timeAgo } from "@/lib/timeAgo";
+
+import socket from "@/lib/socket";
+
 
 export default function TasksPage() {
   const pathname = usePathname();
@@ -44,6 +46,25 @@ export default function TasksPage() {
     fetchTasks();
   }, [selectedDate,searchTerm, page]);
 
+// Task.tsx 
+useEffect(() => {
+  if (!socket.connected) {
+    socket.connect();
+  }
+
+  const handleTaskCreated = () => {
+    console.log("📩 New Task => Refetching...");
+    fetchTasks();
+    toast.success("🔥 New task added!");
+  };
+
+  socket.on("taskCreated", handleTaskCreated);
+
+  // Cleanup
+  return () => {
+    socket.off("taskCreated", handleTaskCreated);
+  };
+}, []);
   // Delete Task Confirmation
   const confirmDelete = (task: Tasks) => {
     setDeleteConfirm({ show: true, task });
