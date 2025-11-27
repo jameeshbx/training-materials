@@ -33,8 +33,23 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Failed to create task");
+        let errorMessage = `Failed to create task (${res.status})`;
+        try {
+          const contentType = res.headers.get("content-type");
+          if (contentType && contentType.includes("application/json")) {
+            const data = await res.json();
+            errorMessage = data.error || errorMessage;
+            console.error("❌ Task creation error:", data);
+          } else {
+            const text = await res.text();
+            console.error("❌ Non-JSON error response:", text.substring(0, 200));
+            errorMessage = `Server error: ${res.status}`;
+          }
+        } catch (parseError) {
+          console.error("❌ Failed to parse error response:", parseError);
+          errorMessage = `Server error: ${res.status}`;
+        }
+        throw new Error(errorMessage);
       }
 
       router.push("/tasks");
@@ -83,15 +98,14 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
       </div>
 
       <div>
-  <label className="block text-sm mb-1">Due Date</label>
-  <input
-    type="date"
-    className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
-    value={dueDate}
-    onChange={(e) => setDueDate(e.target.value)}
-    required
-  />
-</div>
+        <label className="block text-sm mb-1">Due Date</label>
+        <input
+          type="date"
+          className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+          value={dueDate}
+          onChange={(e) => setDueDate(e.target.value)}
+        />
+      </div>
 
       
 

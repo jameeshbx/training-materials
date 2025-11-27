@@ -1,59 +1,93 @@
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { emitActivity } from "@/lib/socket";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
-export async function GET() {
-  const docs = await db.document.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions);
+    // @ts-ignore
+    const userId = session?.user?.id;
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
 
-  return new Response(JSON.stringify(docs), {
-    headers: { "Content-Type": "application/json" },
-  });
+    const documents = await db.document.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(documents);
+  } catch (error) {
+    console.error("❌ Error fetching documents:", error);
+    return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
+  }
 }
 
 export async function POST(req: Request) {
-  const { title, fileName, url } = await req.json();
+  try {
+    const session = await getServerSession(authOptions);
 
-  if (!url) {
-    return new Response(JSON.stringify({ error: "url is required" }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
+    // @ts-ignore
+    const userId = session?.user?.id;
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { url, title, fileName } = body;
+
+    // create DB record
+    const document = await db.document.create({
+      data: {
+        url,
+        title,
+        fileName,
+      },
     });
+
+    // Realtime activity emit
+    await emitActivity({
+      type: "documentUploaded",
+      userId,
+      userName: session?.user?.name || "Unknown User",
+      teamId: (session?.user as any)?.teamId || null,
+      documentName: fileName,
+    });
+
+    return NextResponse.json({ success: true, document });
+
+  } catch (error) {
+    console.error("❌ Upload Error:", error);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
-
-  const doc = await db.document.create({
-    // cast to any because generated Prisma types in this workspace
-    // may differ; runtime model uses these properties so cast is safe here
-    data: ({
-      title: title ?? null,
-      fileName: fileName ?? null,
-      url,
-    } as any),
-  });
-
-  return new Response(JSON.stringify(doc), {
-    status: 201,
-    headers: { "Content-Type": "application/json" },
-  });
 }
-
 
 export async function DELETE(req: Request) {
   try {
-    const { id } = await req.json();
+    const session = await getServerSession(authOptions);
+    // @ts-ignore
+    const userId = session?.user?.id;
+    
+    if (!userId) {
+      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const { id } = body;
+
+    if (!id) {
+      return NextResponse.json({ error: "Document ID is required" }, { status: 400 });
+    }
 
     await db.document.delete({
       where: { id },
     });
 
-    return new Response(JSON.stringify({ success: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("❌ Error deleting document:", error);
-    return new Response(JSON.stringify({ error: "Delete failed" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("❌ Delete Error:", error);
+    return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
   }
 }

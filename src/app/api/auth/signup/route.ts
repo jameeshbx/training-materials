@@ -1,12 +1,18 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { db } from "@/lib/db";   // ✅ Correct Prisma client import
-import { Role } from "@prisma/client";
-
+import { db } from "@/lib/db";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password,role  } = await req.json();
+    const { name, email, password, role } = await req.json();
+
+    // Validate required fields
+    if (!name || !email || !password) {
+      return NextResponse.json(
+        { error: "Name, email, and password are required" },
+        { status: 400 }
+      );
+    }
 
     // Check if email exists
     const existingUser = await db.user.findUnique({
@@ -23,14 +29,14 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create user
+    // Create user with role (default: USER)
     await db.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: role === "ADMIN" ? Role.ADMIN : Role.USER,
-              },
+        role: role === "ADMIN" ? "ADMIN" : "USER",
+      },
     });
 
     return NextResponse.json(
