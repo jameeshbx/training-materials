@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/validators/task";
+import { emitActivity } from "@/lib/emitActivity";
 
 /* ============================================================
    🔹 GET — Fetch Tasks (Search + Pagination + Optimized)
@@ -25,7 +26,6 @@ export async function GET(req: NextRequest) {
 
   const skip = (page - 1) * limit;
 
-  // Optimized multi-query using Prisma transaction
   const [tasks, total] = await prisma.$transaction([
     prisma.task.findMany({
       where: {
@@ -71,7 +71,7 @@ export async function GET(req: NextRequest) {
 }
 
 /* ============================================================
-   🔹 POST — Create New Task
+   🔹 POST — Create New Task (with Activity Save + Live Emit)
    ============================================================ */
 export async function POST(req: Request) {
   try {
@@ -90,14 +90,35 @@ export async function POST(req: Request) {
         ...(data as any),
         dueDate: data.dueDate ? new Date(data.dueDate) : null,
         assigneeId: userId,
-      } as any,
+      },
       include: {
         assignee: true,
         team: true,
       },
     });
 
+    /* ============================================================
+       ⭐ Save Activity to Database (Persistent)
+       ============================================================ */
+    const saved = await prisma.activity.create({
+      data: {
+        teamId: "default-team",
+        message: `Created a new task: "${task.title}"`,
+        userName: session.user.name ?? "Unknown",
+      },
+    });
+
+    /* ============================================================
+       ⭐ Emit Real-Time Activity to Socket Server
+       ============================================================ */
+    await emitActivity("default-team", {
+      message: saved.message,
+      userName: saved.userName,
+      createdAt: saved.createdAt.toISOString(),
+    });
+
     return NextResponse.json({ task });
+
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -135,7 +156,7 @@ export async function PUT(req: Request) {
       data: {
         ...(updates as any),
         dueDate: updates.dueDate ? new Date(updates.dueDate) : existing.dueDate,
-      } as any,
+      },
       include: {
         assignee: true,
         team: true,
@@ -143,6 +164,7 @@ export async function PUT(req: Request) {
     });
 
     return NextResponse.json({ task });
+
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
@@ -186,10 +208,13 @@ export async function DELETE(req: NextRequest) {
     await prisma.timeEntry.deleteMany({ where: { taskId: id } });
     await prisma.task.delete({ where: { id } });
 
-    return NextResponse.json({ message: "Task deleted", task: existing });
+    return NextResponse.json({
+      message: "Task deleted",
+      task: existing,
+    });
+
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
 }
-
 

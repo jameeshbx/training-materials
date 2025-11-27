@@ -1,10 +1,12 @@
 
+
 import "../styles/globals.css"
 import type { ReactNode } from "react"
 import Header from "../components/Header"
 import Sidebar from "../components/Sidebar"
 import MobileNav from "../components/MobileNav"
 import Provider from "./SessionProvider"
+import { Toaster } from "sonner"   // ⭐ ADDED
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
@@ -35,11 +37,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 
                     </div>
                 </Provider>
+
+                {/* ⭐ GLOBAL POPUP SYSTEM (Sonner Toast) */}
+                <Toaster position="top-right" richColors />
+
             </body>
         </html>
     )
 }
-
 
 
 
