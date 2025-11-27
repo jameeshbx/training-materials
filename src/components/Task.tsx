@@ -7,6 +7,10 @@ import { Plus, Edit, Trash2, Search, Clock, Calendar, Target, X } from "lucide-r
 import TaskTimer from "@/components/TaskTimer";
 import toast from "react-hot-toast";
 import { usePathname } from "next/navigation";
+import { timeAgo } from "@/lib/timeAgo";
+
+import socket from "@/lib/socket";
+
 
 export default function TasksPage() {
   const pathname = usePathname();
@@ -15,6 +19,8 @@ export default function TasksPage() {
   const [showForm, setShowForm] = useState(false);
   const [editTask, setEditTask] = useState<Tasks | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split("T")[0]);
   const [deleteConfirm, setDeleteConfirm] = useState<{ show: boolean; task: Tasks | null }>({
     show: false,
@@ -24,9 +30,11 @@ export default function TasksPage() {
   // Fetch Tasks
   const fetchTasks = async () => {
     try {
-      const res = await fetch(`/api/tasks?date=${selectedDate}`);
+      const res = await fetch(`/api/tasks?date=${selectedDate}&search=${searchTerm}&page=${page}&limit=4`);
       const data = await res.json();
       setTasks(data.data);
+            setTotalPages(data?.pagination?.totalPages || 1);
+
     } catch (error) {
       toast.error("Failed to load tasks");
     } finally {
@@ -36,7 +44,42 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchTasks();
-  }, [selectedDate]);
+  }, [selectedDate,searchTerm, page]);
+
+useEffect(() => {
+  if (!socket.connected) socket.connect();
+
+  // New Task
+  const onCreated = (task: Tasks) => {
+    setTasks(prev => [task, ...prev]);
+    toast.success("🔥 New task added!");
+  };
+
+  // Updated Task
+  const onUpdated = (updatedTask: Tasks) => {
+    setTasks(prev =>
+      prev.map(task => task.id === updatedTask.id ? updatedTask : task)
+    );
+    toast.success("♻️ Task updated!");
+  };
+
+  // Deleted Task
+  const onDeleted = ({ id }: { id: number }) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+    toast.success("🗑️ Task deleted!");
+  };
+
+  socket.on("taskCreated", onCreated);
+  socket.on("taskUpdated", onUpdated);
+  socket.on("taskDeleted", onDeleted);
+
+  return () => {
+    socket.off("taskCreated", onCreated);
+    socket.off("taskUpdated", onUpdated);
+    socket.off("taskDeleted", onDeleted);
+  };
+}, []);
+
 
   // Delete Task Confirmation
   const confirmDelete = (task: Tasks) => {
@@ -59,23 +102,30 @@ export default function TasksPage() {
     }
   };
 
-  // Update Status
-  const updateStatus = async (id: number, status: string) => {
-    const res = await fetch(`/api/tasks/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status }),
-    });
+ const updateStatus = async (id: number, status: string) => {
+  const res = await fetch(`/api/tasks/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status }),
+  });
 
-    if (res.ok) {
-      fetchTasks();
-      toast.success(`Task → ${status.replace("_", " ")}`);
-    }
-  };
+  if (res.ok) {
+    toast.success(`Task → ${status}`);
 
-  const filteredTasks = tasks.filter((t) =>
-    (t.title + (t.description || "")).toLowerCase().includes(searchTerm.toLowerCase())
-  );
+    // Get updated task from response
+    const updated = await res.json();
+
+    // Update UI immediately
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === id ? updated.data : task
+      )
+    );
+  } else {
+    toast.error("Failed to update task");
+  }
+};
+
 
   const statusColor = (status: string) => ({
     pending: "bg-amber-50 text-amber-700 border-amber-200",
@@ -91,6 +141,14 @@ export default function TasksPage() {
       default: return <Clock size={14} />;
     }
   };
+
+
+
+
+ 
+
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6 ">
@@ -140,135 +198,175 @@ export default function TasksPage() {
             <div className="flex flex-col sm:flex-row gap-4 items-center">
               <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3 flex-1 w-full">
                 <Search className="text-gray-400" size={20} />
-                <input
+               <input
                   type="text"
-                  placeholder="Search tasks by title or description..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full outline-none bg-transparent placeholder-gray-400 text-gray-700"
+                  onChange={(e) => {
+                    setPage(1);
+                    setSearchTerm(e.target.value);
+                  }}
+                  placeholder="Search tasks..."
+                  className="bg-transparent w-full outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-3 bg-gray-50 rounded-xl px-4 py-3">
                 <Calendar size={18} className="text-gray-400" />
-                <input
-                  type="date"
-                  value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="bg-transparent outline-none text-gray-700 font-medium"
-                />
+               <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => {
+                  setSelectedDate(e.target.value);
+                  setPage(1);
+                }}
+                className="border px-4 py-3 rounded-xl"
+              />
+
               </div>
+               <button
+                onClick={() => {
+                  setSearchTerm("");
+                  setSelectedDate("all");
+                  setPage(1);
+                }}
+                className="px-5 py-3 border rounded-xl"
+              >
+                Show All
+              </button>
             </div>
           </div>
         )}
 
         {/* Task Grid */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  <div className="flex justify-center items-center py-20">
+    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  </div>
+) : tasks.length === 0 ? (
+  <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+    <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
+      <Target size={40} className="text-gray-400" />
+    </div>
+    <h3 className="text-xl font-semibold text-gray-700 mb-2">No tasks found</h3>
+    <p className="text-gray-500 max-w-sm mx-auto">
+      {searchTerm || selectedDate !== new Date().toISOString().split("T")[0]
+        ? "Try adjusting your search or date filter"
+        : "Get started by creating your first task"}
+    </p>
+    {pathname !== "/dashboard" && (
+      <button
+        onClick={() => setShowForm(true)}
+        className="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors"
+      >
+        <Plus size={18} /> Create Task
+      </button>
+    )}
+  </div>
+) : (
+  <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8">
+    {tasks.map((task) => (
+      <div
+        key={task.id}
+        className="bg-white rounded-2xl shadow-2xl hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+      >
+        {/* Timer Section */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
+          <TaskTimer taskId={task.id} status={task.status} />
+        </div>
+
+        {/* Body */}
+        <div className="p-8 space-y-4">
+          <div className="flex items-center justify-between">
+            <span
+              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${statusColor(
+                task.status || "pending"
+              )}`}
+            >
+              {statusIcon(task.status || "pending")}
+              {task.status?.replace("_", " ") || "Pending"}
+            </span>
           </div>
-        ) : filteredTasks.length === 0 ? (
-          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
-            <div className="w-24 h-24 mx-auto mb-4 rounded-full bg-gray-50 flex items-center justify-center">
-              <Target size={40} className="text-gray-400" />
-            </div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">No tasks found</h3>
-            <p className="text-gray-500 max-w-sm mx-auto">
-              {searchTerm || selectedDate !== new Date().toISOString().split("T")[0] 
-                ? "Try adjusting your search or date filter" 
-                : "Get started by creating your first task"}
-            </p>
-            {pathname !== "/dashboard" && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="mt-6 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl transition-colors"
-              >
-                <Plus size={18} /> Create Task
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8 ">
-            {filteredTasks.map((task) => (
-              <div
-                key={task.id}
-                className="bg-white rounded-2xl shadow-2xl hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
-              >
-                {/* Timer Section */}
-                <div className="bg-gradient-to-r from-gray-50 to-gray-100 p-6 border-b border-gray-200">
-                  <TaskTimer taskId={task.id} status={task.status} />
-                </div>
 
-                {/* Body */}
-                <div className="p-8 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border ${statusColor(
-                        task.status || "pending"
-                      )}`}
-                    >
-                      {statusIcon(task.status || "pending")}
-                      {task.status?.replace("_", " ") || "Pending"}
-                    </span>
-                  </div>
+          <h2 className="text-2xl font-bold text-gray-900 leading-tight">
+            {task.title}
+          </h2>
 
-                  <h2 className="text-2xl font-bold text-gray-900 leading-tight">
-                    {task.title}
-                  </h2>
-                  
-                  <p className="text-gray-600 leading-relaxed text-lg">
-                    {task.description || "No description provided"}
-                  </p>
-                </div>
+          <p className="text-gray-600 leading-relaxed text-lg">
+            {task.description || "No description provided"}
+          </p>
+        </div>
 
-                {/* Controls */}
-                <div className="px-8 pb-8 flex gap-3">
-                  {/* Action Button */}
-                  {task.status === "completed" ? (
-                    <button 
-                      disabled 
-                      className="flex-1 bg-emerald-100 text-emerald-700 text-sm font-semibold py-4 px-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
-                      Completed
-                    </button>
-                  ) : task.status === "progress" ? (
-                    <button
-                      onClick={() => updateStatus(task.id, "completed")}
-                      className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      Mark Complete
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => updateStatus(task.id, "progress")}
-                      className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      Start Task
-                    </button>
-                  )}
+        <div className="inline-flex items-center gap-2 px-3 py-1 mb-3 bg-blue-50 rounded-s text-sm text-gray-700 ml-10">
+          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+          <span className="font-medium">{task?.user?.name}</span>
+          <span className="text-gray-400">|</span>
+          <span className="text-gray-600">{timeAgo(task.createdAt)}</span>
+        </div>
 
-                  {/* Edit */}
-                  <button
-                    onClick={() => {
-                      setEditTask(task);
-                      setShowForm(true);
-                    }}
-                    className="flex-1 border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 text-sm font-medium py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <Edit size={16} /> Edit
-                  </button>
+        {/* Controls */}
+        <div className="px-8 pb-8 flex gap-3">
+          {task.status === "completed" ? (
+            <button
+              disabled
+              className="flex-1 bg-emerald-100 text-emerald-700 text-sm font-semibold py-4 px-4 rounded-xl cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+              Completed
+            </button>
+          ) : task.status === "progress" ? (
+            <button
+              onClick={() => updateStatus(task.id, "completed")}
+              className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              Mark Complete
+            </button>
+          ) : (
+            <button
+              onClick={() => updateStatus(task.id, "progress")}
+              className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              Start Task
+            </button>
+          )}
 
-                  {/* Delete */}
-                  <button
-                    onClick={() => confirmDelete(task)}
-                    className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
-                  >
-                    <Trash2 size={16} /> Delete
-                  </button>
-                </div>
-              </div>
-            ))}
+          {task.status === "pending" && (
+            <button
+              onClick={() => {
+                setEditTask(task);
+                setShowForm(true);
+              }}
+              className="flex-1 border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 text-sm font-medium py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+            >
+              <Edit size={16} /> Edit
+            </button>
+          )}
+
+          <button
+            onClick={() => confirmDelete(task)}
+            className="flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white text-sm font-semibold py-4 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2"
+          >
+            <Trash2 size={16} /> Delete
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+)}
+
+        
+ {/* 📍 Pagination */}
+
+         {totalPages > 1 && (
+          <div className="flex justify-center gap-4 mt-6">
+            <button disabled={page === 1} onClick={() => setPage(page - 1)} className="px-4 py-2 border rounded disabled:opacity-50">
+              Prev
+            </button>
+
+            <span className="font-semibold">Page {page} / {totalPages}</span>
+
+            <button disabled={page === totalPages} onClick={() => setPage(page + 1)} className="px-4 py-2 border rounded disabled:opacity-50">
+              Next
+            </button>
           </div>
         )}
 

@@ -1,54 +1,51 @@
 "use client"
 
+import { Heart, Github, Twitter, Mail } from 'lucide-react';
+
 export default function Footer() {
   return (
-    <footer className="bg-black text-white py-10 mt-20">
-      <div className="max-w-screen-xl mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+    <footer className="bg-gray-900 text-white py-6 mt-0.5">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          
+          {/* Brand */}
+          <div className="flex items-center space-x-3">
+            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+              <span className="text-white font-bold text-xs">MP</span>
+            </div>
+            <span className="font-semibold text-sm">My Page</span>
+          </div>
 
-        {/* Column 1 */}
-        <div>
-          <h2 className="text-2xl font-bold mb-3">My Page</h2>
-         
-        </div>
+          {/* Links */}
+          <div className="flex items-center space-x-6 text-sm text-gray-400">
+            <a href="#" className="hover:text-white transition-colors">Home</a>
+            <a href="#" className="hover:text-white transition-colors">About</a>
+            <a href="#" className="hover:text-white transition-colors">Contact</a>
+          </div>
 
-        {/* Column 2 */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
-          <ul className="text-gray-400 space-y-2">
-            <li>Home</li>
-            <li>About</li>
-           
-          </ul>
-        </div>
-
-        {/* Column 3 */}
-        {/* <div>
-          <h3 className="text-lg font-semibold mb-3">Services</h3>
-          <ul className="text-gray-400 space-y-2">
-            <li>Travel Booking</li>
-            <li>Hotel Reservation</li>
-            <li>Guide Assistance</li>
-          </ul>
-        </div> */}
-
-        {/* Column 4 */}
-        <div>
-          <h3 className="text-lg font-semibold mb-3">Follow Us</h3>
-          <div className="flex gap-4 text-gray-400 text-xl">
-            <a href="#">🌐</a>
-            <a href="#">📘</a>
-            <a href="#">📸</a>
-            <a href="#">▶️</a>
+          {/* Social & Copyright */}
+          <div className="flex items-center space-x-4">
+            <div className="flex space-x-3">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Github className="w-4 h-4" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Twitter className="w-4 h-4" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">
+                <Mail className="w-4 h-4" />
+              </a>
+            </div>
+            
+            <div className="w-px h-4 bg-gray-700"></div>
+            
+            <p className="text-xs text-gray-500 flex items-center space-x-1">
+              <span>© {new Date().getFullYear()}</span>
+              <Heart className="w-3 h-3 text-red-500 fill-current" />
+            </p>
           </div>
         </div>
-
       </div>
-
-      <hr className="border-gray-700 mt-8" />
-
-      <p className="text-center text-gray-500 mt-5">
-        © {new Date().getFullYear()} My page. All Rights Reserved.
-      </p>
     </footer>
   );
 }

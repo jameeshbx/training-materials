@@ -13,6 +13,7 @@
     "incremental": true,
     "module": "ESNext",
 "moduleResolution": "bundler",  
+ "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -43,7 +44,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-  ],
+, "socketServer.ts", "src/socket-server.ts", "src/lib/socketServer.ts"  ],
   "exclude": [
     "node_modules"
   ]
