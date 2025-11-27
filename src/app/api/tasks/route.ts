@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { registerSocket } from "./lib/socketServer.js"; 
+import { emitEvent } from "@/lib/socketServer.ts"; 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -106,12 +106,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    console.log("📡 Emitting taskCreated event");
-    emitEvent("taskCreated", {
-      id: task.id,
-      title: task.title,
-      action: 'created'
-    });
+     emitEvent("taskCreated", task); 
     return NextResponse.json({ success: true, data: task }, { status: 201 });
 
   } catch (err) {
