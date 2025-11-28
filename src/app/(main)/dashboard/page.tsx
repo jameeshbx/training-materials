@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import Link from "next/link";
 import { prisma } from "@/lib/db";
+import ActivityFeedWrapper from "@/components/ActivityFeedWrapper";
 
 export default async function DashboardPage() {
     const session = await getServerSession(authOptions);
@@ -108,6 +109,9 @@ export default async function DashboardPage() {
                     <p className="text-3xl font-bold text-blue-400">{weeklyHours}h</p>
                     <p className="text-gray-400 text-xs mt-1">Tracked this week</p>
                 </div>
+            </div>
+            <div className="mt-10">
+                <ActivityFeedWrapper teamId="default-team" />
             </div>
         </div>
     );

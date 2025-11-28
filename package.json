@@ -7,7 +7,8 @@
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+    "socket": "node socket-server.js"
   },
   "dependencies": {
     "@prisma/client": "6.19.0",
@@ -18,6 +19,8 @@
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.8.0",
     "clsx": "^2.1.1",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.553.0",
     "next": "^16.0.1",
@@ -25,6 +28,9 @@
     "prisma": "6.19.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
+    "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "typescript": "^5.4.0",
     "zod": "^4.1.12",
