@@ -7,22 +7,22 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  name      String
-  email     String   @unique
-  password  String   // ADD THIS
-  teamId    String?
-  role      Role     @default(USER)
-  createdAt DateTime @default(now())
-  tasks     Task[]
-  team      Team? @relation(fields: [teamId], references: [id])
-}
 enum Role {
   USER
   ADMIN
 }
 
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String?  // Made optional temporarily to handle existing users
+  role      Role     @default(USER)
+  teamId    String?
+  createdAt DateTime @default(now())
+  tasks     Task[]
+  team      Team?    @relation(fields: [teamId], references: [id])
+}
 
 model Task {
   id          String      @id @default(cuid())
@@ -31,11 +31,11 @@ model Task {
   status      String      @default("pending")
   userId      String
   teamId      String?
+  dueDate     DateTime?
   createdAt   DateTime    @default(now())
   team        Team?       @relation(fields: [teamId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
   timeEntries TimeEntry[]
-  dueDate     DateTime?
 }
 
 model Team {
@@ -51,8 +51,19 @@ model TimeEntry {
   taskId    String
   createdAt DateTime @default(now())
   task      Task     @relation(fields: [taskId], references: [id])
-  startedAt DateTime @default(now())
-  endedAt   DateTime @default(now())
+}
+
+model Activity {
+  id          String   @id @default(cuid())
+  type        String
+  userId      String
+  userName    String
+  teamId      String?
+  taskId      String?
+  taskTitle   String?
+  documentName String?
+  hours       Float?
+  timestamp   DateTime @default(now())
 }
 
 model Document {
@@ -62,5 +73,3 @@ model Document {
   url       String
   createdAt DateTime @default(now())
 }
-
-

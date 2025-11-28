@@ -16,20 +16,34 @@ export default function SignupPage() {
     e.preventDefault();
     setErrorMsg("");
 
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, role }),  // 👈 SEND ROLE
-    });
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role }),
+      });
 
-    const data = await res.json();
+      // Check if response is JSON
+      const contentType = res.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        const text = await res.text();
+        console.error("Non-JSON response:", text);
+        setErrorMsg("Server error: Please check your database connection");
+        return;
+      }
 
-    if (!res.ok) {
-      setErrorMsg(data.error || "Something went wrong");
-      return;
+      const data = await res.json();
+
+      if (!res.ok) {
+        setErrorMsg(data.error || "Something went wrong");
+        return;
+      }
+
+      router.push("/auth/login"); // redirect to login
+    } catch (error) {
+      console.error("Signup error:", error);
+      setErrorMsg("Network error: Please try again");
     }
-
-    router.push("/auth/login"); // redirect to login
   }
 
   return (

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { z } from "zod";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 // ------------------------
 // ZOD VALIDATIONS
@@ -133,7 +135,39 @@ export async function PUT(req: Request) {
         endedAt: end,
         hours,
       },
+      include: {
+        task: {
+          include: {
+            user: {
+              select: { id: true, name: true, teamId: true },
+            },
+          },
+        },
+      },
     });
+
+    // ⬅️ EMIT SOCKET EVENT for activity feed when time is logged
+    try {
+      if (updated.hours > 0) {
+        console.log("🚀 Attempting to emit activity for time logging...");
+        const { emitActivity } = await import("@/lib/socket");
+        const activityData = {
+          type: "timeLogged" as const,
+          userId: updated.task.user.id,
+          userName: updated.task.user.name,
+          teamId: updated.task.user.teamId ?? updated.task.teamId ?? null,
+          taskId: updated.task.id,
+          taskTitle: updated.task.title,
+          hours: updated.hours,
+        };
+        console.log("📤 Activity data:", activityData);
+        await emitActivity(activityData);
+        console.log("✅ Activity emission completed");
+      }
+    } catch (error) {
+      console.error("❌ Failed to emit activity:", error);
+      // Don't fail the request if socket emission fails
+    }
 
     return NextResponse.json(updated);
 

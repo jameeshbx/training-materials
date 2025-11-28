@@ -6,6 +6,11 @@ export default withAuth(
     const token = req.nextauth.token;
     const pathname = req.nextUrl.pathname;
 
+    // Skip API routes — let them pass through
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.next();
+    }
+
     // 🔐 Block non-admin users from /admin
     if (pathname.startsWith("/admin")) {
       if (token?.role !== "ADMIN") {
@@ -30,10 +35,14 @@ export default withAuth(
 
 export const config = {
   matcher: [
+    // Protect dashboard and app routes
     "/dashboard/:path*",
     "/tasks/:path*",
     "/reports/:path*",
     "/teams/:path*",
     "/admin/:path*",
+    "/documents/:path*",
+    // Make sure to NOT match /api/auth/* paths so NextAuth API works
+    // Negative patterns are done by adding exceptions in the middleware function itself
   ],
 };

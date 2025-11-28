@@ -85,8 +85,21 @@ function DocumentsList() {
 
   useEffect(() => {
     fetch("/api/documents")
-      .then((res) => res.json())
-      .then((data) => setDocs(data));
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          throw new Error("Response is not JSON");
+        }
+        return res.json();
+      })
+      .then((data) => setDocs(data))
+      .catch((error) => {
+        console.error("Error fetching documents:", error);
+        setDocs([]);
+      });
   }, []);
 
   const isImage = (fileName?: string | null) => {
