@@ -80,7 +80,11 @@ export async function PATCH(req: Request) {
   }
 
   const endAt = new Date();
-  const duration = Math.floor((endAt.getTime() - entry.startAt.getTime()) / 1000);
+
+  // FIX: convert to minutes
+  const duration = Math.floor(
+    (endAt.getTime() - entry.startAt.getTime()) / (1000 * 60)
+  );
 
   const updated = await prisma.timeEntry.update({
     where: { id },
@@ -89,4 +93,3 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json(updated);
 }
-
