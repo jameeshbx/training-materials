@@ -1,16 +1,19 @@
 "use client";
 
 import "@/styles/globals.css";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/sidebar";
 import { useState, useEffect } from "react";
 import AuthSessionProvider from "@/components/SessionProviderWrapper";
+import { Toaster } from "react-hot-toast";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // Auto-close sidebar on small screens
   useEffect(() => {
+      fetch("/api/socket"); 
+      
     const handleResize = () => {
       if (window.innerWidth < 768) {
         setSidebarOpen(false);
@@ -56,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {/* MAIN CONTENT */}
             <main className="flex-1 p-4 sm:p-6 bg-white overflow-y-auto md:ml-0">
               {children}
+                 <Toaster position="top-right" />
             </main>
 
           </div>

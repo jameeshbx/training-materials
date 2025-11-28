@@ -8,16 +8,17 @@ datasource db {
 }
 
 model User {
-  id          String      @id @default(cuid())
-  email       String      @unique
+  id          String       @id @default(cuid())
+  email       String       @unique
   name        String
-  createdAt   DateTime    @default(now())
+  createdAt   DateTime     @default(now())
   teamId      String?
   password    String
-  role        Role        @default(USER)
+  role        Role         @default(USER)
+  attachments Attachment[]
   tasks       Task[]
   timeEntries TimeEntry[]
-  team        Team?       @relation(fields: [teamId], references: [id])
+  team        Team?        @relation(fields: [teamId], references: [id])
 }
 
 model Task {
@@ -58,6 +59,16 @@ model Attachment {
   fileName  String
   fileUrl   String
   fileType  String
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String
+  action    String
   createdAt DateTime @default(now())
 }
 

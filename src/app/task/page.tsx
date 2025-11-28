@@ -138,6 +138,8 @@ export default function TasksPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
+  
+
   // page change effect
   useEffect(() => {
     if (userId) fetchTasks({ page, search });
