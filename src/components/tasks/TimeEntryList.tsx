@@ -16,10 +16,23 @@ export default function TimeEntryList({ taskId }: { taskId: string }) {
   async function fetchEntries() {
     try {
       const res = await fetch(`/api/time-entries?taskId=${taskId}`);
+      if (!res.ok) {
+        console.log("API error:", res.status, res.statusText);
+        setEntries([]);
+        setLoading(false);
+        return;
+      }
       const data = await res.json();
-      setEntries(data);
+      // Ensure data is an array before setting it
+      if (Array.isArray(data)) {
+        setEntries(data);
+      } else {
+        console.error("Invalid response format (expected array):", data);
+        setEntries([]);
+      }
     } catch (err) {
       console.error("Failed to load time entries:", err);
+      setEntries([]);
     }
     setLoading(false);
   }
@@ -32,7 +45,7 @@ export default function TimeEntryList({ taskId }: { taskId: string }) {
     return <p className="text-gray-400 text-sm">Loading time logs…</p>;
   }
 
-  if (entries.length === 0) {
+  if (!Array.isArray(entries) || entries.length === 0) {
     return <p className="text-gray-400 text-sm">No time entries yet.</p>;
   }
 

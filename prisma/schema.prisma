@@ -22,6 +22,7 @@ model User {
   createdAt DateTime @default(now())
   tasks     Task[]
   team      Team?    @relation(fields: [teamId], references: [id])
+  timeEntries TimeEntry[]
 }
 
 model Task {
@@ -47,11 +48,17 @@ model Team {
 
 model TimeEntry {
   id        String   @id @default(cuid())
-  hours     Float
   taskId    String
-  createdAt DateTime @default(now())
+  userId    String
+  startedAt DateTime
+  endedAt   DateTime?
+  hours     Float? @default(0)
+
   task      Task     @relation(fields: [taskId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
+
 
 model Activity {
   id          String   @id @default(cuid())
