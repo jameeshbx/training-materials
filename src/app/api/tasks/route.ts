@@ -2,12 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 // =============================
-// GET ALL TASKS (with pagination + search + include timeEntries)
-// Query params:
-//  - userId (optional) -> filter tasks by user
-//  - page (optional, default 1)
-//  - limit (optional, default 5)
-//  - search (optional) -> searches title and description (insensitive, contains)
+// GET TASKS (pagination + search)
 // =============================
 export async function GET(req: NextRequest) {
   try {
@@ -45,19 +40,26 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ data: tasks, totalPages, count });
   } catch (error) {
     console.error("GET /api/tasks error", error);
-    return NextResponse.json({ error: "Failed to fetch tasks" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch tasks" },
+      { status: 500 }
+    );
   }
 }
 
 // =============================
-// CREATE A TASK
+// CREATE TASK
 // =============================
 export async function POST(req: NextRequest) {
   try {
-    const { title, description, status = "pending", userId, dueDate } = await req.json();
+    const { title, description, status = "pending", userId, dueDate } =
+      await req.json();
 
     if (!title || !userId) {
-      return NextResponse.json({ error: "title and userId are required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "title and userId are required" },
+        { status: 400 }
+      );
     }
 
     const task = await prisma.task.create({
@@ -70,10 +72,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Emit event: task created
+    if (global.io) {
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true },
+      });
+
+      global.io.emit("taskCreated", {
+        ...task,
+        userName: user?.name,
+      });
+    }
+
     return NextResponse.json({ data: task }, { status: 201 });
   } catch (error) {
     console.error("POST /api/tasks error", error);
-    return NextResponse.json({ error: "Failed to create task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to create task" },
+      { status: 500 }
+    );
   }
 }
 
@@ -85,7 +103,10 @@ export async function PUT(req: NextRequest) {
     const { id, title, description, status, dueDate } = await req.json();
 
     if (!id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "id is required" },
+        { status: 400 }
+      );
     }
 
     const updatedTask = await prisma.task.update({
@@ -94,14 +115,24 @@ export async function PUT(req: NextRequest) {
         ...(title !== undefined && { title }),
         ...(description !== undefined && { description }),
         ...(status !== undefined && { status }),
-        ...(dueDate !== undefined && { dueDate: dueDate ? new Date(dueDate) : null }),
+        ...(dueDate !== undefined && {
+          dueDate: dueDate ? new Date(dueDate) : null,
+        }),
       },
     });
+
+    // Emit event: task updated
+    if (global.io) {
+      global.io.emit("taskUpdated", updatedTask);
+    }
 
     return NextResponse.json({ data: updatedTask });
   } catch (error) {
     console.error("PUT /api/tasks error", error);
-    return NextResponse.json({ error: "Failed to update task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to update task" },
+      { status: 500 }
+    );
   }
 }
 
@@ -114,10 +145,18 @@ export async function DELETE(req: NextRequest) {
     const id = url.searchParams.get("id");
 
     if (!id) {
-      return NextResponse.json({ error: "id is required" }, { status: 400 });
+      return NextResponse.json(
+        { error: "id is required" },
+        { status: 400 }
+      );
     }
 
-    await prisma.task.delete({ where: { id } });
+    const deleted = await prisma.task.delete({ where: { id } });
+
+    // Emit event: task deleted
+    if (global.io) {
+      global.io.emit("taskDeleted", deleted);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
@@ -130,6 +169,10 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
-    return NextResponse.json({ error: "Failed to delete task" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete task" },
+      { status: 500 }
+    );
   }
 }
+

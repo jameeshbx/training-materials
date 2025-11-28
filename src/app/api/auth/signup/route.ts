@@ -6,7 +6,7 @@ import { Role } from "@prisma/client";
 export async function POST(req: Request) {
   try {
     const { name, email, password, role } = await req.json();
-
+console.log("user created.........")
     // Validate input
     if (!name || !email || !password) {
       return NextResponse.json(
@@ -45,7 +45,6 @@ export async function POST(req: Request) {
         role: isAdminRequest ? Role.ADMIN : Role.USER,
       },
     });
-
     return NextResponse.json(
       { message: "User created successfully" },
       { status: 201 }

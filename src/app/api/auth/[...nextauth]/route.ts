@@ -1,9 +1,8 @@
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -26,14 +25,14 @@ export const authOptions: NextAuthOptions = {
                     credentials.password,
                     user.password
                 );
-
                 if (!isValid) return null;
 
+                // ⭐ RETURN EVERYTHING YOU NEED INCLUDING NAME
                 return {
                     id: user.id,
-                    name: user.name,
+                    name: user.name,      // username from database
                     email: user.email,
-                    role: user.role,   // ⭐ ADDED: include role in returned user
+                    role: user.role,
                 };
             },
         }),
@@ -51,19 +50,20 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async jwt({ token, user }) {
-            // When user logs in for the first time
+            // user exists only on login
             if (user) {
-  token.id = (user as any).id;
-      token.role = (user as any).role; // ← add this                  // ⭐ ADDED: store role in JWT token
+                token.id = (user as any).id;
+                token.name = (user as any).name;  // ⭐ SAVE USERNAME IN TOKEN
+                token.role = (user as any).role;
             }
-            console.log("🔥 TOKEN:", token);
             return token;
         },
 
         async session({ session, token }) {
             if (session.user) {
                 (session.user as any).id = token.id;
-                (session.user as any).role = token.role;  // ⭐ ADDED: expose role in session
+                (session.user as any).role = token.role;
+                session.user.name = token.name as string; // ⭐ MAKE USERNAME AVAILABLE IN SESSION
             }
             return session;
         },
