@@ -9,7 +9,9 @@ import {
   Users, 
   TrendingUp,
   Calendar,
-  AlertCircle
+  AlertCircle,
+  BarChart3,
+  PieChart
 } from "lucide-react";
 
 Chart.register(...registerables);
@@ -82,7 +84,7 @@ export default function ReportsPage() {
     fetchData();
   }, []);
 
-  // Default color schemes
+  // Enhanced color schemes
   const statusColors: Record<string, string> = {
     pending: "#FF6B6B",
     IN_PROGRESS: "#4ECDC4",
@@ -90,33 +92,57 @@ export default function ReportsPage() {
     REVIEW: "#FFA07A",
     BLOCKED: "#FFD93D",
     TODO: "#667eea",
-    DONE: "#96ceb4"
+    DONE: "#96ceb4",
+    CANCELLED: "#94a3b8"
   };
 
+  // Professional gradient colors for weekly hours
   const weeklyColors = [
-    "#667eea", "#764ba2", "#f093fb", "#f5576c", 
-    "#4ecdc4", "#45b7d1", "#96ceb4", "#ffeaa7"
+    "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+    "linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%)",
+    "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)",
+    "linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)",
+    "linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)",
+    "linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%)",
+    "linear-gradient(135deg, #a6c0fe 0%, #f68084 100%)"
   ];
 
-  // Chart data with fallbacks
+  // Solid colors for hover states
+  const weeklySolidColors = [
+    "#667eea", "#f093fb", "#4ecdc4", "#a8edea", 
+    "#ffecd2", "#84fab0", "#d4fc79", "#a6c0fe"
+  ];
+
+  // Chart data with enhanced styling
   const barData = {
     labels: weekly.length > 0 ? weekly.map((w) => w.user) : ['No Data'],
     datasets: [
       {
         label: "Hours Worked",
         data: weekly.length > 0 ? weekly.map((w) => w.hours) : [0],
-        backgroundColor: weeklyColors,
-        borderColor: weeklyColors.map(color => color + "DD"),
-        borderWidth: 2,
-        borderRadius: 8,
+        backgroundColor: weekly.length > 0 
+          ? weeklyColors.slice(0, weekly.length) 
+          : ["linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%)"],
+        borderColor: weekly.length > 0 
+          ? weeklySolidColors.slice(0, weekly.length).map(color => color + "DD") 
+          : ["#94a3b8"],
+        borderWidth: 3,
+        borderRadius: 12,
         borderSkipped: false,
+        hoverBackgroundColor: weekly.length > 0 
+          ? weeklySolidColors.slice(0, weekly.length).map(color => color + "CC")
+          : ["#cbd5e1"],
+        hoverBorderWidth: 4,
+        barPercentage: 0.7,
+        categoryPercentage: 0.8,
       },
     ],
   };
 
   const pieData = {
     labels: distribution.length > 0 
-      ? distribution.map((d) => d.status) 
+      ? distribution.map((d) => d.status.replace('_', ' ')) 
       : ['No Data'],
     datasets: [
       {
@@ -127,8 +153,10 @@ export default function ReportsPage() {
           ? distribution.map(d => statusColors[d.status] || "#94a3b8")
           : ["#e2e8f0"],
         borderColor: "#ffffff",
-        borderWidth: 3,
-        hoverOffset: 15,
+        borderWidth: 4,
+        hoverBorderWidth: 6,
+        hoverOffset: 20,
+        spacing: distribution.length > 0 ? 2 : 0,
       },
     ],
   };
@@ -141,20 +169,40 @@ export default function ReportsPage() {
         position: 'bottom' as const,
         labels: {
           usePointStyle: true,
-          padding: 20,
+          padding: 25,
           font: {
-            size: 12,
-          }
+            size: 13,
+            family: "'Inter', sans-serif",
+            weight: '500' as const,
+          },
+          color: '#475569',
         }
       },
       tooltip: {
-        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+        backgroundColor: 'rgba(255, 255, 255, 0.98)',
         titleColor: '#1e293b',
         bodyColor: '#475569',
         borderColor: '#e2e8f0',
-        borderWidth: 1,
-        cornerRadius: 8,
+        borderWidth: 2,
+        cornerRadius: 12,
         usePointStyle: true,
+        padding: 16,
+        boxPadding: 8,
+        titleFont: {
+          size: 14,
+          weight: '600' as const,
+        },
+        bodyFont: {
+          size: 13,
+        },
+        callbacks: {
+          label: function(context: any) {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y || context.raw;
+            const suffix = context.chart.data.labels[context.dataIndex] === 'Hours Worked' ? ' hrs' : ' tasks';
+            return `${label}: ${value}${suffix}`;
+          }
+        }
       }
     }
   };
@@ -165,20 +213,56 @@ export default function ReportsPage() {
       y: {
         beginAtZero: true,
         grid: {
-          color: 'rgba(226, 232, 240, 0.5)'
+          color: 'rgba(226, 232, 240, 0.8)',
+          drawBorder: false,
         },
         ticks: {
-          color: '#64748b'
+          color: '#64748b',
+          font: {
+            size: 12,
+            family: "'Inter', sans-serif",
+          },
+          padding: 10,
+          callback: function(value: any) {
+            return value + ' hrs';
+          }
+        },
+        border: {
+          display: false,
         }
       },
       x: {
         grid: {
-          display: false
+          display: false,
         },
         ticks: {
-          color: '#64748b'
+          color: '#64748b',
+          font: {
+            size: 12,
+            family: "'Inter', sans-serif",
+            weight: '500' as const,
+          },
+          padding: 15,
+        },
+        border: {
+          display: false,
         }
       }
+    },
+    animation: {
+      duration: 1000,
+      easing: 'easeOutQuart' as const,
+    }
+  };
+
+  const pieOptions = {
+    ...chartOptions,
+    cutout: '65%',
+    animation: {
+      animateScale: true,
+      animateRotate: true,
+      duration: 1200,
+      easing: 'easeOutQuart' as const,
     }
   };
 
@@ -190,10 +274,10 @@ export default function ReportsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-slate-600">Loading reports...</p>
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-slate-600 text-lg font-medium">Loading reports...</p>
         </div>
       </div>
     );
@@ -201,14 +285,16 @@ export default function ReportsPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Error Loading Reports</h2>
-          <p className="text-slate-600 mb-4">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto">
+          <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-10 h-10 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-3">Error Loading Reports</h2>
+          <p className="text-slate-600 mb-6 text-lg">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 shadow-lg hover:shadow-xl font-medium"
           >
             Try Again
           </button>
@@ -218,17 +304,21 @@ export default function ReportsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-        
-            <p className="text-slate-600 mt-2">Track team performance and task distribution</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Enhanced Header */}
+        <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-slate-800 to-indigo-600 bg-clip-text text-transparent">
+              Team Analytics
+            </h1>
+            <p className="text-slate-600 text-lg max-w-2xl">
+              Comprehensive overview of team performance, task distribution, and productivity metrics
+            </p>
           </div>
-          <div className="flex items-center space-x-4 bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3 shadow-sm border border-slate-200">
-            <Calendar className="w-5 h-5 text-blue-600" />
-            <span className="text-slate-700 font-medium">
+          <div className="flex items-center space-x-4 bg-white/90 backdrop-blur-lg rounded-2xl px-6 py-4 shadow-lg border border-slate-200/60">
+            <Calendar className="w-6 h-6 text-indigo-600" />
+            <span className="text-slate-800 font-semibold text-lg">
               {new Date().toLocaleDateString('en-US', { 
                 weekday: 'long', 
                 year: 'numeric', 
@@ -239,71 +329,83 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Stats Grid */}
+        {/* Enhanced Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Total Hours</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">{totalHours.toFixed(1)}</p>
+          {[
+            { 
+              label: "Total Hours", 
+              value: totalHours.toFixed(1), 
+              icon: Clock, 
+              color: "blue",
+              gradient: "from-blue-500 to-cyan-500"
+            },
+            { 
+              label: "Total Tasks", 
+              value: totalTasks.toString(), 
+              icon: CheckCircle, 
+              color: "green",
+              gradient: "from-green-500 to-emerald-500"
+            },
+            { 
+              label: "Team Members", 
+              value: weekly.length.toString(), 
+              icon: Users, 
+              color: "purple",
+              gradient: "from-purple-500 to-indigo-500"
+            },
+            { 
+              label: "Completion Rate", 
+              value: `${completionRate.toFixed(1)}%`, 
+              icon: TrendingUp, 
+              color: "green",
+              gradient: "from-green-500 to-emerald-500"
+            }
+          ].map((stat, index) => (
+            <div 
+              key={stat.label}
+              className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/60 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
+              <div className="flex items-center justify-between">
+                <div className="space-y-2">
+                  <p className="text-slate-600 text-sm font-semibold uppercase tracking-wide">
+                    {stat.label}
+                  </p>
+                  <p className="text-3xl font-bold text-slate-900">
+                    {stat.value}
+                  </p>
+                </div>
+                <div className={`p-4 bg-gradient-to-r ${stat.gradient} rounded-2xl shadow-lg`}>
+                  <stat.icon className="w-6 h-6 text-white" />
+                </div>
               </div>
-              <div className="p-3 bg-blue-50 rounded-xl">
-                <Clock className="w-6 h-6 text-blue-600" />
+              <div className="mt-4 h-1 bg-slate-100 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full bg-gradient-to-r ${stat.gradient} rounded-full transition-all duration-1000`}
+                  style={{ width: `${Math.min(100, (index + 1) * 25)}%` }}
+                />
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Total Tasks</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">{totalTasks}</p>
-              </div>
-              <div className="p-3 bg-green-50 rounded-xl">
-                <CheckCircle className="w-6 h-6 text-green-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Team Members</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">{weekly.length}</p>
-              </div>
-              <div className="p-3 bg-purple-50 rounded-xl">
-                <Users className="w-6 h-6 text-purple-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-slate-600 text-sm font-medium">Completion Rate</p>
-                <p className="text-3xl font-bold text-slate-900 mt-2">{completionRate.toFixed(1)}%</p>
-              </div>
-              <div className="p-3 bg-orange-50 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Enhanced Charts Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Weekly Hours Chart */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-blue-600" />
-                  Weekly Hours Per Member
-                </h2>
-                <p className="text-slate-500 text-sm mt-1">Total hours tracked this week</p>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/60 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-blue-50 rounded-xl">
+                  <BarChart3 className="w-6 h-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Weekly Hours Distribution
+                  </h2>
+                  <p className="text-slate-500 text-sm">Hours tracked per team member this week</p>
+                </div>
               </div>
-              <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium">
-                This Week
+              <div className="bg-gradient-to-r from-blue-500 to-cyan-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                Real-time
               </div>
             </div>
             <div className="h-80">
@@ -312,41 +414,57 @@ export default function ReportsPage() {
           </div>
 
           {/* Task Distribution Chart */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-xl font-semibold text-slate-900 flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-purple-600" />
-                  Task Status Distribution
-                </h2>
-                <p className="text-slate-500 text-sm mt-1">Breakdown of tasks by status</p>
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/60 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 bg-purple-50 rounded-xl">
+                  <PieChart className="w-6 h-6 text-purple-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">
+                    Task Status Overview
+                  </h2>
+                  <p className="text-slate-500 text-sm">Breakdown of tasks by current status</p>
+                </div>
               </div>
-              <div className="bg-purple-50 text-purple-700 px-3 py-1 rounded-full text-sm font-medium">
-                All Tasks
+              <div className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+                All Time
               </div>
             </div>
             <div className="h-80">
-              <Doughnut data={pieData} options={chartOptions} />
+              <Doughnut data={pieData} options={pieOptions} />
             </div>
           </div>
         </div>
 
-        {/* Status Legend */}
+        {/* Enhanced Status Legend */}
         {distribution.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200">
-            <h3 className="text-lg font-semibold text-slate-900 mb-4">Status Overview</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="bg-white rounded-2xl p-6 shadow-lg border border-slate-200/60">
+            <div className="flex items-center space-x-3 mb-6">
+              <CheckCircle className="w-6 h-6 text-slate-700" />
+              <h3 className="text-xl font-bold text-slate-900">Status Breakdown</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {distribution.map((item) => (
-                <div key={item.status} className="flex items-center space-x-3 p-3 bg-slate-50 rounded-lg">
+                <div 
+                  key={item.status} 
+                  className="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors duration-200 group"
+                >
                   <div 
-                    className="w-3 h-3 rounded-full"
+                    className="w-4 h-4 rounded-full shadow-lg group-hover:scale-110 transition-transform duration-200"
                     style={{ 
-                      backgroundColor: statusColors[item.status] || '#94a3b8' 
+                      backgroundColor: statusColors[item.status] || '#94a3b8',
+                      boxShadow: `0 4px 12px ${statusColors[item.status] || '#94a3b8'}40`
                     }}
                   />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-700 capitalize">{item.status.toLowerCase()}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-700 capitalize truncate">
+                      {item.status.toLowerCase().replace('_', ' ')}
+                    </p>
                     <p className="text-2xl font-bold text-slate-900">{item._count}</p>
+                  </div>
+                  <div className="text-sm font-medium text-slate-500">
+                    {totalTasks > 0 ? ((item._count / totalTasks) * 100).toFixed(1) : 0}%
                   </div>
                 </div>
               ))}

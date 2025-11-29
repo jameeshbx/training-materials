@@ -3,21 +3,18 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { emitEvent } from "@/lib/socketServer.ts";
 
-// Schema for validation
-const idSchema = z.coerce.number().int().positive(); 
+const idSchema = z.coerce.number().int().positive();
 
 const updateTaskSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
   status: z.enum(["pending", "progress", "completed"]).optional(),
-      dueDate: z.string().optional(), // 👈 Add this
-
+  dueDate: z.string().optional(),
 });
-
 
 // ---------- GET SINGLE TASK ----------
 export async function GET(req: NextRequest, context: any) {
-  const { id } = await context.params;  // 👈 FIX
+  const { id } = await context.params;
 
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
@@ -35,10 +32,10 @@ export async function GET(req: NextRequest, context: any) {
 
 // ---------- UPDATE TASK ----------
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const body = await req.json();
-  const id = Number(params.id);
-
   try {
+    const body = await req.json();
+    const id = Number(params.id);
+
     const updated = await prisma.task.update({
       where: { id },
       data: {
@@ -48,12 +45,17 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
       },
       include: {
-        user: { select: { name: true } }, // 👈 helps UI show username without refetch
-      }
+        user: { select: { name: true } },
+      },
     });
 
-    // 🎯 SOCKET EVENT
-    emitEvent("taskUpdated", updated);
+    // 🚀 Send cleaner event
+    emitEvent("taskUpdated", {
+      id: updated.id,
+      title: updated.title,
+      status: updated.status,
+      user: updated.user,
+    });
 
     return NextResponse.json({ success: true, data: updated });
 
@@ -61,7 +63,6 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }
-
 
 
 
@@ -80,20 +81,35 @@ export async function DELETE(req: NextRequest, context: any) {
   const taskId = parsedId.data;
 
   try {
-    // First delete related time entries
-    await prisma.timeEntry.deleteMany({
-      where: { taskId }
+    // Fetch task first (to send name + user)
+    const task = await prisma.task.findUnique({
+      where: { id: taskId },
+      include: { user: { select: { name: true } } }
     });
 
-    // Then delete task
-    await prisma.task.delete({
-      where: { id: taskId }
+    if (!task) {
+      return NextResponse.json(
+        { success: false, error: "Task not found" },
+        { status: 404 }
+      );
+    }
+
+    // Delete related time entries
+    await prisma.timeEntry.deleteMany({ where: { taskId } });
+
+    // Delete task
+    await prisma.task.delete({ where: { id: taskId } });
+
+    // 🚀 Emit With Name & Title
+    emitEvent("taskDeleted", {
+      id: taskId,
+      title: task.title,
+      user: task.user
     });
-emitEvent("taskDeleted", { id: taskId });
 
     return NextResponse.json({
       success: true,
-      message: "Task and related time entries deleted"
+      message: "Task deleted"
     });
 
   } catch (error: any) {
@@ -104,4 +120,3 @@ emitEvent("taskDeleted", { id: taskId });
     );
   }
 }
-

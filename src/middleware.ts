@@ -7,17 +7,29 @@ export async function middleware(req: any) {
 
   console.log("🔥 TOKEN =>", token, " | PATH =>", pathname);
 
-  // 1️⃣ Not logged in → protect admin & dashboard
-  if (!token && (pathname.startsWith("/dashboard") || pathname.startsWith("/admin"))) {
+  // 1️⃣ Allow invite acceptance without login
+  if (pathname.startsWith("/dashboard/") && pathname.split('/').length === 3) {
+    const potentialToken = pathname.split('/')[2];
+    // Allow if it looks like a token (not a normal dashboard page)
+    if (potentialToken && potentialToken.length > 10) {
+      return NextResponse.next();
+    }
+  }
+
+  // 2️⃣ Not logged in → protect dashboard (except invite tokens)
+  if (!token && pathname.startsWith("/dashboard")) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // 2️⃣ Logged-in USER trying to access admin → block
+  // 3️⃣ Rest of your middleware rules...
+  if (!token && pathname.startsWith("/admin")) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+
   if (token && token.role === "USER" && pathname.startsWith("/admin")) {
-    return NextResponse.redirect(new URL("/login", req.url));
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
-  // 3️⃣ Logged-in user/admin cannot visit login or signup again
   if (token && (pathname === "/login" || pathname === "/signup")) {
     return NextResponse.redirect(
       new URL(token.role === "ADMIN" ? "/admin" : "/dashboard", req.url)
@@ -27,13 +39,25 @@ export async function middleware(req: any) {
   return NextResponse.next();
 }
 
+// export const config = {
+//   matcher: [
+//     "/dashboard",
+//     "/dashboard/:path*",
+//     "/admin",
+//     "/admin/:path*",
+//     "/login",
+//     "/signup",
+//   ],
+// };
+
 export const config = {
   matcher: [
-    "/dashboard",
     "/dashboard/:path*",
-    "/admin",
     "/admin/:path*",
     "/login",
     "/signup",
+
+    // ❌ DO NOT block API routes
+    "/((?!api).*)",
   ],
 };

@@ -3,7 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Users, ClipboardList, FileBarChart, Menu, X } from "lucide-react";
+import { 
+  Home, 
+  Bell, 
+  ClipboardList, 
+  BarChart3, 
+  Upload,
+  Menu, 
+  X,
+  Users,
+  Shield
+} from "lucide-react";
 
 export default function Sidebar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,10 +42,10 @@ export default function Sidebar() {
 
   const navItems = [
     { href: "/dashboard", icon: Home, label: "Home" },
-    { href: "/dashboard/teams", icon: Users, label: "Teams" },
+    { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { href: "/dashboard/tasks", icon: ClipboardList, label: "Tasks" },
-    { href: "/dashboard/reports", icon: FileBarChart, label: "Report" },
-    {href: "/dashboard/uploads", icon: FileBarChart, label: "Uploads"}
+    { href: "/dashboard/reports", icon: BarChart3, label: "Reports" },
+    { href: "/dashboard/uploads", icon: Upload, label: "Uploads" }
   ];
 
   // Close sidebar when clicking a link on mobile
@@ -49,7 +59,7 @@ export default function Sidebar() {
     <>
       {/* Mobile Header with Hamburger Button */}
       {isMobile && (
-        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-green-500 to-green-600 shadow-lg z-50 p-4">
+        <div className="fixed top-0 left-0 right-0 bg-gradient-to-r from-sky-500 to-sky-600 shadow-lg z-50 p-4">
           <div className="flex items-center justify-between">
             <button
               onClick={toggleSidebar}
@@ -88,8 +98,13 @@ export default function Sidebar() {
       >
         {/* Desktop Header */}
         {!isMobile && (
-          <div className="p-6 border-b border-green-400/30">
-            {/* <h2 className="text-2xl font-bold text-white text-center">Dashboard</h2> */}
+          <div className="p-6 border-b border-sky-400/30">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <Shield className="w-6 h-6 text-white" />
+              </div>
+              <h2 className="text-xl font-bold text-white">Dashboard</h2>
+            </div>
             <button
               onClick={() => setIsOpen(false)}
               className="absolute top-4 right-4 p-1 rounded-md hover:bg-white/10 transition-colors md:hidden"
@@ -115,19 +130,26 @@ export default function Sidebar() {
                   flex items-center gap-4 p-4 rounded-xl
                   transition-all duration-200
                   font-medium
+                  group
                   ${isActive 
-                    ? "bg-white/20 text-white shadow-lg transform scale-105" 
-                    : "text-white/90 hover:bg-white/10 hover:text-white"
+                    ? "bg-white/20 text-white shadow-lg transform scale-105 border-l-4 border-white" 
+                    : "text-white/90 hover:bg-white/10 hover:text-white hover:border-l-4 border-white/30"
                   }
                 `}
               >
                 <Icon 
-                  size={20} 
-                  className={isActive ? "text-white" : "text-white/80"} 
+                  size={22} 
+                  className={`
+                    transition-transform duration-200
+                    ${isActive 
+                      ? "text-white scale-110" 
+                      : "text-white/80 group-hover:scale-105"
+                    }
+                  `} 
                 />
-                <span className="text-lg">{item.label}</span>
+                <span className="text-lg font-medium">{item.label}</span>
                 {isActive && (
-                  <div className="ml-auto w-2 h-2 bg-white rounded-full"></div>
+                  <div className="ml-auto w-2 h-2 bg-white rounded-full animate-pulse"></div>
                 )}
               </Link>
             );
@@ -135,14 +157,14 @@ export default function Sidebar() {
         </nav>
 
         {/* User Info Section */}
-        <div className="absolute bottom-6 left-4 right-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm">
+        <div className="absolute bottom-6 left-4 right-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
               <Users size={20} className="text-white" />
             </div>
             <div className="flex-1">
-              <p className="text-white font-medium text-sm">Welcome Back!</p>
-              <p className="text-white/70 text-xs">Manage your tasks</p>
+              <p className="text-white font-semibold text-sm">Welcome Back!</p>
+              <p className="text-white/70 text-xs">Manage your workspace</p>
             </div>
           </div>
         </div>

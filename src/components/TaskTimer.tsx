@@ -8,23 +8,34 @@ interface TaskTimerProps {
 
 export default function TaskTimer({ taskId, status }: TaskTimerProps) {
   const [startTime, setStartTime] = useState<number | null>(null);
-  const [endTime, setEndTime] = useState<number | null>(null);
   const [running, setRunning] = useState(0);
   const [buttonStatus, setButtonStatus] = useState(false);
   const [savedEntry, setSavedEntry] = useState<any>(null);
 
-  // Start
-  const handleToggle = () => {
+  // Start/Stop Handler
+  const handleToggle = async () => {
     if (!buttonStatus) {
+      // Start timer
       setButtonStatus(true);
-      if (!startTime) setStartTime(Date.now()); // set only first time
+      if (!startTime) setStartTime(Date.now());
     } else {
-      setEndTime(Date.now());
+      // Stop timer
       setButtonStatus(false);
+      const end = Date.now();
+
+      if (startTime) {
+        await fetch("/api/time-entries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ taskId, startTime, endTime: end }),
+        });
+
+        fetchSavedTime();
+      }
     }
   };
 
-  // Count up timer
+  // Count up live timer
   useEffect(() => {
     if (!buttonStatus) return;
 
@@ -35,43 +46,26 @@ export default function TaskTimer({ taskId, status }: TaskTimerProps) {
     return () => clearInterval(interval);
   }, [buttonStatus]);
 
-  useEffect(() => {
-    if (status !== "completed") return;
-    if (!startTime || !endTime) return;
-
-    const saveData = async () => {
-      await fetch("/api/time-entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ taskId, startTime, endTime }),
-      });
-
-      fetchSavedTime();
-    };
-
-    saveData();
-  }, [status, endTime]);
-
+  // Fetch saved entry when task is completed or loaded
   useEffect(() => {
     if (status === "completed") {
       fetchSavedTime();
     }
   }, [status, taskId]);
 
- 
   const fetchSavedTime = async () => {
     try {
       const res = await fetch(`/api/time-entries?taskId=${taskId}`);
       const data = await res.json();
       if (data && data.length > 0) {
-        setSavedEntry(data[data.length - 1]); 
+        setSavedEntry(data[data.length - 1]);
       }
     } catch (err) {
       console.log("❌ Error fetching entry:", err);
     }
   };
 
-  // Display format for live counter
+  // Live time counter formatting
   const formatTime = (seconds: number) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
@@ -82,7 +76,6 @@ export default function TaskTimer({ taskId, status }: TaskTimerProps) {
     )}:${String(secs).padStart(2, "0")}`;
   };
 
-  // Display format for stored timestamps
   const formatDateTime = (timestamp: string | number) => {
     const date = new Date(timestamp);
     return date.toLocaleString("en-IN", {

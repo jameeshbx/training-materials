@@ -14,31 +14,31 @@ const createTaskSchema = z.object({
 export async function GET(req: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
 
-    const userId = Number(session.user.id);
     const { searchParams } = new URL(req.url);
 
-    // Read query params
     const date = searchParams.get("date");
     const search = searchParams.get("search") || "";
     const page = Number(searchParams.get("page")) || 1;
-    const limit = Number(searchParams.get("limit")) || 5;
+    const limit = Number(searchParams.get("limit")) || 10;
     const skip = (page - 1) * limit;
 
-    let filters: any = {
-      userId,
-      AND: search ? [
+    let filters: any = {};
+
+    if (search) {
+      filters.AND = [
         {
           OR: [
             { title: { contains: search, mode: "insensitive" } },
-            { description: { contains: search, mode: "insensitive" } }
-          ]
-        }
-      ] : {}
-    };
+            { description: { contains: search, mode: "insensitive" } },
+          ],
+        },
+      ];
+    }
 
-    // Filter by date only if user selected
     if (date && date !== "all") {
       filters.dueDate = {
         gte: new Date(date + "T00:00:00.000Z"),
@@ -47,13 +47,16 @@ export async function GET(req: NextRequest) {
     }
 
     const tasks = await prisma.task.findMany({
-      where:filters,
+      where: filters,
       skip,
       take: limit,
       orderBy: { createdAt: "desc" },
+      include: {
+        user: { select: { name: true, email: true, id: true } },
+      },
     });
 
-const total = await prisma.task.count({ where: filters });
+    const total = await prisma.task.count({ where: filters });
 
     return NextResponse.json({
       success: true,
@@ -62,8 +65,8 @@ const total = await prisma.task.count({ where: filters });
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit)
-      }
+        totalPages: Math.ceil(total / limit),
+      },
     });
 
   } catch (err) {
