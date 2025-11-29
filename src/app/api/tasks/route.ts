@@ -153,8 +153,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(task, { status: 201 });
 
   } catch (err: any) {
-    console.error("❌ Error in POST /api/tasks:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error("❌ Error in POST /api/tasks:", err?.stack || err);
+    if (err instanceof Error) {
+      return NextResponse.json({ error: err.message, stack: err.stack }, { status: 500 });
+    }
+    return NextResponse.json({ error: "Unknown error" }, { status: 500 });
   }
 }
 

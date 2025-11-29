@@ -51,6 +51,7 @@ async function main() {
     data: {
       hours: 3.5,
       taskId: task.id,
+      userId: user.id,   // 🟢 REQUIRED NOW
     },
   });
 
