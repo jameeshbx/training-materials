@@ -3,6 +3,7 @@
 import Link from "next/link";
 import ActivityFeed from "@/components/ActivityFeed";
 
+
 type DashboardClientProps = {
   todaysTasks: any[];
   role: string | undefined;
@@ -30,6 +31,7 @@ export default function DashboardClient({
         >
           👤 View All Users
         </Link>
+        
       )}
 
       {/* LIVE ACTIVITY FEED */}

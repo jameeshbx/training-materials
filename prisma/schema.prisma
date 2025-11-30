@@ -44,6 +44,8 @@ model Team {
   name  String
   tasks Task[]
   users User[]
+  invites Invite[]
+
 }
 
 model TimeEntry {
@@ -64,6 +66,7 @@ model Activity {
   id          String   @id @default(cuid())
   type        String
   userId      String
+  activityText String? 
   userName    String
   teamId      String?
   taskId      String?
@@ -79,4 +82,17 @@ model Document {
   fileName  String?
   url       String
   createdAt DateTime @default(now())
+}
+
+model Invite {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  teamId    String
+  team      Team     @relation(fields: [teamId], references: [id])
+  invitedBy String   // userId of the person who sent invite
+  status    String   @default("PENDING") // PENDING | ACCEPTED | CANCELLED
+  createdAt DateTime @default(now())
+  acceptedAt DateTime?
+  
 }
