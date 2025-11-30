@@ -1,41 +1,85 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const loadData = async () => {
-  try {
-    const res = await fetch("/api/admin/users");
-    const data = await res.json();
+  // Invite state
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteLoading, setInviteLoading] = useState(false);
 
-    console.log("ADMIN API RESPONSE:", data); 
+  // -----------------------------------------------------
+  // LOAD USERS (Admin list)
+  // -----------------------------------------------------
+  const loadUsers = async () => {
+    try {
+      const res = await fetch("/api/admin/users");
+      const data = await res.json();
 
-    if (!res.ok) {
-      console.error("Admin API error:", data);
-      setUsers([]);
-    } else if (Array.isArray(data)) {
-      setUsers(data);
-    } else if (data && Array.isArray((data as any).users)) {
-      setUsers((data as any).users);
-    } else {
-      
-      console.warn("Admin API returned unexpected shape, expected array.", data);
+      if (res.ok) {
+        if (Array.isArray(data)) {
+          setUsers(data);
+        } else if (data.users && Array.isArray(data.users)) {
+          setUsers(data.users);
+        } else {
+          setUsers([]);
+        }
+      } else {
+        setUsers([]);
+      }
+    } catch (err) {
+      console.error("Admin user fetch error:", err);
       setUsers([]);
     }
-  } catch (err) {
-    console.error("Failed to fetch admin data:", err);
-  }
-  setLoading(false);
-};
+
+    setLoadingUsers(false);
+  };
 
   useEffect(() => {
-    loadData();
+    loadUsers();
   }, []);
 
-  if (loading) {
+  // -----------------------------------------------------
+  // SEND INVITE (EMAIL SYSTEM)
+  // -----------------------------------------------------
+  const sendInvite = async () => {
+    if (!inviteEmail.trim()) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setInviteLoading(true);
+
+    try {
+      const res = await fetch("/api/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: inviteEmail }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        toast.error(data.error || "Failed to send invite");
+      } else {
+        toast.success(`Invitation sent to ${inviteEmail}`);
+        setInviteEmail("");
+      }
+    } catch (err) {
+      toast.error("Failed to send invite");
+    }
+
+    setInviteLoading(false);
+  };
+
+  // -----------------------------------------------------
+  // UI
+  // -----------------------------------------------------
+  if (loadingUsers) {
     return (
       <div className="p-6 text-center text-xl font-semibold">
         Loading admin dashboard...
@@ -44,17 +88,40 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold mb-4">👨‍💼 Admin Dashboard</h1>
+    <div className="p-6 space-y-10">
+      <h1 className="text-3xl font-bold">👨‍💼 Admin Dashboard</h1>
 
+      {/* Invite Section */}
+      <div className="max-w-xl bg-white p-5 rounded-xl shadow border">
+        <h2 className="text-xl font-bold mb-3">📩 Invite a User</h2>
+
+        <input
+          type="email"
+          placeholder="Enter email address..."
+          value={inviteEmail}
+          onChange={(e) => setInviteEmail(e.target.value)}
+          className="w-full border-black p-2 rounded-lg mb-3 text-black"
+        />
+
+        <button
+          onClick={sendInvite}
+          disabled={inviteLoading}
+          className={`px-4 py-2 rounded-lg text-white 
+            ${inviteLoading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}
+          `}
+        >
+          {inviteLoading ? "Sending email..." : "Send Invite"}
+        </button>
+      </div>
+
+      {/* Users List */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {users.map((user: any) => (
           <div
             key={user.id}
             className="border rounded-xl p-5 bg-white shadow hover:shadow-lg transition"
           >
-           
-            <h2 className="text-2xl font-bold mb-1">{user.name}</h2>
+            <h2 className="text-2xl font-bold">{user.name}</h2>
             <p className="text-gray-600 mb-3">{user.email}</p>
 
             <div className="flex items-center gap-3 mb-4">
@@ -62,11 +129,10 @@ export default function AdminDashboard() {
                 {user.tasks.length} Tasks
               </span>
               <span className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                User ID: {user.id.slice(0, 6)}...
+                ID: {user.id.slice(0, 6)}...
               </span>
             </div>
 
-          
             <h3 className="text-lg font-semibold mb-2">Tasks:</h3>
 
             {user.tasks.length === 0 ? (
@@ -78,24 +144,27 @@ export default function AdminDashboard() {
                     key={task.id}
                     className="border rounded-lg p-3 bg-gray-50 shadow-sm"
                   >
-                    <h4 className="font-semibold text-md">{task.title}</h4>
-                    <p className="text-sm text-gray-600 mb-1">
+                    <h4 className="font-semibold">{task.title}</h4>
+
+                    <p className="text-sm text-gray-600">
                       {task.description || "No description"}
                     </p>
 
                     <div className="flex flex-wrap gap-2 mt-2">
                       <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">
-                        Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}
+                        Due:{" "}
+                        {task.dueDate
+                          ? new Date(task.dueDate).toLocaleDateString()
+                          : "N/A"}
                       </span>
 
                       <span
-                        className={`text-xs px-2 py-1 rounded ${
-                          task.status === "COMPLETED"
-                            ? "bg-green-100 text-green-700"
-                            : task.status === "IN_PROGRESS"
+                        className={`text-xs px-2 py-1 rounded ${task.status === "COMPLETED"
+                          ? "bg-green-100 text-green-700"
+                          : task.status === "IN_PROGRESS"
                             ? "bg-yellow-100 text-yellow-700"
                             : "bg-red-100 text-red-700"
-                        }`}
+                          }`}
                       >
                         {task.status}
                       </span>
@@ -110,4 +179,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-
