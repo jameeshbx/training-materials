@@ -1,36 +1,3 @@
-// import { NextResponse } from "next/server";
-// import { prisma } from "@/lib/db";
-// import crypto from "crypto";
-
-// export async function POST(req: Request) {
-//     try {
-//         const { email } = await req.json();
-
-//         if (!email) {
-//             return NextResponse.json({ error: "Email required" }, { status: 400 });
-//         }
-
-//         // Create token
-//         const token = crypto.randomBytes(32).toString("hex");
-
-//         // Save invite
-//         await prisma.invite.create({
-//             data: {
-//                 email,
-//                 token,
-//                 expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hr
-//             },
-//         });
-
-//         const link = `http://localhost:3000/accept-invite?token=${token}`;
-
-//         return NextResponse.json({ link });
-//     } catch (err) {
-//         console.log(err);
-//         return NextResponse.json({ error: "Server error" }, { status: 500 });
-//     }
-// }
-
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
