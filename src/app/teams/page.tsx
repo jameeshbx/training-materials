@@ -1,7 +1,16 @@
-export default function TeamsPage() {
+import { db } from "@/lib/db";
+
+export default async function TeamsPage() {
+  const team = await db.team.findFirst();
+
+  if (!team) {
+    return <p>No team found</p>;
+  }
+
   return (
- <div className="text-black">      <h2 className="text-3xl font-semibold">Teams</h2>
-      <p>Manage your teams here.</p>
+    <div className="p-10">
+      <h1 className="text-2xl font-bold">{team.name}</h1>
+      <p className="text-gray-400 mt-3">Team Members & tasks will show here.</p>
     </div>
   );
 }

@@ -1,28 +1,49 @@
-const { Server } = require('socket.io');
-const http = require('http');
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const next = require("next");
 
-const server = http.createServer();
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:3000", // Your Next.js app URL
-    methods: ["GET", "POST"]
-  }
-});
+const dev = process.env.NODE_ENV !== "production";
+const hostname = "localhost";
+const port = 3001; // Socket.io server port
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
+const app = next({ dev, hostname, port: 3000 });
+const handler = app.getRequestHandler();
 
-  socket.on('logout', (user) => {
-    console.log('User logged out:', user);
-    // Handle any cleanup for this user
+app.prepare().then(() => {
+  const httpServer = createServer(handler);
+
+  // Initialize Socket.io
+  const io = new Server(httpServer, {
+    cors: {
+      origin: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+      methods: ["GET", "POST"],
+      credentials: true,
+    },
   });
 
-  socket.on('disconnect', () => {
-    console.log('User disconnected');
-  });
-});
+  // Make io available globally for API routes
+  global.io = io;
 
-const PORT = 3001;
-server.listen(PORT, () => {
-  console.log(`Socket.IO server running on port ${PORT}`);
+  io.on("connection", (socket) => {
+    console.log("✅ Client connected:", socket.id);
+
+    socket.on("disconnect", () => {
+      console.log("❌ Client disconnected:", socket.id);
+    });
+
+    // You can add custom event handlers here
+    socket.on("ping", () => {
+      socket.emit("pong");
+    });
+  });
+
+  httpServer
+    .once("error", (err) => {
+      console.error(err);
+      process.exit(1);
+    })
+    .listen(port, () => {
+      console.log(`> Ready on http://${hostname}:${port}`);
+      console.log(`> Socket.io server running on port ${port}`);
+    });
 });

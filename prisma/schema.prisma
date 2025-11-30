@@ -26,6 +26,7 @@ model User {
 
   timeEntries TimeEntry[]
   team        Team?       @relation(fields: [teamId], references: [id])
+  invites     Invite[]
 }
 
 model Task {
@@ -52,10 +53,11 @@ model Task {
 }
 
 model Team {
-  id    String @id @default(cuid())
-  name  String
-  tasks Task[]
-  users User[]
+  id      String   @id @default(cuid())
+  name    String
+  tasks   Task[]
+  users   User[]
+  // invites Invite[]
 }
 
 model TimeEntry {
@@ -87,6 +89,25 @@ model Activity {
   action    String
   createdAt DateTime @default(now())
 }
+
+model Invite {
+  id        Int          @id @default(autoincrement())
+  email     String
+  token     String       @unique
+  status    InviteStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  expiresAt DateTime
+  userId  String?
+  user   User?    @relation(fields: [userId], references: [id])
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+
 
 enum Role {
   USER
