@@ -23,9 +23,7 @@ export async function POST(req: NextRequest) {
     const nameFromEmail = invite.email.split("@")[0];
 
     // Find or create user
-    let user = await db.user.findUnique({
-      where: { email: invite.email },
-    });
+    let user = await db.user.findUnique({ where: { email: invite.email } });
 
     if (!user) {
       user = await db.user.create({
@@ -38,34 +36,32 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Add user to team
-    await db.team.update({
-      where: { id: invite.teamId },
-      data: { users: { connect: { id: user.id } } },
+    // Add user to team (correct way)
+    await db.user.update({
+      where: { id: user.id },
+      data: { teamId: invite.teamId },
     });
 
     // Create activity feed entry
-  await db.activity.create({
-  data: {
-    type: "USER_JOINED",
-    activityText: `${user.name} joined the team`,
-    userId: user.id,
-    userName: user.name,
-    teamId: invite.teamId,
-  },
-});
+    await db.activity.create({
+      data: {
+        type: "USER_JOINED",
+        activityText: `${user.name} joined the team`,
+        userId: user.id,
+        userName: user.name,
+        teamId: invite.teamId,
+      },
+    });
 
-
-    // Mark invite accepted
+    // Mark invite as accepted
     await db.invite.update({
       where: { token },
       data: { status: "ACCEPTED", acceptedAt: new Date() },
     });
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
-    console.error(error);
+    console.error("Invite accept error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

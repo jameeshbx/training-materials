@@ -1,3 +1,4 @@
+// app/invite/accept/page.tsx
 "use client";
 
 import { useSearchParams } from "next/navigation";
@@ -6,45 +7,77 @@ import { useEffect, useState } from "react";
 export default function AcceptInvitePage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const [status, setStatus] = useState("Processing invite...");
+  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
+  const [message, setMessage] = useState("Processing your invite...");
 
   useEffect(() => {
+    if (!token) {
+      setStatus("error");
+      setMessage("Invalid invite link.");
+      return;
+    }
+
     async function acceptInvite() {
       try {
         const res = await fetch("/api/invites/accept", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token }),
         });
 
+        const data = await res.json();
+
         if (res.ok) {
-          setStatus("Invite Accepted! Redirecting to login...");
+          setStatus("success");
+          setMessage("Welcome! Invite accepted successfully 🎉");
           setTimeout(() => {
-            window.location.href = "/dashboard"; // redirect to login
-          }, 1500);
+            window.location.href = "/dashboard"; // or "/login" if you want them to log in first
+          }, 2000);
         } else {
-          setStatus("Invalid or expired invite.");
+          setStatus("error");
+          setMessage(data.error || "This invite is invalid or has already been used.");
         }
       } catch (error) {
-        console.error(error);
-        setStatus("Server error. Try again later.");
+        setStatus("error");
+        setMessage("Something went wrong. Please try again later.");
       }
     }
 
-    if (token) {
-      acceptInvite();
-    } else {
-      setStatus("Invalid invite link.");
-    }
+    acceptInvite();
   }, [token]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-black text-white">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold mb-4">Accepting Invite</h1>
-        <p className="text-lg">{status}</p>
+      <div className="text-center p-8 bg-gray-900 rounded-xl shadow-2xl max-w-md mx-4">
+        <h1 className="text-4xl font-bold mb-6 bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+          Team Invite
+        </h1>
+
+        {status === "loading" && (
+          <div className="flex flex-col items-center gap-4">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-blue-500"></div>
+            <p className="text-lg">{message}</p>
+          </div>
+        )}
+
+        {status === "success" && (
+          <div className="text-green-400">
+            <p className="text-2xl font-semibold">{message}</p>
+            <p className="mt-4 text-gray-300">Redirecting you to dashboard...</p>
+          </div>
+        )}
+
+        {status === "error" && (
+          <div className="text-red-400">
+            <p className="text-xl font-medium">{message}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-6 px-6 py-3 bg-gray-800 hover:bg-gray-700 rounded-lg transition"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
