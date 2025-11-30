@@ -3,10 +3,12 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { signIn } from "next-auth/react"; // 👈 IMPORTANT
 
 export default function AcceptInvitePage() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
   const [message, setMessage] = useState("Processing your invite...");
 
@@ -27,16 +29,33 @@ export default function AcceptInvitePage() {
 
         const data = await res.json();
 
-        if (res.ok) {
+        if (res.ok && data.success) {
+          // Auto-login newly created user
           setStatus("success");
-          setMessage("Welcome! Invite accepted successfully 🎉");
+          setMessage("Account created! Logging you in...");
+
+          await signIn("credentials", {
+            email: data.email,
+            password: data.password,
+            redirect: false,
+          });
+
+          window.location.href = "/dashboard"; // 👈 redirect after login
+        } 
+        
+        else if (data.requiresSignup) {
+          setStatus("success");
+          setMessage("Invite verified! Redirecting to signup...");
           setTimeout(() => {
-            window.location.href = "/dashboard"; // or "/login" if you want them to log in first
+            window.location.href = `/signup?token=${token}`;
           }, 2000);
-        } else {
+        } 
+        
+        else {
           setStatus("error");
           setMessage(data.error || "This invite is invalid or has already been used.");
         }
+
       } catch (error) {
         setStatus("error");
         setMessage("Something went wrong. Please try again later.");
@@ -63,7 +82,7 @@ export default function AcceptInvitePage() {
         {status === "success" && (
           <div className="text-green-400">
             <p className="text-2xl font-semibold">{message}</p>
-            <p className="mt-4 text-gray-300">Redirecting you to dashboard...</p>
+            <p className="mt-4 text-gray-300">Redirecting...</p>
           </div>
         )}
 
