@@ -1,15 +1,24 @@
 "use client";
 
 import { deleteTask } from "./delete/action";
+import { useRouter } from "next/navigation";
 
 export default function DeleteButton({ id }: { id: string }) {
+  const router = useRouter();
+
   return (
     <form
       action={async () => {
         const yes = confirm("Are you sure?");
         if (!yes) return;
 
-        await deleteTask(id);
+        try {
+          await deleteTask(id);
+          router.refresh();
+        } catch (error) {
+          console.error("Failed to delete task:", error);
+          alert("Failed to delete task. It may have already been deleted.");
+        }
       }}
     >
       <button
