@@ -5,6 +5,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import crypto from "crypto";
 import bcrypt from "bcryptjs";
+import { logAction } from "@/lib/auditLogger";
+
 
 export async function POST(req: Request) {
     try {
@@ -41,6 +43,17 @@ export async function POST(req: Request) {
         await prisma.invite.update({
             where: { token },
             data: { status: "ACCEPTED" },
+        });
+
+        /* ============================================================
+   ⭐ AUDIT LOG — Invite Accepted
+   ============================================================ */
+        await logAction({
+            userId: user.id,
+            action: "INVITE_ACCEPTED",
+            entityType: "INVITE",
+            entityId: invite.id,
+            details: `User with email ${user.email} accepted invite`,
         });
 
         return NextResponse.json({

@@ -5,6 +5,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { CreateTaskSchema, UpdateTaskSchema } from "@/lib/validators/task";
 import { emitActivity } from "@/lib/emitActivity";
+import { logAction } from "@/lib/auditLogger";
+
 
 /* ============================================================
    🔹 GET — Fetch Tasks (Search + Pagination + Optimized)
@@ -96,6 +98,14 @@ export async function POST(req: Request) {
         team: true,
       },
     });
+    // ⭐ Audit Log — Task Created
+    await logAction({
+      userId,
+      action: "TASK_CREATED",
+      entityType: "TASK",
+      entityId: task.id,
+      details: `Task "${task.title}" was created`,
+    });
 
     /* ============================================================
        ⭐ Save Activity to Database (Persistent)
@@ -163,6 +173,16 @@ export async function PUT(req: Request) {
       },
     });
 
+    /* ⭐ Audit Log — Task Updated */
+    await logAction({
+      userId,
+      action: "TASK_UPDATED",
+      entityType: "TASK",
+      entityId: task.id,
+      details: `Task "${task.title}" was updated`,
+    });
+
+
     return NextResponse.json({ task });
 
   } catch (error: any) {
@@ -208,6 +228,13 @@ export async function DELETE(req: NextRequest) {
     await prisma.timeEntry.deleteMany({ where: { taskId: id } });
     await prisma.task.delete({ where: { id } });
 
+    await logAction({
+      userId,
+      action: "TASK_DELETED",
+      entityType: "TASK",
+      entityId: existing.id,
+      details: `Task "${existing.title}" was deleted`,
+    });
     return NextResponse.json({
       message: "Task deleted",
       task: existing,
