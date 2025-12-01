@@ -84,4 +84,13 @@ model Activity {
   createdAt DateTime @default(now())
 }
 
+model Invite {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  status    String   @default("PENDING") // PENDING | ACCEPTED | EXPIRED
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+}
+
 

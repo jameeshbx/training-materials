@@ -40,8 +40,14 @@ app.post("/emit-activity", (req, res) => {
         return res.status(400).json({ error: "teamId and activity required" });
     }
 
-    // Broadcast to all connected users in this team
-    io.to(teamId).emit("activity", activity);
+    // ⭐ NEW FEATURE — Popup event
+    if (activity.popup === true) {
+        io.to(teamId).emit("popup", activity.message);
+    }
+    else {
+        // ⭐ Existing feature — Activity feed (unchanged)
+        io.to(teamId).emit("activity", activity);
+    }
 
     return res.status(200).json({ ok: true });
 });
