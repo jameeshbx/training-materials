@@ -49,24 +49,53 @@ export default function TasksPage() {
 useEffect(() => {
   if (!socket.connected) socket.connect();
 
-  // New Task
+  const saveNotification = async (message: string) => {
+    try {
+      await fetch("/api/notifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+    } catch (err) {
+      console.error("❌ Failed to save notification", err);
+    }
+  };
+
+  // 🔹 New Task
   const onCreated = (task: Tasks) => {
     setTasks(prev => [task, ...prev]);
-    toast.success("🔥 New task added!");
+
+    const userName = task?.user?.name ?? "Someone";
+    const msg = `🔥 ${userName} added a new task: ${task.title}`;
+
+    toast.success(msg);
+    saveNotification(msg);
   };
 
-  // Updated Task
+  // 🔹 Updated Task
   const onUpdated = (updatedTask: Tasks) => {
     setTasks(prev =>
-      prev.map(task => task.id === updatedTask.id ? updatedTask : task)
+      prev.map(task =>
+        task.id === updatedTask.id ? updatedTask : task
+      )
     );
-    toast.success("♻️ Task updated!");
+
+    const userName = updatedTask?.user?.name ?? "Someone";
+    const msg = `♻️ ${userName} updated task: ${updatedTask.title}`;
+
+    toast.success(msg);
+    saveNotification(msg);
   };
 
-  // Deleted Task
-  const onDeleted = ({ id }: { id: number }) => {
+  // 🔹 Deleted Task
+  const onDeleted = ({ id, title, user }: any) => {
     setTasks(prev => prev.filter(task => task.id !== id));
-    toast.success("🗑️ Task deleted!");
+
+    const userName = user?.name ?? "Someone";
+    const msg = `🗑️ ${userName} deleted task${title ? `: ${title}` : ""}`;
+
+    toast.success(msg);
+    saveNotification(msg);
   };
 
   socket.on("taskCreated", onCreated);
@@ -79,7 +108,6 @@ useEffect(() => {
     socket.off("taskDeleted", onDeleted);
   };
 }, []);
-
 
   // Delete Task Confirmation
   const confirmDelete = (task: Tasks) => {

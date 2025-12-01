@@ -1,24 +1,41 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { redirect } from "next/navigation";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-} from "@/components/ui/card";
+"use client";
+
+import { useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import socket from "@/lib/socket";
 import Tasks from "./tasks/page";
 
-export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+export default function DashboardPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  if (!session) {
-    redirect("/login");
-  }
+  // ⛔ Wait until session loads
+  useEffect(() => {
+    if (status === "loading") return;
+
+    if (!session) {
+      router.push("/login");
+    }
+  }, [session, status, router]);
+
+  // 🔥 Socket listener
+  useEffect(() => {
+    if (!socket.connected) socket.connect();
+
+    socket.on("user_logged_in", (data) => {
+      toast(`👋 ${data.name} just logged in`);
+    });
+
+    return () => socket.off("user_logged_in");
+  }, []);
+
+  if (status === "loading") return <div>Loading...</div>;
 
   return (
-   <>
-   <Tasks />
-   </>
+    <div>
+      <Tasks />
+    </div>
   );
 }

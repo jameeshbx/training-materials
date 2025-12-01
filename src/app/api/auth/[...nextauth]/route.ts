@@ -2,6 +2,7 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { emitEvent } from "@/lib/socketServer"; // 👈 IMPORTANT
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -22,7 +23,6 @@ export const authOptions: NextAuthOptions = {
         if (!user) throw new Error("User not found");
 
         const isValid = await bcrypt.compare(credentials.password, user.password);
-
         if (!isValid) throw new Error("Invalid password");
 
         return {
@@ -34,29 +34,46 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+
   session: {
     strategy: "jwt",
   },
+
   pages: {
     signIn: "/login",
   },
-callbacks: {
-  async jwt({ token, user }) {
-    if (user) {
-      token.id = (user as any).id;
-      token.role = (user as any).role;
-    }
-    return token;
+
+  // 🔥 Emit socket event when user logs in
+  events: {
+    async signIn({ user }) {
+      emitEvent("user_logged_in", {
+        userId: user.id,
+        name: user.name,
+        email: user.email,
+        timestamp: new Date().toISOString(),
+      });
+    },
   },
 
-  async session({ session, token }) {
-    session.user.id = token.id as string;
-    session.user.role = token.role as string;
-    return session;
-  }
-}
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = (user as any).id;
+        token.role = (user as any).role;
+        token.name = (user as any).name;
+        token.email = (user as any).email;
+      }
+      return token;
+    },
 
-
+    async session({ session, token }) {
+      session.user.id = token.id as string;
+      session.user.role = token.role as string;
+      session.user.name = token.name;
+      session.user.email = token.email;
+      return session;
+    },
+  },
 };
 
 const handler = NextAuth(authOptions);

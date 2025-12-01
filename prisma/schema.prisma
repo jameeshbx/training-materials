@@ -8,15 +8,17 @@ datasource db {
 }
 
 model User {
-  id          Int         @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
-  email       String      @unique
-  createdAt   DateTime    @default(now())
+  email       String       @unique
+  createdAt   DateTime     @default(now())
   password    String
-  role        Role        @default(USER)
-  tasks       Task[]      @relation("UserTasks")
+  role        Role         @default(USER)
+  tasks       Task[]       @relation("UserTasks")
   timeEntries TimeEntry[]
   fileUploads FileUpload[]
+  invites Invite[]
+   notifications Notification[]  
 }
 
 model Team {
@@ -24,6 +26,17 @@ model Team {
   name      String
   createdAt DateTime @default(now())
   tasks     Task[]   @relation("TaskToTeam")
+}
+
+model Invite {
+  id        Int          @id @default(autoincrement())
+  email     String
+  token     String       @unique
+  status    InviteStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  expiresAt DateTime
+  userId  Int?
+  user   User?    @relation(fields: [userId], references: [id])
 }
 
 model Task {
@@ -56,13 +69,28 @@ model FileUpload {
   url       String
   createdAt DateTime @default(now())
 
- 
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  message   String
   userId    Int
-  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  seen      Boolean  @default(false)
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 
 enum Role {
   USER
   ADMIN
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
 }

@@ -1,47 +1,62 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { startOfWeek, endOfWeek } from "date-fns";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
-    const start = startOfWeek(new Date(), { weekStartsOn: 1 });
-    const end = endOfWeek(new Date(), { weekStartsOn: 1 });
 
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
+    // Week range (Monday → Sunday)
+    const now = new Date();
+    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    weekStart.setHours(0, 0, 0, 0);
+
+    const weekEnd = endOfWeek(now, { weekStartsOn: 1 });
+    weekEnd.setHours(23, 59, 59, 999);
+
+    console.log("📅 Week Range:", weekStart, "→", weekEnd);
+
+    // Fetch all entries within this week
     const entries = await prisma.timeEntry.findMany({
       where: {
-        startTime: {
-          gte: start,
-          lte: end,
-        },
-        endTime: { not: null },
+        startTime: { gte: weekStart },
+        endTime: { lte: weekEnd }
       },
-      include: { 
-        user: true,
-        task: true 
-      },
+      include: { user: true }
     });
 
-    const result: Record<string, number> = {};
+    console.log("⏱ Entry Count:", entries.length);
 
-    entries.forEach((entry) => {
-      const diffHours =
-        (new Date(entry.endTime!).getTime() -
-          new Date(entry.startTime).getTime()) /
-        (1000 * 60 * 60);
+    const weeklyMap: Record<string, number> = {};
 
-      const name = entry.user.name || "Unknown";
+    for (const entry of entries) {
+      if (!entry.endTime) continue;
 
-      result[name] = (result[name] || 0) + diffHours;
-    });
+      const durationMs = entry.endTime.getTime() - entry.startTime.getTime();
+      const durationHours = durationMs / (1000 * 60 * 60);
 
-    const formatted = Object.entries(result).map(([user, hours]) => ({
+      weeklyMap[entry.user.name] =
+        (weeklyMap[entry.user.name] || 0) + durationHours;
+    }
+
+    // Ensure UI never gets `0`, so small time shows
+    const weeklyData = Object.entries(weeklyMap).map(([user, hours]) => ({
       user,
-      hours: Number(hours.toFixed(2)),
+      hours: Math.max(0.01, Number(hours.toFixed(2))) // Minimum 0.01 hr
     }));
 
-    return NextResponse.json(formatted);
+    console.log("📊 Weekly Result:", weeklyData);
+
+    return NextResponse.json(weeklyData);
+
   } catch (error: any) {
-    console.error("❌ Weekly report error:", error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("❌ Weekly Report API Error:", error);
+    return NextResponse.json({ message: error.message }, { status: 500 });
   }
 }
