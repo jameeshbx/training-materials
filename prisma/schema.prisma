@@ -16,48 +16,37 @@ model User {
   password  String
   role      Role     @default(USER)
 
-  attachments Attachment[]
-
-  // The tasks created by this user
-  tasks Task[] @relation("UserCreatedTasks")
-
-  // Tasks assigned to this user
-  assignedTasks Task[] @relation("UserAssignedTasks")
-
-  timeEntries TimeEntry[]
-  team        Team?       @relation(fields: [teamId], references: [id])
-  invites     Invite[]
+  attachments   Attachment[]
+  invites       Invite[]
+  assignedTasks Task[]       @relation("UserAssignedTasks")
+  tasks         Task[]       @relation("UserCreatedTasks")
+  timeEntries   TimeEntry[]
+  team          Team?        @relation(fields: [teamId], references: [id])
+  auditLogs     AuditLog[]
 }
 
 model Task {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-  status      String  @default("pending")
-
-  // Creator
-  userId String
-  user   User   @relation("UserCreatedTasks", fields: [userId], references: [id])
-
-  // Assignee
-  assigneeId String?
-  assignee   User?   @relation("UserAssignedTasks", fields: [assigneeId], references: [id])
-
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  status        String      @default("pending")
+  userId        String
   teamId        String?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime    @default(now())
   dueDate       DateTime?
   attachmentUrl String?
-
-  team        Team?       @relation(fields: [teamId], references: [id])
-  timeEntries TimeEntry[]
+  assigneeId    String?
+  assignee      User?       @relation("UserAssignedTasks", fields: [assigneeId], references: [id])
+  team          Team?       @relation(fields: [teamId], references: [id])
+  user          User        @relation("UserCreatedTasks", fields: [userId], references: [id])
+  timeEntries   TimeEntry[]
 }
 
 model Team {
-  id      String   @id @default(cuid())
-  name    String
-  tasks   Task[]
-  users   User[]
-  // invites Invite[]
+  id    String @id @default(cuid())
+  name  String
+  tasks Task[]
+  users User[]
 }
 
 model TimeEntry {
@@ -67,9 +56,8 @@ model TimeEntry {
   endTime   DateTime?
   startTime DateTime
   userId    String
-
-  task Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user User @relation(fields: [userId], references: [id])
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
 }
 
 model Attachment {
@@ -91,14 +79,32 @@ model Activity {
 }
 
 model Invite {
-  id        Int          @id @default(autoincrement())
-  email     String
   token     String       @unique
-  status    InviteStatus @default(PENDING)
   createdAt DateTime     @default(now())
   expiresAt DateTime
-  userId  String?
-  user   User?    @relation(fields: [userId], references: [id])
+  email     String
+  status    InviteStatus @default(PENDING)
+  userId    String?
+  id        Int          @id @default(autoincrement())
+  user      User?        @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action   String
+  entity   String?
+  entityId String? // FIXED
+
+  details Json?
+
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
 }
 
 enum InviteStatus {
@@ -106,8 +112,6 @@ enum InviteStatus {
   ACCEPTED
   EXPIRED
 }
-
-
 
 enum Role {
   USER
