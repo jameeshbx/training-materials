@@ -20,6 +20,7 @@ model User {
   timeEntries TimeEntry[]
   teams       Team[]      @relation("TeamMembers")
   files       FileUpload[]
+  auditLogs   AuditLog[]
 }
 
 model Team {
@@ -92,5 +93,29 @@ model Invite {
   createdAt DateTime @default(now())
   expiresAt DateTime
 }
+
+model AuditLog {
+  id          String   @id @default(cuid())
+
+ 
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id])
+
+  action      String   // e.g. "INVITE_SENT", "TASK_CREATED", "LOGIN", "FILE_UPLOADED"
+
+  entityType  String?  // e.g. "TASK", "FILE", "TEAM", "INVITE"
+  entityId    String?  // e.g. taskId, fileId, teamId
+
+  details     String?  @db.Text
+
+  ipAddress   String?
+
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 
 

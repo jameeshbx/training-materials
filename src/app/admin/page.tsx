@@ -91,6 +91,16 @@ export default function AdminDashboard() {
     <div className="p-6 space-y-10">
       <h1 className="text-3xl font-bold">👨‍💼 Admin Dashboard</h1>
 
+      <div className="mt-4">
+        <button
+          onClick={() => (window.location.href = "/admin/audit-logs")}
+          className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold shadow"
+        >
+          📜 View Audit Logs
+        </button>
+      </div>
+
+
       {/* Invite Section */}
       <div className="max-w-xl bg-white p-5 rounded-xl shadow border">
         <h2 className="text-xl font-bold mb-3">📩 Invite a User</h2>
@@ -179,3 +189,4 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
