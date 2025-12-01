@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import InviteForm from "@/components/inviteform";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -15,6 +16,24 @@ export default function AdminDashboard() {
       >
         View Users
       </button>
+      <div className="max-w-3xl mx-auto p-6">
+<InviteForm  />
+      </div>
     </div>
+
+    
   );
+  
 }
+
+// import InviteForm from "@/components/inviteform";
+
+// export default function AdminPage() {
+//   return (
+//     <div className="max-w-3xl mx-auto p-6">
+//       <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+
+//       <InviteForm />
+//     </div>
+//   );
+// }

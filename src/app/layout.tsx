@@ -1,7 +1,7 @@
 "use client";
 
 import "@/styles/globals.css";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/navbar";
 import Sidebar from "@/components/sidebar";
 import { useState, useEffect } from "react";
 import AuthSessionProvider from "@/components/SessionProviderWrapper";
@@ -57,7 +57,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             )}
 
             {/* MAIN CONTENT */}
-            <main className="flex-1 p-4 sm:p-6 bg-white overflow-y-auto md:ml-0">
+            <main className="flex-1 p-4 sm:p-6 bg-white text-black overflow-y-auto md:ml-0">
               {children}
                  <Toaster position="top-right" />
             </main>

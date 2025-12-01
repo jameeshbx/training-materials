@@ -1,6 +1,28 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
+// Helper function to create activity
+async function createActivity(userId: string | null, userName: string, action: string) {
+  try {
+    const activity = await prisma.activity.create({
+      data: {
+        userId,
+        userName,
+        action,
+      },
+    });
+
+    // Emit activity in real-time
+    if (global.io) {
+      global.io.emit("activityCreated", activity);
+    }
+
+    return activity;
+  } catch (error) {
+    console.error("Failed to create activity:", error);
+  }
+}
+
 // =============================
 // GET TASKS (pagination + search)
 // =============================
@@ -72,16 +94,26 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Get user info
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { name: true },
+    });
+
+    const userName = user?.name || "Unknown User";
+
+    // Create activity record
+    await createActivity(
+      userId,
+      userName,
+      `created task "${title}"`
+    );
+
     // Emit event: task created
     if (global.io) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { name: true },
-      });
-
       global.io.emit("taskCreated", {
         ...task,
-        userName: user?.name,
+        userName,
       });
     }
 
@@ -100,7 +132,7 @@ export async function POST(req: NextRequest) {
 // =============================
 export async function PUT(req: NextRequest) {
   try {
-    const { id, title, description, status, dueDate } = await req.json();
+    const { id, title, description, status, dueDate, userId, userName } = await req.json();
 
     if (!id) {
       return NextResponse.json(
@@ -120,6 +152,20 @@ export async function PUT(req: NextRequest) {
         }),
       },
     });
+
+    // Create activity record if userName provided
+    if (userName) {
+      let actionText = `updated task "${updatedTask.title}"`;
+      if (status !== undefined) {
+        actionText = `changed task "${updatedTask.title}" status to ${status}`;
+      }
+      
+      await createActivity(
+        userId || null,
+        userName,
+        actionText
+      );
+    }
 
     // Emit event: task updated
     if (global.io) {
@@ -143,6 +189,8 @@ export async function DELETE(req: NextRequest) {
   try {
     const url = new URL(req.url);
     const id = url.searchParams.get("id");
+    const userName = url.searchParams.get("userName");
+    const userId = url.searchParams.get("userId");
 
     if (!id) {
       return NextResponse.json(
@@ -151,7 +199,21 @@ export async function DELETE(req: NextRequest) {
       );
     }
 
+    const task = await prisma.task.findUnique({
+      where: { id },
+      select: { title: true },
+    });
+
     const deleted = await prisma.task.delete({ where: { id } });
+
+    // Create activity record
+    if (userName && task) {
+      await createActivity(
+        userId || null,
+        userName,
+        `deleted task "${task.title}"`
+      );
+    }
 
     // Emit event: task deleted
     if (global.io) {
@@ -175,4 +237,3 @@ export async function DELETE(req: NextRequest) {
     );
   }
 }
-

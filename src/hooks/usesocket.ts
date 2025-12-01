@@ -1,38 +1,58 @@
-"use client";
-
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
 export default function useSocket(
-  userId: string,
-  userName: string,
-  onEvent: (type: string, data: any) => void
+  userId?: string,
+  userName?: string,
+  onActivity?: (activity: any) => void
 ) {
+  const socketRef = useRef<Socket | null>(null);
+
   useEffect(() => {
-    if (!userId) return;
+    // Initialize socket connection
+    if (!socketRef.current) {
+      socketRef.current = io(process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001", {
+        transports: ["websocket", "polling"],
+      });
 
-    const socket: Socket = io("http://localhost:3001", {
-      transports: ["websocket"],
-    });
+      socketRef.current.on("connect", () => {
+        console.log("✅ Socket connected:", socketRef.current?.id);
+      });
 
-    socket.on("connect", () => {
-      console.log("Connected:", socket.id);
-      socket.emit("user:join", { userId, userName });
-    });
+      socketRef.current.on("disconnect", () => {
+        console.log("❌ Socket disconnected");
+      });
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected");
-    });
+      // Listen for activity events
+      socketRef.current.on("activityCreated", (activity) => {
+        console.log("📢 New activity:", activity);
+        if (onActivity) {
+          onActivity(activity);
+        }
+      });
 
-    socket.onAny((event, ...args) => {
-      onEvent(event, args[0]);
-    });
+      // Listen for task events (optional)
+      socketRef.current.on("taskCreated", (task) => {
+        console.log("📢 Task created:", task);
+      });
 
+      socketRef.current.on("taskUpdated", (task) => {
+        console.log("📢 Task updated:", task);
+      });
+
+      socketRef.current.on("taskDeleted", (task) => {
+        console.log("📢 Task deleted:", task);
+      });
+    }
+
+    // Cleanup on unmount
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.offAny();
-      socket.disconnect();
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
     };
-  }, [userId, userName, onEvent]);
+  }, [userId, userName, onActivity]);
+
+  return socketRef.current;
 }
