@@ -19,6 +19,8 @@ model User {
   fileUploads FileUpload[]
   invites Invite[]
    notifications Notification[]  
+   auditLogs AuditLog[]
+
 }
 
 model Team {
@@ -81,6 +83,23 @@ model Notification {
   seen      Boolean  @default(false)
 
   user User @relation(fields: [userId], references: [id])
+}
+model AuditLog {
+  id         Int      @id @default(autoincrement())
+
+  userId     Int?
+  user       User?    @relation(fields: [userId], references: [id])
+
+  action     String        // example: TASK_CREATED, TASK_UPDATED
+  entity     String        // example: Task, User, Invite
+  entityId   Int?          // related record id
+
+  details    Json?         // before/after changes
+
+  ip         String?
+  userAgent  String?
+
+  createdAt  DateTime @default(now())
 }
 
 

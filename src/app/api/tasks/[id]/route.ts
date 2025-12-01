@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { emitEvent } from "@/lib/socketServer.ts";
-
+import { createAuditLog } from "@/lib/audit";
+import { getRequestMeta } from "@/lib/request-meta";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 const idSchema = z.coerce.number().int().positive();
 
 const updateTaskSchema = z.object({
@@ -33,8 +36,20 @@ export async function GET(req: NextRequest, context: any) {
 // ---------- UPDATE TASK ----------
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await req.json();
     const id = Number(params.id);
+
+    // get before update snapshot
+    const before = await prisma.task.findUnique({ where: { id } });
+
+    if (!before) {
+      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+    }
 
     const updated = await prisma.task.update({
       where: { id },
@@ -49,7 +64,24 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
-    // 🚀 Send cleaner event
+    // get device + IP info
+    const { ip, userAgent } = getRequestMeta(req);
+
+    // 👉 Audit log entry
+   await createAuditLog({
+  userId: Number(session.user.id),
+  action: "TASK_UPDATED",
+  entity: "Task",
+  entityId: updated.id,
+  details: {
+    beforeTitle: before.title,
+    afterTitle: updated.title,
+    status: updated.status,
+    dueDate: updated.dueDate,
+  },
+  ip,
+  userAgent,
+});
     emitEvent("taskUpdated", {
       id: updated.id,
       title: updated.title,
@@ -65,58 +97,55 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 
-
 // ---------- DELETE TASK ----------
 export async function DELETE(req: NextRequest, context: any) {
   const { id } = await context.params;
-
-  const parsedId = idSchema.safeParse(id);
-  if (!parsedId.success) {
-    return NextResponse.json(
-      { success: false, error: "Invalid ID" },
-      { status: 400 }
-    );
-  }
-
-  const taskId = parsedId.data;
+  const taskId = Number(id);
 
   try {
-    // Fetch task first (to send name + user)
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Fetch before delete
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: { user: { select: { name: true } } }
     });
 
     if (!task) {
-      return NextResponse.json(
-        { success: false, error: "Task not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
     }
 
-    // Delete related time entries
     await prisma.timeEntry.deleteMany({ where: { taskId } });
-
-    // Delete task
     await prisma.task.delete({ where: { id: taskId } });
 
-    // 🚀 Emit With Name & Title
+    const { ip, userAgent } = getRequestMeta(req);
+
+    // 👉 Audit log entry
+    await createAuditLog({
+  userId: Number(session.user.id),
+  action: "TASK_DELETED",
+  entity: "Task",
+  entityId: taskId,
+  details: {
+    title: task.title,
+    status: task.status,
+  },
+  ip,
+  userAgent,
+});
+
     emitEvent("taskDeleted", {
       id: taskId,
       title: task.title,
       user: task.user
     });
 
-    return NextResponse.json({
-      success: true,
-      message: "Task deleted"
-    });
+    return NextResponse.json({ success: true, message: "Task deleted" });
 
   } catch (error: any) {
-    console.error("❌ Error deleting:", error);
-    return NextResponse.json(
-      { success: false, error: error.message },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
   }
 }

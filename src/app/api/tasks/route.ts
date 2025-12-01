@@ -4,6 +4,9 @@ import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { emitEvent } from "@/lib/socketServer.ts"; 
+import { createAuditLog } from "@/lib/audit";
+import { getRequestMeta } from "@/lib/request-meta";
+
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -109,7 +112,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
-     emitEvent("taskCreated", task); 
+    const { ip, userAgent } = getRequestMeta(req);
+
+   await createAuditLog({
+  userId,
+  action: "TASK_CREATED",
+  entity: "Task",
+  entityId: task.id,
+  details: {
+    title: task.title,   // ⭐ now UI always gets proper name
+    status: task.status,
+    dueDate: task.dueDate,
+  },
+  ip,
+  userAgent,
+});
+
+
+    emitEvent("taskCreated", task);
+
     return NextResponse.json({ success: true, data: task }, { status: 201 });
 
   } catch (err) {
@@ -117,3 +138,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
+

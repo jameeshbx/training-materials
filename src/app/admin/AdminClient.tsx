@@ -125,37 +125,43 @@ export default function AdminClientPage({ session }: any) {
   }, []);
 
   const adminCards = [
-    {
-      title: "Manage Users",
-      description: `Manage ${stats.totalUsers} users`,
-      icon: Users,
-      path: '/admin/userlist',
-      color: "from-blue-500 to-cyan-500",
-      bgColor: "bg-blue-50",
-      iconColor: "text-blue-600"
-    },
-    {
-      title: "Send Invitations",
-      description: "Invite new users to the platform",
-      icon: UserPlus,
-      path: '/admin/invite',
-      color: "from-green-500 to-emerald-500",
-      bgColor: "bg-green-50",
-      iconColor: "text-green-600"
-    },
-   
-    
-    {
-      title: "Notifications",
-      description: "Manage system notifications",
-      icon: Bell,
-      path: '/dashboard/notifications',
-      color: "from-teal-500 to-cyan-500",
-      bgColor: "bg-teal-50",
-      iconColor: "text-teal-600"
-    }
-  ];
-
+  {
+    title: "Manage Users",
+    description: `Manage ${stats.totalUsers} users`,
+    icon: Users,
+    path: '/admin/userlist',
+    color: "from-blue-500 to-cyan-500",
+    bgColor: "bg-blue-50",
+    iconColor: "text-blue-600"
+  },
+  {
+    title: "Send Invitations",
+    description: "Invite new users to the platform",
+    icon: UserPlus,
+    path: '/admin/invite',
+    color: "from-green-500 to-emerald-500",
+    bgColor: "bg-green-50",
+    iconColor: "text-green-600"
+  },
+  {
+    title: "Notifications",
+    description: "Manage system notifications",
+    icon: Bell,
+    path: '/dashboard/notifications',
+    color: "from-teal-500 to-cyan-500",
+    bgColor: "bg-teal-50",
+    iconColor: "text-teal-600"
+  },  // <-- Added comma here
+  {
+    title: "Audit-log",
+    description: "All Logs",
+    icon: Bell,
+    path: '/admin/audit-logs',
+    color: "from-teal-500 to-cyan-500",
+    bgColor: "bg-teal-50",
+    iconColor: "text-teal-600"
+  }
+];
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
