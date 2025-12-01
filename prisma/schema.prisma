@@ -23,6 +23,7 @@ model User {
   tasks     Task[]
   team      Team?    @relation(fields: [teamId], references: [id])
   timeEntries TimeEntry[]
+  auditLogs AuditLog[]
 }
 
 model Task {
@@ -96,3 +97,19 @@ model Invite {
   acceptedAt DateTime?
   
 }
+model AuditLog {
+  id         String   @id @default(cuid())
+
+  action     String        // e.g. "TASK_CREATED", "TASK_DELETED"
+  userId     String?       // who did this action
+  user       User?   @relation(fields: [userId], references: [id])
+
+  targetType String?       // e.g. "TASK", "INVITE", "TEAM"
+  targetId   String?       // ID of that thing
+  userName  String? 
+
+  meta       Json?         // extra details, like { "title": "Task 1" }
+
+  createdAt  DateTime @default(now())
+}
+

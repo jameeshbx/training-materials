@@ -2,35 +2,48 @@
 
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import { logAction } from "@/lib/audit";
 
 export async function deleteTask(id: string) {
-  try {
-    // Check if task exists first
-    const task = await db.task.findUnique({
-      where: { id },
-    });
+  const session = await getServerSession(authOptions);
 
-    if (!task) {
-      console.warn(`Task with id ${id} not found, skipping delete`);
-      revalidatePath("/tasks");
-      return;
-    }
-
-    // 1️⃣ Delete all related time entries first
-    await db.timeEntry.deleteMany({
-      where: { taskId: id },
-    });
-
-    // 2️⃣ Now delete the task
-    await db.task.delete({
-      where: { id },
-    });
-
-    revalidatePath("/tasks");
-  } catch (error) {
-    console.error("Error deleting task:", error);
-    // Revalidate path even on error to refresh the UI
-    revalidatePath("/tasks");
-    throw error;
+  // Authentication check
+  if (!session || !session.user) {
+    throw new Error("Not authenticated");
   }
+
+  // RBAC: Only ADMIN can delete tasks
+  // @ts-ignore
+  if (session.user.role !== "ADMIN") {
+    console.log("❌ DELETE BLOCKED: User is not admin");
+    throw new Error("Not allowed");
+  }
+
+  // Check if task exists
+  const task = await db.task.findUnique({ where: { id } });
+  if (!task) {
+    console.warn(`Task with id ${id} not found`);
+    revalidatePath("/tasks");
+    return;
+  }
+
+  // Delete related time entries
+  await db.timeEntry.deleteMany({ where: { taskId: id } });
+
+  // Delete task
+  await db.task.delete({ where: { id } });
+
+  // Audit Log entry
+  // @ts-ignore
+  await logAction({
+    action: "TASK_DELETED",
+    userId: session.user.id,
+    targetType: "TASK",
+    targetId: id,
+  });
+
+  revalidatePath("/tasks");
+  return { message: "Task deleted" };
 }

@@ -3,6 +3,9 @@
 import { db } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { logAction } from "@/lib/audit";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
 
 export async function updateTask(formData: FormData) {
   const id = formData.get("id")?.toString();
@@ -14,13 +17,24 @@ export async function updateTask(formData: FormData) {
     throw new Error("Missing task ID");
   }
 
-  await db.task.update({
+  const session = await getServerSession(authOptions);
+  const userId = session?.user?.id;
+
+  const updated = await db.task.update({
     where: { id },
     data: {
       title: title || "",
       description: description || "",
       status: status || "pending",
     },
+  });
+
+  await logAction({
+    action: "TASK_UPDATED",
+    userId,
+    targetType: "TASK",
+    targetId: id,
+    meta: { title, status },
   });
 
   revalidatePath("/tasks");
