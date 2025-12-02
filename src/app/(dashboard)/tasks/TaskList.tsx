@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import TaskTimer from "@/components/tasks/TaskTimer";
 import TimeEntryList from "@/components/tasks/TimeEntryList";
 import DeleteButton from "./DeleteButton";
+import { useSession } from "next-auth/react";
+
 
 export default function TaskList() {
   const [tasks, setTasks] = useState<any[]>([]);
@@ -11,6 +13,8 @@ export default function TaskList() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(false);
+  const { data: session } = useSession();
+
 
   async function loadTasks() {
     setLoading(true);
@@ -64,6 +68,15 @@ export default function TaskList() {
         {tasks.map((task) => (
           <div key={task.id} className="bg-slate-800 p-4 rounded-lg shadow">
             <h2 className="text-xl font-semibold">{task.title}</h2>
+
+            {/* Show creator name only if ADMIN */}
+                  {/* @ts-ignore */}
+                {session?.user?.role === "ADMIN" && task.user && (
+              <p className="text-sm text-gray-400 mt-1">
+                 Created by: {task.user.name}
+                </p>
+                 )}
+
 
             {task.description && (
               <p className="text-gray-300 mt-1">{task.description}</p>

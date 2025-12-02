@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { createTaskSchema, updateTaskSchema } from "@/lib/validations/task";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logAction } from "@/lib/audit";
+
 
 /* ======================================================
    GET /api/tasks
@@ -37,15 +39,21 @@ export async function GET(req: NextRequest) {
   const page = Math.max(1, Number(pageParam));
   const PAGE_SIZE = 10;
 
-  const where: any = {
-    userId,
-    ...(search && {
-      OR: [
-        { title: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
-      ],
-    }),
-  };
+  let where: any = {};
+
+// If NOT admin → filter tasks by userId
+// @ts-ignore
+if (session?.user?.role !== "ADMIN") {
+  where.userId = userId;
+}
+
+// If search text exists → add conditions
+if (search) {
+  where.OR = [
+    { title: { contains: search, mode: "insensitive" } },
+    { description: { contains: search, mode: "insensitive" } },
+  ];
+}
 
   const [tasks, totalCount] = await Promise.all([
     db.task.findMany({
@@ -58,6 +66,11 @@ export async function GET(req: NextRequest) {
         title: true,
         status: true,
         createdAt: true,
+         user: {
+      select: {
+        name: true
+      }
+    }
       },
     }),
     db.task.count({ where }),
@@ -119,6 +132,17 @@ export async function POST(req: NextRequest) {
     });
 
     console.log("✅ Task created:", task.id);
+
+    // --- Write Audit Log ---
+await logAction({
+  action: "TASK_CREATED",
+  userId,
+  targetType: "TASK",
+  targetId: task.id,
+  meta: { title: task.title },
+  
+});
+
 
     // --- Create Activity in DB ---
     const activity = await db.activity.create({
@@ -186,6 +210,15 @@ export async function PUT(req: NextRequest) {
   }
 
   const updated = await db.task.update({ where: { id }, data: parsed.data });
+
+  // ✨ Add audit log for update
+await logAction({
+  action: "TASK_UPDATED",
+  userId,
+  targetType: "TASK",
+  targetId: id,
+  meta: parsed.data, // optional details - what changed
+});
   return NextResponse.json(updated);
 }
 
@@ -198,6 +231,11 @@ export async function DELETE(req: NextRequest) {
   const userId = session?.user?.id;
 
   if (!userId) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  // @ts-ignore
+if (session?.user?.role !== "ADMIN") {
+  return NextResponse.json({ error: "Not allowed" }, { status: 403 });
+}
+
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
@@ -205,6 +243,14 @@ export async function DELETE(req: NextRequest) {
   if (!id) return NextResponse.json({ error: "Task id is required" }, { status: 400 });
 
   await db.task.delete({ where: { id } });
+
+  await logAction({
+  action: "TASK_DELETED",
+  userId,
+  targetType: "TASK",
+  targetId: id,
+});
+
 
   return NextResponse.json({ message: "Task deleted" });
 }

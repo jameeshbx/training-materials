@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import bcrypt from "bcryptjs";
+import { logAction } from "@/lib/audit";   // <-- add import at top
+
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,6 +37,15 @@ export async function POST(req: NextRequest) {
       where: { token },
       data: { status: "ACCEPTED", acceptedAt: new Date() },
     });
+
+    await logAction({
+  action: "INVITE_ACCEPTED",
+  userId: invite.invitedBy,
+  targetType: "INVITE",
+  targetId: invite.id,
+  meta: { acceptedEmail: invite.email },
+});
+
 
     return NextResponse.json({
       success: true,
