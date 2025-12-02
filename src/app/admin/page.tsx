@@ -16,6 +16,13 @@ export default function AdminDashboard() {
       >
         View Users
       </button>
+
+      <button
+        onClick={() => router.push("/admin/audit-logs")}
+        className="px-4 py-2 bg-blue-600 text-white rounded"
+      >
+        Audit logs
+      </button>
       <div className="max-w-3xl mx-auto p-6">
 <InviteForm  />
       </div>
