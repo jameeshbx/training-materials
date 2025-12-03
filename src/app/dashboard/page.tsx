@@ -22,14 +22,16 @@ export default function DashboardPage() {
 
   // 🔥 Socket listener
   useEffect(() => {
-    if (!socket.connected) socket.connect();
+  if (!socket.connected) socket.connect();
 
-    socket.on("user_logged_in", (data) => {
-      toast(`👋 ${data.name} just logged in`);
-    });
+  socket.on("user_logged_in", (data) => {
+    toast(`👋 ${data.name} just logged in`);
+  });
 
-    return () => socket.off("user_logged_in");
-  }, []);
+  return () => {
+    socket.off("user_logged_in");
+  };
+}, []);
 
   if (status === "loading") return <div>Loading...</div>;
 
