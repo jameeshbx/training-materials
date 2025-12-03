@@ -4,8 +4,9 @@ import { z } from "zod";
 import { emitEvent } from "@/lib/socketServer.ts";
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
-import { auth } from "@/auth"; // ✔ FIXED — use auth instead of authOptions
+import { auth } from "@/auth"; // new NextAuth auth()
 
+// ---------------- Schema ----------------
 const idSchema = z.coerce.number().int().positive();
 
 const updateTaskSchema = z.object({
@@ -15,11 +16,19 @@ const updateTaskSchema = z.object({
   dueDate: z.string().optional(),
 });
 
-// ---------- GET SINGLE TASK ----------
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+// -----------------------------------------------------
+//                    GET SINGLE TASK
+// -----------------------------------------------------
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   const parsedId = idSchema.safeParse(params.id);
   if (!parsedId.success) {
-    return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "Invalid ID" },
+      { status: 400 }
+    );
   }
 
   const task = await prisma.task.findUnique({
@@ -27,28 +36,40 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   });
 
   if (!task)
-    return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+    return NextResponse.json(
+      { success: false, error: "Task not found" },
+      { status: 404 }
+    );
 
   return NextResponse.json({ success: true, data: task });
 }
 
-// ---------- UPDATE TASK ----------
+// -----------------------------------------------------
+//                    UPDATE TASK
+// -----------------------------------------------------
 export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth(); // ✔ FIXED
+    const session = await auth();
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    const body = await req.json();
     const id = Number(params.id);
+    const body = await req.json();
 
     const before = await prisma.task.findUnique({ where: { id } });
+
     if (!before) {
-      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Task not found" },
+        { status: 404 }
+      );
     }
 
     const updated = await prisma.task.update({
@@ -59,9 +80,7 @@ export async function PUT(
         status: body.status,
         dueDate: body.dueDate ? new Date(body.dueDate) : null,
       },
-      include: {
-        user: { select: { name: true } },
-      },
+      include: { user: { select: { name: true } } },
     });
 
     const { ip, userAgent } = getRequestMeta(req);
@@ -90,19 +109,30 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: updated });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
-// ---------- DELETE TASK ----------
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
-
+// -----------------------------------------------------
+//                    DELETE TASK
+// -----------------------------------------------------
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
   try {
-    const session = await auth(); // ✔ FIXED
+    const session = await auth();
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
+
+    const id = Number(params.id);
 
     const task = await prisma.task.findUnique({
       where: { id },
@@ -110,7 +140,10 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     });
 
     if (!task) {
-      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Task not found" },
+        { status: 404 }
+      );
     }
 
     await prisma.timeEntry.deleteMany({ where: { taskId: id } });
@@ -139,6 +172,9 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
 
     return NextResponse.json({ success: true, message: "Task deleted" });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
