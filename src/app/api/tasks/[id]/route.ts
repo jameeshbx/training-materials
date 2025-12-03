@@ -23,7 +23,9 @@ export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const parsedId = idSchema.safeParse(params.id);
+  const { id } = params;
+
+  const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
     return NextResponse.json(
       { success: false, error: "Invalid ID" },
@@ -37,12 +39,13 @@ export async function GET(
 
   if (!task)
     return NextResponse.json(
-      { success: false, error: "Task not found" },
+      { success: false, error: "Not found" },
       { status: 404 }
     );
 
   return NextResponse.json({ success: true, data: task });
 }
+
 
 // -----------------------------------------------------
 //                    UPDATE TASK
