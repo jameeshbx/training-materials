@@ -52,6 +52,7 @@ async function main() {
       hours: 3.5,
       taskId: task.id,
       userId: user.id,   // 🟢 REQUIRED NOW
+      startedAt: new Date(),
     },
   });
 

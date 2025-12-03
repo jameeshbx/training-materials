@@ -45,7 +45,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin}>
           {/* Email */}
         
-            <label className="block  text-sm font-medium text-gray-700">
+            {/* <label className="block  text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -54,12 +54,12 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full  rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
-            />
+            /> */}
          
 
           {/* Password */}
           
-            <label className="block  text-sm font-medium text-gray-700">
+            {/* <label className="block  text-sm font-medium text-gray-700">
               Password
             </label>
             <input
@@ -69,7 +69,42 @@ export default function LoginPage() {
               required
               className="w-full p-6 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
             />
-          
+           */}
+
+
+          {/* Email */}
+<label
+  htmlFor="email"
+  className="block text-sm font-medium text-gray-700"
+>
+  Email
+</label>
+<input
+  id="email"
+  type="email"
+  value={email}
+  onChange={(e) => setEmail(e.target.value)}
+  required
+  className="w-full rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
+/>
+
+{/* Password */}
+<label
+  htmlFor="password"
+  className="block text-sm font-medium text-gray-700"
+>
+  Password
+</label>
+<input
+  id="password"
+  type="password"
+  value={password}
+  onChange={(e) => setPassword(e.target.value)}
+  required
+  className="w-full p-6 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
+/>
+
+
 
           {/* Error Message */}
           {errorMsg && (

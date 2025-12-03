@@ -1,3 +1,8 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
+
+
 import { db } from "@/lib/db";
 import { ReportsCharts } from "@/components/reports/ReportsCharts";
 
