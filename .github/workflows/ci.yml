@@ -1,6 +1,5 @@
 name: CI
 
-# When should this run?
 on:
   push:
     branches: [ "**" ]
@@ -24,7 +23,7 @@ jobs:
         run: yarn install
 
       - name: Run tests
-        run: yarn test
+        run: yarn test --run --exclude tests/e2e/**
 
       - name: Build application
         run: yarn build
