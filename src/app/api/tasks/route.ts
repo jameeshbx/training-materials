@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { emitEvent } from "@/lib/socketServer.ts"; 
+import { emitEvent } from "@/lib/socketServer.ts";
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
-
+import { auth } from "@/auth"; 
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -16,9 +14,13 @@ const createTaskSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth(); 
+
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const { searchParams } = new URL(req.url);
@@ -71,20 +73,21 @@ export async function GET(req: NextRequest) {
         totalPages: Math.ceil(total / limit),
       },
     });
-
   } catch (err) {
     console.error("Tasks GET Error:", err);
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
 
-
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    const session = await auth(); // ✔ FIXED
 
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
     const body = await req.json();
@@ -114,28 +117,28 @@ export async function POST(req: NextRequest) {
 
     const { ip, userAgent } = getRequestMeta(req);
 
-   await createAuditLog({
-  userId,
-  action: "TASK_CREATED",
-  entity: "Task",
-  entityId: task.id,
-  details: {
-    title: task.title,   // ⭐ now UI always gets proper name
-    status: task.status,
-    dueDate: task.dueDate,
-  },
-  ip,
-  userAgent,
-});
-
+    await createAuditLog({
+      userId,
+      action: "TASK_CREATED",
+      entity: "Task",
+      entityId: task.id,
+      details: {
+        title: task.title,
+        status: task.status,
+        dueDate: task.dueDate,
+      },
+      ip,
+      userAgent,
+    });
 
     emitEvent("taskCreated", task);
 
-    return NextResponse.json({ success: true, data: task }, { status: 201 });
-
+    return NextResponse.json(
+      { success: true, data: task },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("Tasks POST Error:", err);
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }
-

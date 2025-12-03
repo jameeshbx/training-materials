@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth"; // ✔ FIXED — use auth instead of authOptions
 import { z } from "zod";
 
 // --------- Zod Schema ----------
@@ -19,7 +19,7 @@ const timeEntrySchema = z.object({
 export async function POST(req: Request) {
   try {
     // 1) Auth check
-    const session = await getServerSession(authOptions);
+    const session = await await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }

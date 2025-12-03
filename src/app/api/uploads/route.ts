@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth"; 
 import { z } from "zod";
 
 const fileUploadSchema = z.object({
@@ -11,8 +11,7 @@ const fileUploadSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
+    const session = await auth();
     if (!session || !session.user?.id) {
       return NextResponse.json(
         { error: "Unauthorized — Please login" },
@@ -49,7 +48,7 @@ const userId = Number(session.user.id);
 }
 
 export async function GET(req: NextRequest) {
-  const session = await getServerSession(authOptions);
+  const session = await await auth();
 
   if (!session || !session.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
