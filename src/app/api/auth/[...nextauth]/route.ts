@@ -1,10 +1,10 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { emitEvent } from "@/lib/socketServer"; // 👈 IMPORTANT
+import { emitEvent } from "@/lib/socketServer";
 
-export const authOptions: NextAuthOptions = {
+const handler = NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -35,15 +35,10 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
-  session: {
-    strategy: "jwt",
-  },
+  session: { strategy: "jwt" },
 
-  pages: {
-    signIn: "/login",
-  },
+  pages: { signIn: "/login" },
 
-  // 🔥 Emit socket event when user logs in
   events: {
     async signIn({ user }) {
       emitEvent("user_logged_in", {
@@ -74,8 +69,6 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
   },
-};
-
-const handler = NextAuth(authOptions);
+});
 
 export { handler as GET, handler as POST };
