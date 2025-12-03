@@ -6,7 +6,7 @@
   "build": "next build",
   "start": "NODE_ENV=production node server.js",
   "lint": "next lint",
-  "test": "vitest --run --exclude tests/e2e/**",
+  "test": "vitest --exclude tests/e2e/**",
   "db:push": "prisma db push",
   "db:seed": "ts-node --project tsconfig.seed.json prisma/seed.ts"
 },
