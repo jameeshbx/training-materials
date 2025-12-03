@@ -6,7 +6,8 @@ export default function TaskForm({ task, close, refresh }: any) {
   const [title, setTitle] = useState(task?.title || "");
   const [description, setDescription] = useState(task?.description || "");
   const [loading, setLoading] = useState(false);
-const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
+  const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
+  const [dateInputType, setDateInputType] = useState<"date" | "text">("date");
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -20,7 +21,11 @@ const [dueDate, setDueDate] = useState(task?.dueDate?.split("T")[0] || "");
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-body: JSON.stringify({ title, description, dueDate }),
+        body: JSON.stringify({ 
+          title, 
+          description, 
+          dueDate 
+        }),
       });
 
       if (res.ok) {
@@ -32,6 +37,27 @@ body: JSON.stringify({ title, description, dueDate }),
     } finally {
       setLoading(false);
     }
+  };
+
+  // Format date for manual input (YYYY-MM-DD)
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    if (dateInputType === "text") {
+      // Allow manual typing - basic validation for YYYY-MM-DD format
+      setDueDate(value);
+    } else {
+      setDueDate(value);
+    }
+  };
+
+  // Validate date format
+  const isValidDate = (dateString: string) => {
+    const regex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!regex.test(dateString)) return false;
+    
+    const date = new Date(dateString);
+    return date instanceof Date && !isNaN(date.getTime());
   };
 
   return (
@@ -83,27 +109,51 @@ body: JSON.stringify({ title, description, dueDate }),
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
             />
           </div>
-<div className="space-y-2">
-  <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
-    Due Date *
-  </label>
 
-  <input
-    id="dueDate"
-    type="date"
-    value={dueDate}
-    onChange={(e) => setDueDate(e.target.value)}
-    min={new Date().toISOString().split("T")[0]} // Disable past dates
-    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    required
-  />
-</div>
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700">
+                Due Date *
+              </label>
+              <button
+                type="button"
+                onClick={() => setDateInputType(dateInputType === "date" ? "text" : "date")}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                {dateInputType === "date" ? "Type manually" : "Use calendar"}
+              </button>
+            </div>
+
+            <input
+              id="dueDate"
+              type={dateInputType}
+              value={dueDate}
+              onChange={handleDateChange}
+              min={dateInputType === "date" ? new Date().toISOString().split("T")[0] : undefined}
+              placeholder={dateInputType === "text" ? "YYYY-MM-DD" : undefined}
+              pattern={dateInputType === "text" ? "\\d{4}-\\d{2}-\\d{2}" : undefined}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+            
+            {dateInputType === "text" && dueDate && !isValidDate(dueDate) && (
+              <p className="text-sm text-red-600 mt-1">
+                Please enter date in YYYY-MM-DD format
+              </p>
+            )}
+            
+            {dateInputType === "text" && (
+              <p className="text-xs text-gray-500 mt-1">
+                Format: YYYY-MM-DD (e.g., 2024-12-25)
+              </p>
+            )}
+          </div>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-4">
             <button
               type="submit"
-              disabled={loading || !title.trim()}
+              disabled={loading || !title.trim() || !isValidDate(dueDate)}
               className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <Save className="w-4 h-4 mr-2" />
