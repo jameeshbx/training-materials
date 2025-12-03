@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - navigation [ref=e2]:
+    - generic [ref=e3]:
+      - generic [ref=e4]:
+        - button [ref=e5]:
+          - img [ref=e6]
+        - heading "My Next App" [level=1] [ref=e7]
+      - generic [ref=e8]:
+        - link "Sign Up" [ref=e9] [cursor=pointer]:
+          - /url: /signup
+        - button "Sign Out" [ref=e10]
+  - generic [ref=e11]:
+    - complementary [ref=e13]:
+      - link "Home" [ref=e14] [cursor=pointer]:
+        - /url: /home
+      - link "Dashboard" [ref=e15] [cursor=pointer]:
+        - /url: /dashboard
+      - link "Teams" [ref=e16] [cursor=pointer]:
+        - /url: /teams
+      - link "Tasks" [ref=e17] [cursor=pointer]:
+        - /url: /task
+      - link "Reports" [ref=e18] [cursor=pointer]:
+        - /url: /reports
+      - link "Documents" [ref=e19] [cursor=pointer]:
+        - /url: /files
+    - main [ref=e20]:
+      - generic [ref=e22]:
+        - heading "Login" [level=1] [ref=e23]
+        - generic [ref=e24]:
+          - generic [ref=e25]:
+            - generic [ref=e26]: Email
+            - textbox [ref=e27]
+          - generic [ref=e28]:
+            - generic [ref=e29]: Password
+            - textbox [ref=e30]
+          - button "LOGIN" [ref=e31]
+        - paragraph [ref=e32]: © 2025 Your App • Secure Login
+  - button "Open Next.js Dev Tools" [ref=e40] [cursor=pointer]:
+    - img [ref=e41]
+  - alert [ref=e45]
+```
