@@ -1,13 +1,16 @@
-import { auth } from "@/auth"; 
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import AdminClientPage from "./AdminClient";
 
+// ⛔ Prevent static generation (Fixes build error)
+export const dynamic = "force-dynamic";
+
 export default async function AdminDashboard() {
-  const session = await await auth();
+  const session = await auth();
 
-  if (!session) redirect("/login");
-
-  
+  if (!session) {
+    redirect("/login");
+  }
 
   return <AdminClientPage session={session} />;
 }
