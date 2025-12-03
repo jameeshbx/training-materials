@@ -3,9 +3,9 @@ name: CI
 # When should this run?
 on:
   push:
-    branches: [ anirva-training ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ anirva-training ]
+    branches: [ "**" ]
 
 jobs:
   build-and-test:
