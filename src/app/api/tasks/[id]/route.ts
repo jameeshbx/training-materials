@@ -4,26 +4,17 @@ import { z } from "zod";
 import { emitEvent } from "@/lib/socketServer.ts";
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
-import { auth } from "@/auth"; // new NextAuth auth()
+import { auth } from "@/auth";
 
 // ---------------- Schema ----------------
 const idSchema = z.coerce.number().int().positive();
 
-const updateTaskSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  status: z.enum(["pending", "progress", "completed"]).optional(),
-  dueDate: z.string().optional(),
-});
-
-// -----------------------------------------------------
-//                    GET SINGLE TASK
-// -----------------------------------------------------
+// ---------------- GET SINGLE TASK ----------------
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }   // 👈 FIXED FOR NEXT 15
 ) {
-  const { id } = params;
+  const { id } = await context.params;           // 👈 FIXED
 
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
@@ -37,22 +28,21 @@ export async function GET(
     where: { id: parsedId.data },
   });
 
-  if (!task)
+  if (!task) {
     return NextResponse.json(
       { success: false, error: "Not found" },
       { status: 404 }
     );
+  }
 
   return NextResponse.json({ success: true, data: task });
 }
 
 
-// -----------------------------------------------------
-//                    UPDATE TASK
-// -----------------------------------------------------
+// ---------------- UPDATE TASK ----------------
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }   // 👈 FIX AGAIN
 ) {
   try {
     const session = await auth();
@@ -63,10 +53,10 @@ export async function PUT(
       );
     }
 
-    const id = Number(params.id);
-    const body = await req.json();
+    const { id } = await context.params;
 
-    const before = await prisma.task.findUnique({ where: { id } });
+    const body = await req.json();
+    const before = await prisma.task.findUnique({ where: { id: Number(id) } });
 
     if (!before) {
       return NextResponse.json(
@@ -76,7 +66,7 @@ export async function PUT(
     }
 
     const updated = await prisma.task.update({
-      where: { id },
+      where: { id: Number(id) },
       data: {
         title: body.title,
         description: body.description,
@@ -119,12 +109,11 @@ export async function PUT(
   }
 }
 
-// -----------------------------------------------------
-//                    DELETE TASK
-// -----------------------------------------------------
+
+// ---------------- DELETE TASK ----------------
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }   // 👈 FIX AGAIN
 ) {
   try {
     const session = await auth();
@@ -135,10 +124,10 @@ export async function DELETE(
       );
     }
 
-    const id = Number(params.id);
+    const { id } = await context.params;
 
     const task = await prisma.task.findUnique({
-      where: { id },
+      where: { id: Number(id) },
       include: { user: { select: { name: true } } },
     });
 
@@ -149,8 +138,8 @@ export async function DELETE(
       );
     }
 
-    await prisma.timeEntry.deleteMany({ where: { taskId: id } });
-    await prisma.task.delete({ where: { id } });
+    await prisma.timeEntry.deleteMany({ where: { taskId: Number(id) } });
+    await prisma.task.delete({ where: { id: Number(id) } });
 
     const { ip, userAgent } = getRequestMeta(req);
 
@@ -158,7 +147,7 @@ export async function DELETE(
       userId: Number(session.user.id),
       action: "TASK_DELETED",
       entity: "Task",
-      entityId: id,
+      entityId: Number(id),
       details: {
         title: task.title,
         status: task.status,
@@ -168,7 +157,7 @@ export async function DELETE(
     });
 
     emitEvent("taskDeleted", {
-      id,
+      id: Number(id),
       title: task.title,
       user: task.user,
     });
