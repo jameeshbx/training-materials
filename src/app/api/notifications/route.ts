@@ -37,8 +37,7 @@ export async function POST(req: Request) {
 }
 // 🔹 Current user-inte notifications list
 export async function GET() {
-  const session = await getServerSession(authOptions);
-
+  const session = await await auth()
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
