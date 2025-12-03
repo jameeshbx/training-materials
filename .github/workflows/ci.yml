@@ -2,7 +2,7 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: ["feat-development"]
+    branches: ["eldhose-training-day-19"]
   pull_request:
 
 jobs:
