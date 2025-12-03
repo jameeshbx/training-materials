@@ -2,7 +2,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { GET } from "@/app/api/tasks/route";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 
 function createGetRequest(url: string) {
   return new Request(url, {
@@ -16,7 +16,7 @@ describe("GET /api/tasks", () => {
   });
 
   it("🔐 returns 401 if not authenticated", async () => {
-    (getServerSession as any).mockResolvedValue(null);
+    (auth as any).mockResolvedValue(null);
 
     const req = createGetRequest("http://localhost/api/tasks");
 
@@ -29,7 +29,7 @@ describe("GET /api/tasks", () => {
   });
 
   it("✅ returns tasks with pagination", async () => {
-    (getServerSession as any).mockResolvedValue({
+    (auth as any).mockResolvedValue({
       user: { id: 1, email: "user@test.com" },
     });
 

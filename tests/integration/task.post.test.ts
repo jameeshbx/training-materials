@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "@/app/api/tasks/route";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
+import { auth } from "@/auth";
 
 function createJsonRequest(url: string, method: string, body: any) {
   return new Request(url, {
@@ -20,7 +20,7 @@ describe("POST /api/tasks", () => {
   });
 
   it("✅ creates task for valid data", async () => {
-    (getServerSession as any).mockResolvedValue({
+    (auth as any).mockResolvedValue({
       user: { id: 1, email: "user@test.com" },
     });
 
