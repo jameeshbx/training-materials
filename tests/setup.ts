@@ -1,16 +1,15 @@
-// tests/setup.ts
 import { vi } from "vitest";
 
-// ✅ next-auth mock (default + getServerSession)
-vi.mock("next-auth", () => {
+// ✅ Correct mock for your actual auth import
+vi.mock("@/auth", () => {
   return {
-    __esModule: true,
-    default: vi.fn(),          // NextAuth()
-    getServerSession: vi.fn(), // tests mockResolvedValue set 
+    auth: vi.fn(),      // mock auth() used in API routes
+    signIn: vi.fn(),
+    signOut: vi.fn(),
   };
 });
 
-// ✅ prisma mock – Task related methods  mock 
+// Prisma mock
 vi.mock("@/lib/prisma", () => ({
   prisma: {
     task: {
@@ -21,17 +20,17 @@ vi.mock("@/lib/prisma", () => ({
   },
 }));
 
-// ✅ socket.io event emit mock
+// socket mock
 vi.mock("@/lib/socketServer.ts", () => ({
   emitEvent: vi.fn(),
 }));
 
-// ✅ audit log mock
+// audit mock
 vi.mock("@/lib/audit", () => ({
   createAuditLog: vi.fn().mockResolvedValue(undefined),
 }));
 
-// ✅ request meta mock
+// request meta mock
 vi.mock("@/lib/request-meta", () => ({
   getRequestMeta: () => ({
     ip: "127.0.0.1",
