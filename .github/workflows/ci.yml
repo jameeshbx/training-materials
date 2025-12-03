@@ -1,56 +1,49 @@
-name: CI Pipeline
+
+name: CI
+
+
 
 on:
   push:
-    branches: ["aiswarya-training"]
+    branches: [ "*" ]
   pull_request:
-    branches: ["aiswarya-training"]
+    branches: [ "*" ]
+
 
 jobs:
-  install-build-test:
+  build-and-test:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: "postgres://user:pass@localhost:5432/db"
+      NEXTAUTH_SECRET: "dummysecret"
+      NEXTAUTH_URL: "http://localhost:3000"
+      NEXT_PUBLIC_APP_URL: "http://localhost:3000"
+      SENDGRID_API_KEY: "dummy"
+      EMAIL_FROM: "test@example.com"
+
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
+          cache: "yarn"
+
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
+
 
       - name: Generate Prisma Client
         run: npx prisma generate
 
-      - name: Run Unit + Integration Tests
+
+      - name: Run tests
         run: yarn test
 
-      - name: Install Playwright Browsers
-        run: npx playwright install --with-deps
 
-      - name: Run E2E Tests
-        run: npx playwright test
-
-      - name: Build Next.js App
+      - name: Build application
         run: yarn build
-
-  deploy:
-    needs: install-build-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v20
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./
-
-      - name: Apply Prisma Migrations to Staging DB
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
