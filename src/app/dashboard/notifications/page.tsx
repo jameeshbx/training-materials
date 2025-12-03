@@ -34,14 +34,17 @@ export default function NotificationsPage() {
 
   // Real-time updates from socket
   useEffect(() => {
+  fetchNotifications();
+
+  socket.on("notification", () => {
     fetchNotifications();
+  });
 
-    socket.on("notification", () => {
-      fetchNotifications();
-    });
+  return () => {
+    socket.off("notification");
+  };
+}, []);
 
-    return () => socket.off("notification");
-  }, []);
 
   if (loading) {
     return (
