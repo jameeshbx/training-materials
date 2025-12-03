@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  teamId    String?
+  password  String
+  role      Role     @default(USER)
+
+  attachments   Attachment[]
+  invites       Invite[]
+  assignedTasks Task[]       @relation("UserAssignedTasks")
+  tasks         Task[]       @relation("UserCreatedTasks")
+  timeEntries   TimeEntry[]
+  team          Team?        @relation(fields: [teamId], references: [id])
+  auditLogs     AuditLog[]
+}
+
+model Task {
+  id            String      @id @default(cuid())
+  title         String
+  description   String?
+  status        String      @default("pending")
+  userId        String
+  teamId        String?
+  createdAt     DateTime    @default(now())
+  dueDate       DateTime?
+  attachmentUrl String?
+  assigneeId    String?
+  assignee      User?       @relation("UserAssignedTasks", fields: [assigneeId], references: [id])
+  team          Team?       @relation(fields: [teamId], references: [id])
+  user          User        @relation("UserCreatedTasks", fields: [userId], references: [id])
+  timeEntries   TimeEntry[]
+}
+
+model Team {
+  id    String @id @default(cuid())
+  name  String
+  tasks Task[]
+  users User[]
+}
+
+model TimeEntry {
+  id        String    @id @default(cuid())
+  taskId    String
+  createdAt DateTime  @default(now())
+  endTime   DateTime?
+  startTime DateTime
+  userId    String
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Attachment {
+  id        String   @id @default(uuid())
+  fileName  String
+  fileUrl   String
+  fileType  String
+  createdAt DateTime @default(now())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+}
+
+model Activity {
+  id        String   @id @default(cuid())
+  userId    String?
+  userName  String
+  action    String
+  createdAt DateTime @default(now())
+}
+
+model Invite {
+  token     String       @unique
+  createdAt DateTime     @default(now())
+  expiresAt DateTime
+  email     String
+  status    InviteStatus @default(PENDING)
+  userId    String?
+  id        Int          @id @default(autoincrement())
+  user      User?        @relation(fields: [userId], references: [id])
+}
+
+model AuditLog {
+  id Int @id @default(autoincrement())
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
+  action   String
+  entity   String?
+  entityId String? // FIXED
+
+  details Json?
+
+  ip        String?
+  userAgent String?
+
+  createdAt DateTime @default(now())
+}
+
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  EXPIRED
+}
+
+enum Role {
+  USER
+  ADMIN
+}
