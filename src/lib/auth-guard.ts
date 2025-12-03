@@ -1,9 +1,8 @@
 // lib/auth-guard.ts
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth"; 
 
 export async function requireAdmin() {
-  const session = await getServerSession(authOptions);
+  const session = await auth()
 
   if (!session || !session.user?.id) {
     return { ok: false, status: 401 as const, reason: "Unauthorized" };
