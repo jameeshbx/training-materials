@@ -66,45 +66,48 @@ export default function TaskList() {
 
       <div className="space-y-4">
         {tasks.map((task) => (
-          <div key={task.id} className="bg-slate-800 p-4 rounded-lg shadow">
-            <h2 className="text-xl font-semibold">{task.title}</h2>
+         <div
+  data-testid={`task-card-${task.id}`}
+  key={task.id}
+  className="bg-slate-800 p-4 rounded-lg shadow"
+>
+  <h2 className="text-xl font-semibold" data-testid="task-title">
+    {task.title}
+  </h2>
 
-            {/* Show creator name only if ADMIN */}
-                  {/* @ts-ignore */}
-                {session?.user?.role === "ADMIN" && task.user && (
-              <p className="text-sm text-gray-400 mt-1">
-                 Created by: {task.user.name}
-                </p>
-                 )}
+  {/* Show creator name only if ADMIN */}
+  {session?.user?.role === "ADMIN" && task.user && (
+    <p className="text-sm text-gray-400 mt-1">Created by: {task.user.name}</p>
+  )}
 
+  {task.description && (
+    <p className="text-gray-300 mt-1">{task.description}</p>
+  )}
 
-            {task.description && (
-              <p className="text-gray-300 mt-1">{task.description}</p>
-            )}
+  <div className="flex justify-between mt-3 text-sm text-gray-400">
+    <span>Status: {task.status}</span>
+  </div>
 
-            <div className="flex justify-between mt-3 text-sm text-gray-400">
-              <span>Status: {task.status}</span>
-            </div>
+  {task.dueDate && (
+    <p className="text-yellow-400 text-sm mt-1">
+      Due Date: {new Date(task.dueDate).toLocaleDateString()}
+    </p>
+  )}
 
-            {task.dueDate && (
-              <p className="text-yellow-400 text-sm mt-1">
-                Due Date: {new Date(task.dueDate).toLocaleDateString()}
-              </p>
-            )}
+  <TaskTimer taskId={task.id} />
+  <TimeEntryList taskId={task.id} />
 
-            <TaskTimer taskId={task.id} />
-            <TimeEntryList taskId={task.id} />
+  <div className="flex gap-3 mt-4">
+    <a
+      href={`/tasks/${task.id}/edit`}
+      className="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1 text-sm rounded"
+    >
+      Edit
+    </a>
+    <DeleteButton id={task.id} />
+  </div>
+</div>
 
-            <div className="flex gap-3 mt-4">
-              <a
-                href={`/tasks/${task.id}/edit`}
-                className="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1 text-sm rounded"
-              >
-                Edit
-              </a>
-              <DeleteButton id={task.id} />
-            </div>
-          </div>
         ))}
       </div>
     </>
