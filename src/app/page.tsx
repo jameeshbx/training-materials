@@ -11,11 +11,13 @@ export default function Home() {
         title="NEXT APP"
         className="w-full max-w-sm bg-white/10 backdrop-blur-md border border-white/20 text-white shadow-xl"
       >
+        
         <h1 >WELCOME.</h1>
       </Card>
     </main>
   );
 }
+
 // import { redirect } from "next/navigation";
 
 // export default function Home() {
