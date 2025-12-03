@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
+// import { getServerSession } from "next-auth";
 import { auth } from "@/auth"; // ✔ FIXED — use auth instead of authOptions
 import { z } from "zod";
 

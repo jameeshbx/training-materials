@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+// import { getServerSession } from "next-auth";
+// import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { auth } from "@/auth"; 
+
 import { emitEvent } from "@/lib/socketServer";  
 // 🔹 New notification create (toast pole message save)
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
+
+  const session = await auth()
 
   if (!session?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
