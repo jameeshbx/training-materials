@@ -29,5 +29,14 @@ export interface Tasks {
   id: number;
   title: string;
   description?: string;
-  status?: string;
+  status: "pending" | "progress" | "completed";
+  createdAt: string;
+  dueDate?: string | null;
+
+  // 👇 ADD THIS PART
+  user?: {
+    id: number;
+    name: string;
+    email?: string;
+  };
 }
