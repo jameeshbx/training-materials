@@ -6,7 +6,7 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { emitEvent } from "@/lib/socketServer.ts"; 
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
-
+import { logger } from "@/lib/logger";
 const createTaskSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
@@ -16,7 +16,9 @@ const createTaskSchema = z.object({
 
 export async function GET(req: NextRequest) {
   try {
+   
     const session = await getServerSession(authOptions);
+     logger.info(session,"sessionsessionsessionsessionsessionsessionsessionsessionsession")
     if (!session) {
       return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
@@ -73,7 +75,8 @@ export async function GET(req: NextRequest) {
     });
 
   } catch (err) {
-    console.error("Tasks GET Error:", err);
+    // logger.error("Something failed");
+
     return NextResponse.json({ success: false, error: "Server error" }, { status: 500 });
   }
 }

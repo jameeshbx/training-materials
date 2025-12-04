@@ -1,4 +1,3 @@
-// src/types/user.ts
 export interface User {
   id: string
   name: string
@@ -28,6 +27,13 @@ export interface Teammembers{
 export interface Tasks {
   id: number;
   title: string;
-  description?: string;
-  status?: string;
+  description: string;
+  createdAt: string;
+  status: string;
+  dueDate: string;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+  };
 }
