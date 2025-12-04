@@ -6,8 +6,11 @@ import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+// Validate numeric ID
 const idSchema = z.coerce.number().int().positive();
 
+// Schema for updating task
 const updateTaskSchema = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
@@ -16,43 +19,76 @@ const updateTaskSchema = z.object({
 });
 
 // ---------- GET SINGLE TASK ----------
-export async function GET(req: NextRequest, context: any) {
-  const { id } = await context.params;
+export async function GET(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  // 👇 FIX: unwrap params Promise
+  const { id } = await Promise.resolve(context.params);
 
   const parsedId = idSchema.safeParse(id);
   if (!parsedId.success) {
-    return NextResponse.json({ success: false, error: "Invalid ID" }, { status: 400 });
+    return NextResponse.json(
+      { success: false, error: "Invalid ID" },
+      { status: 400 }
+    );
   }
 
-  const task = await prisma.task.findUnique({ where: { id: parsedId.data } });
+  const task = await prisma.task.findUnique({
+    where: { id: parsedId.data },
+  });
 
-  if (!task) return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
+  if (!task) {
+    return NextResponse.json(
+      { success: false, error: "Not found" },
+      { status: 404 }
+    );
+  }
 
   return NextResponse.json({ success: true, data: task });
 }
 
 
-
-// ---------- UPDATE TASK ----------
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+/// ---------- UPDATE TASK ----------
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
+    // 👇 FIX: unwrap params Promise
+    const { id } = await Promise.resolve(context.params);
+    const taskId = Number(id);
+
     const body = await req.json();
-    const id = Number(params.id);
 
-    // get before update snapshot
-    const before = await prisma.task.findUnique({ where: { id } });
+    // validate body (optional but recommended)
+    const parsed = updateTaskSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { success: false, error: "Invalid data" },
+        { status: 400 }
+      );
+    }
 
+    // before update
+    const before = await prisma.task.findUnique({ where: { id: taskId } });
     if (!before) {
-      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Task not found" },
+        { status: 404 }
+      );
     }
 
     const updated = await prisma.task.update({
-      where: { id },
+      where: { id: taskId },
       data: {
         title: body.title,
         description: body.description,
@@ -64,24 +100,23 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       },
     });
 
-    // get device + IP info
     const { ip, userAgent } = getRequestMeta(req);
 
-    // 👉 Audit log entry
-   await createAuditLog({
-  userId: Number(session.user.id),
-  action: "TASK_UPDATED",
-  entity: "Task",
-  entityId: updated.id,
-  details: {
-    beforeTitle: before.title,
-    afterTitle: updated.title,
-    status: updated.status,
-    dueDate: updated.dueDate,
-  },
-  ip,
-  userAgent,
-});
+    await createAuditLog({
+      userId: Number(session.user.id),
+      action: "TASK_UPDATED",
+      entity: "Task",
+      entityId: updated.id,
+      details: {
+        beforeTitle: before.title,
+        afterTitle: updated.title,
+        status: updated.status,
+        dueDate: updated.dueDate,
+      },
+      ip,
+      userAgent,
+    });
+
     emitEvent("taskUpdated", {
       id: updated.id,
       title: updated.title,
@@ -90,32 +125,43 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     });
 
     return NextResponse.json({ success: true, data: updated });
-
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
 
 
 // ---------- DELETE TASK ----------
-export async function DELETE(req: NextRequest, context: any) {
-  const { id } = await context.params;
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  // 👇 FIX: unwrap params for Next.js 16 runtime
+  const { id } = await Promise.resolve(context.params);
   const taskId = Number(id);
 
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    // Fetch before delete
     const task = await prisma.task.findUnique({
       where: { id: taskId },
       include: { user: { select: { name: true } } }
     });
 
     if (!task) {
-      return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "Task not found" },
+        { status: 404 }
+      );
     }
 
     await prisma.timeEntry.deleteMany({ where: { taskId } });
@@ -123,19 +169,18 @@ export async function DELETE(req: NextRequest, context: any) {
 
     const { ip, userAgent } = getRequestMeta(req);
 
-    // 👉 Audit log entry
     await createAuditLog({
-  userId: Number(session.user.id),
-  action: "TASK_DELETED",
-  entity: "Task",
-  entityId: taskId,
-  details: {
-    title: task.title,
-    status: task.status,
-  },
-  ip,
-  userAgent,
-});
+      userId: Number(session.user.id),
+      action: "TASK_DELETED",
+      entity: "Task",
+      entityId: taskId,
+      details: {
+        title: task.title,
+        status: task.status
+      },
+      ip,
+      userAgent,
+    });
 
     emitEvent("taskDeleted", {
       id: taskId,
@@ -143,9 +188,14 @@ export async function DELETE(req: NextRequest, context: any) {
       user: task.user
     });
 
-    return NextResponse.json({ success: true, message: "Task deleted" });
-
+    return NextResponse.json(
+      { success: true, message: "Task deleted" },
+      { status: 200 }
+    );
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 }
+    );
   }
 }
