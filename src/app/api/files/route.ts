@@ -112,7 +112,7 @@ export async function GET() {
         orderBy: { createdAt: "desc" },
     });
 
-    logger.info({ count: files.length, userId: session.user.id }, "Files fetched successfully"); // <-- Log count
+    logger.info({ fileId: saved.id }, "File saved to database successfully");
 
     return NextResponse.json(files);
 }
