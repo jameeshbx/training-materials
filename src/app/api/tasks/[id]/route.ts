@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
@@ -6,7 +7,6 @@ import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-
 const idSchema = z.coerce.number().int().positive();
 
 const updateTaskSchema = z.object({
