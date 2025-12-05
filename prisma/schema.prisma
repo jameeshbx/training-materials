@@ -90,21 +90,25 @@ model Invite {
 }
 
 model AuditLog {
-  id Int @id @default(autoincrement())
+  id         Int      @id @default(autoincrement())
 
-  userId String?
-  user   User?   @relation(fields: [userId], references: [id])
+  actorId    String?
 
-  action   String
-  entity   String?
-  entityId String? // FIXED
+    actor       User?    @relation(fields: [actorId], references: [id])  // <--- FIX
+    
+  actorEmail String?
+  actorRole  String?
 
-  details Json?
+  action     String
+  resource   String?
+  resourceId String?
+  details    Json?
 
-  ip        String?
-  userAgent String?
+  ip         String?
+  userAgent  String?
+  level      String? @default("info")
 
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 }
 
 enum InviteStatus {

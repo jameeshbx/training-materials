@@ -1,5 +1,5 @@
 import sgMail from "@sendgrid/mail";
-import bcrypt from "bcryptjs/umd/types";
+import bcrypt from "bcryptjs";
 import { AuthOptions as NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "./prisma";

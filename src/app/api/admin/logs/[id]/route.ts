@@ -10,3 +10,6 @@
 
 //   return Response.json({ success: true });
 // }
+export async function GET() {
+  return Response.json({ message: "Not implemented yet" });
+}

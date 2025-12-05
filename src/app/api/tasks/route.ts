@@ -112,15 +112,15 @@ export async function POST(req: NextRequest) {
 
     if (global.io) global.io.emit("taskCreated", { ...task, userName });
 
-    await createAuditLog({
-      userId: session?.user?.id || null,
-      action: "TASK_CREATED",
-      entity: "Task",
-      entityId: task.id,
-      details: { title, status, dueDate },
-      ip,
-      userAgent,
-    });
+   await createAuditLog({
+  actorId: session?.user?.id || undefined,
+  action: "TASK_CREATED",
+  resource: "Task",
+  resourceId: task.id,
+  details: { title, status, dueDate },
+  ip: ip ?? undefined,
+  userAgent: userAgent ?? undefined,
+});
 
     return NextResponse.json({ data: { ...task, userName } }, { status: 201 });
   } catch (error) {
@@ -165,17 +165,17 @@ export async function PUT(req: NextRequest) {
     const { ip, userAgent } = getRequestMeta(req);
 
     await createAuditLog({
-      userId: session?.user?.id || null,
-      action: "TASK_UPDATED",
-      entity: "Task",
-      entityId: updatedTask.id,
-      details: {
-        before,
-        after: updatedTask,
-      },
-      ip,
-      userAgent,
-    });
+  actorId: session?.user?.id || undefined,
+  action: "TASK_UPDATED",
+  resource: "Task",
+  resourceId: updatedTask.id,
+  details: {
+    before,
+    after: updatedTask,
+  },
+  ip: ip ?? undefined,
+  userAgent: userAgent ?? undefined,
+});
 
     return NextResponse.json({ data: updatedTask });
   } catch (error) {
@@ -211,16 +211,15 @@ export async function DELETE(req: NextRequest) {
 
     const { ip, userAgent } = getRequestMeta(req);
 
-    await createAuditLog({
-      userId: session?.user?.id || null,
-      action: "TASK_DELETED",
-      entity: "Task",
-      entityId: id,
-      details: { title: task?.title, status: task?.status },
-      ip,
-      userAgent,
-    });
-
+   await createAuditLog({
+  actorId: session?.user?.id || undefined,
+  action: "TASK_DELETED",
+  resource: "Task",
+  resourceId: id,
+  details: { title: task?.title, status: task?.status },
+  ip: ip ?? undefined,
+  userAgent: userAgent ?? undefined,
+});
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("DELETE /api/tasks error", error);
