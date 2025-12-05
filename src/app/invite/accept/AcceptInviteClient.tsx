@@ -33,13 +33,45 @@ export default function AcceptInviteClient() {
           setStatus("success");
           setMessage("Account created! Logging you in...");
 
-          await signIn("credentials", {
-            email: data.email,
-            password: data.password,
-            redirect: false,
-          });
+          try {
+            const signInResult = await signIn("credentials", {
+              email: data.email,
+              password: data.password,
+              redirect: false,
+            });
 
-          window.location.href = "/dashboard";
+            if (signInResult?.error) {
+              // Check if it's a rate limit error
+              if (signInResult.error === "Too many requests" || 
+                  signInResult.error.includes("rate limit") || 
+                  signInResult.error.includes("429")) {
+                setStatus("error");
+                setMessage("Too many login attempts. Please wait a minute before trying again.");
+                return;
+              }
+              setStatus("error");
+              setMessage("Failed to log in. Please try logging in manually.");
+              return;
+            }
+
+            if (signInResult?.ok) {
+              window.location.href = "/dashboard";
+            }
+          } catch (signInError: any) {
+            console.error("Sign in error:", signInError);
+            // Check if it's a rate limit error
+            if (signInError?.message?.includes("429") || 
+                signInError?.message?.includes("rate limit") || 
+                signInError?.message?.includes("Too many requests") ||
+                signInError?.message?.includes("Failed to construct 'URL'") ||
+                signInError?.message?.includes("Invalid URL")) {
+              setStatus("error");
+              setMessage("Too many login attempts. Please wait a minute before trying again.");
+            } else {
+              setStatus("error");
+              setMessage("Failed to log in. Please try logging in manually.");
+            }
+          }
         } else if (data.requiresSignup) {
           setStatus("success");
           setMessage("Invite verified! Redirecting to signup...");
