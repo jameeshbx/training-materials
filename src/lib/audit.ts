@@ -1,27 +1,48 @@
 import { prisma } from "@/lib/prisma";
+import { AuditLog } from "@prisma/client";
+
+type CreateAuditLogParams = {
+  actorId?: string;
+  actorEmail?: string;
+  actorRole?: string;
+  action: string;
+  resource?: string;
+  resourceId?: string;
+  details?: any;
+  ip?: string;
+  userAgent?: string;
+  level?: 'info' | 'warn' | 'error';
+};
 
 export async function createAuditLog({
-  userId,
+  actorId,
+  actorEmail,
+  actorRole,
   action,
-  entity,
-  entityId,
+  resource,
+  resourceId,
   details,
   ip,
   userAgent,
-}: any) {
+  level = 'info',
+}: CreateAuditLogParams): Promise<AuditLog | null> {
   try {
-    await prisma.auditLog.create({
+    return await prisma.auditLog.create({
       data: {
-        userId,
+        actorId,
+        actorEmail,
+        actorRole,
         action,
-        entity,
-        entityId,
+        resource,
+        resourceId,
         details,
         ip,
         userAgent,
+        level,
       },
     });
   } catch (err) {
-    console.log("audit error:", err);
+    console.error("Audit log creation failed:", err);
+    return null;
   }
 }
