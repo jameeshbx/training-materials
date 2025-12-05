@@ -51,13 +51,8 @@ export default function Sidebar() {
         );
       })}
 
-      {/* Simple Navigate Button */}
-      {/* <button
-        onClick={goToFiles}
-        className="mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white"
-      >
-        Upload Files
-      </button> */}
+    
+
     </aside>
   );
 }
