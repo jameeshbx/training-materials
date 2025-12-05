@@ -1,8 +1,8 @@
+export const dynamic = "force-dynamic";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { emitEvent } from "@/lib/socketServer"; // 👈 IMPORTANT
+import { prisma } from "@/lib/prisma";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -13,8 +13,9 @@ export const authOptions: NextAuthOptions = {
         password: { type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password)
-          throw new Error("Invalid credentials");
+        if (!credentials?.email || !credentials.password) {
+          throw new Error("Missing credentials");
+        }
 
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
@@ -22,14 +23,14 @@ export const authOptions: NextAuthOptions = {
 
         if (!user) throw new Error("User not found");
 
-        const isValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isValid) throw new Error("Invalid password");
+        const valid = await bcrypt.compare(credentials.password, user.password);
+        if (!valid) throw new Error("Invalid password");
 
         return {
-          id: user.id.toString(),
+          id: user.id,
+          name: user.name,
           email: user.email,
           role: user.role,
-          name: user.name,
         };
       },
     }),
@@ -43,32 +44,20 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
 
-  // 🔥 Emit socket event when user logs in
-  events: {
-    async signIn({ user }) {
-      emitEvent("user_logged_in", {
-        userId: user.id,
-        name: user.name,
-        email: user.email,
-        timestamp: new Date().toISOString(),
-      });
-    },
-  },
-
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = (user as any).id;
-        token.role = (user as any).role;
-        token.name = (user as any).name;
-        token.email = (user as any).email;
-      }
-      return token;
-    },
+   async jwt({ token, user }) {
+  if (user) {
+    token.id = Number(user.id);  // 👈 forces number
+    token.role = user.role;
+    token.name = user.name;
+    token.email = user.email;
+  }
+  return token;
+},
 
     async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.role = token.role as string;
+      session.user.id = token.id;
+      session.user.role = token.role;
       session.user.name = token.name;
       session.user.email = token.email;
       return session;

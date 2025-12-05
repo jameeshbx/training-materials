@@ -173,7 +173,7 @@ export default function ReportsPage() {
           font: {
             size: 13,
             family: "'Inter', sans-serif",
-            weight: '500' as const,
+            weight: 500,
           },
           color: '#475569',
         }
@@ -190,7 +190,7 @@ export default function ReportsPage() {
         boxPadding: 8,
         titleFont: {
           size: 14,
-          weight: '600' as const,
+          weight: 600,
         },
         bodyFont: {
           size: 13,
@@ -240,7 +240,7 @@ export default function ReportsPage() {
           font: {
             size: 12,
             family: "'Inter', sans-serif",
-            weight: '500' as const,
+            weight: 500,
           },
           padding: 15,
         },
