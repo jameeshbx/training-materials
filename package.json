@@ -43,6 +43,7 @@
     "tailwindcss-animate": "^1.0.7",
     "timeago.js": "^4.0.2",
     "typescript": "^5.4.0",
+    "xss": "^1.0.15",
     "zod": "^4.1.12",
     "zustand": "^4.5.0"
   },

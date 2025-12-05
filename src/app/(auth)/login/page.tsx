@@ -4,7 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
-
+import toast from "react-hot-toast";
 interface LoginForm {
   email: string;
   password: string;
@@ -39,16 +39,22 @@ export default function Login() {
       password: formData.password,
     });
 
+   // 🔥 Rate Limit (429)
+  if (res?.error && res.error.toLowerCase().includes("too many")) {
+    toast.error("Too many login attempts. Try again in 1 minute.");
     setLoading(false);
+    return;
+  }
 
-    if (res?.error) {
-      setError("Invalid email or password");
-      return;
-    }
+  // 🔥 Invalid credentials
+  if (res?.error) {
+    setError("Invalid email or password");
+    setLoading(false);
+    return;
+  }
 
-    // 🔥 Fetch updated session with role
-    const session = await getSession();
-
+  const session = await getSession();
+  setLoading(false);
     if (session?.user?.role === "ADMIN") {
       router.push("/admin");
     } else {

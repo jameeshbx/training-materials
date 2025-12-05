@@ -33,7 +33,7 @@ export async function POST(req:any) {
         name,
         email,
         password: hashed,
-        role // simple check
+        role 
       },
     });
 
