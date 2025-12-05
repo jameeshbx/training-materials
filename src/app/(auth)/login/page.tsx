@@ -12,7 +12,6 @@ interface LoginForm {
 
 export default function Login() {
   const router = useRouter();
-
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
@@ -27,7 +26,7 @@ export default function Login() {
       [e.target.name]: e.target.value,
     });
   };
-
+ 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -38,14 +37,12 @@ export default function Login() {
       email: formData.email,
       password: formData.password,
     });
-
-   // 🔥 Rate Limit (429)
-  if (res?.error && res.error.toLowerCase().includes("too many")) {
-    toast.error("Too many login attempts. Try again in 1 minute.");
-    setLoading(false);
-    return;
-  }
-
+// 🔥 Rate limit
+if (res?.error?.includes("Too many login attempts")) {
+  toast.error("Too many login attempts, try again later");
+  setLoading(false);
+  return;
+}
   // 🔥 Invalid credentials
   if (res?.error) {
     setError("Invalid email or password");
