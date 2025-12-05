@@ -1,4 +1,5 @@
 
+
 import "../styles/globals.css";
 import type { ReactNode } from "react";
 import Provider from "./SessionProvider";
@@ -7,8 +8,8 @@ import LayoutWrapper from "../components/LayoutWrapper";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (
-        <html lang="en">
-            <body className="bg-white text-black">
+        <html lang="en" suppressHydrationWarning>
+            <body className="bg-white text-black" suppressHydrationWarning>
                 <Provider>
                     <LayoutWrapper>
                         {children}
@@ -20,7 +21,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         </html>
     );
 }
-
 
 
 
