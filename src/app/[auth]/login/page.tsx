@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -12,22 +12,78 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
+  // Global error handler for uncaught errors (like URL construction errors)
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Check if it's a URL construction error (likely from rate limiting)
+      if (event.error?.message?.includes("Failed to construct 'URL'") || 
+          event.error?.message?.includes("Invalid URL")) {
+        event.preventDefault(); // Prevent the error from showing in console
+        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
+      }
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Check if it's a URL construction error
+      if (event.reason?.message?.includes("Failed to construct 'URL'") || 
+          event.reason?.message?.includes("Invalid URL") ||
+          event.reason?.message?.includes("429")) {
+        event.preventDefault(); // Prevent the error from showing in console
+        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
+      }
+    };
+
+    window.addEventListener("error", handleError);
+    window.addEventListener("unhandledrejection", handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener("error", handleError);
+      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
+    };
+  }, []);
+
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+    setErrorMsg(""); // Clear previous errors
 
-    const res = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-      callbackUrl: "/dashboard",
-    });
+    try {
+      const res = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+        callbackUrl: "/dashboard",
+      });
 
-    if (res?.error) {
-      setErrorMsg("Invalid email or password");
-      return;
+      if (res?.error) {
+        // Check if it's a rate limit error
+        if (res.error === "Too many requests" || 
+            res.error.includes("rate limit") || 
+            res.error.includes("429")) {
+          setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
+        } else {
+          setErrorMsg("Invalid email or password");
+        }
+        return;
+      }
+
+      if (res?.ok) {
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      // Handle network errors or other exceptions
+      console.error("Login error:", error);
+      
+      // Check if it's a rate limit error
+      if (error?.message?.includes("429") || 
+          error?.message?.includes("rate limit") || 
+          error?.message?.includes("Too many requests") ||
+          error?.message?.includes("Failed to construct 'URL'") || 
+          error?.message?.includes("Invalid URL")) {
+        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
+      } else {
+        setErrorMsg("An error occurred. Please try again.");
+      }
     }
-
-    router.push("/dashboard");
   }
 
   return (
@@ -108,9 +164,11 @@ export default function LoginPage() {
 
           {/* Error Message */}
           {errorMsg && (
-            <p className="text-red-600 text-center text-sm mb-3">
-              {errorMsg}
-            </p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+              <p className="text-red-700 text-center text-sm font-medium">
+                {errorMsg}
+              </p>
+            </div>
           )}
 
           {/* Button */}

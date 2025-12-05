@@ -41,6 +41,7 @@
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^3.4.0",
     "typescript": "^5.4.0",
+    "xss": "^1.0.15",
     "zod": "^4.1.12",
     "zustand": "^4.5.0"
   },
