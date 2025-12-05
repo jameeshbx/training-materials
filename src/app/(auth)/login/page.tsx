@@ -4,7 +4,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
-
+import toast from "react-hot-toast";
 interface LoginForm {
   email: string;
   password: string;
@@ -12,7 +12,6 @@ interface LoginForm {
 
 export default function Login() {
   const router = useRouter();
-
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
@@ -27,7 +26,7 @@ export default function Login() {
       [e.target.name]: e.target.value,
     });
   };
-
+ 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
@@ -38,17 +37,21 @@ export default function Login() {
       email: formData.email,
       password: formData.password,
     });
-
+// 🔥 Rate limit
+if (res?.error?.includes("Too many login attempts")) {
+  toast.error("Too many login attempts, try again later");
+  setLoading(false);
+  return;
+}
+  // 🔥 Invalid credentials
+  if (res?.error) {
+    setError("Invalid email or password");
     setLoading(false);
+    return;
+  }
 
-    if (res?.error) {
-      setError("Invalid email or password");
-      return;
-    }
-
-    // 🔥 Fetch updated session with role
-    const session = await getSession();
-
+  const session = await getSession();
+  setLoading(false);
     if (session?.user?.role === "ADMIN") {
       router.push("/admin");
     } else {

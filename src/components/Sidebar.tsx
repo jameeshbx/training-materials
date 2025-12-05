@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+
 import { 
   Home, 
   Bell, 
@@ -16,6 +18,8 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
+  const { data: session } = useSession();
+
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
@@ -160,11 +164,15 @@ export default function Sidebar() {
         <div className="absolute bottom-6 left-4 right-4 p-4 bg-white/10 rounded-xl backdrop-blur-sm border border-white/20">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
-              <Users size={20} className="text-white" />
+              <Users size={20} className="text-black" />
             </div>
             <div className="flex-1">
-              <p className="text-white font-semibold text-sm">Welcome Back!</p>
-              <p className="text-white/70 text-xs">Manage your workspace</p>
+             <p className="text-black font-semibold text-sm">
+        {session?.user?.name ? `Hi, ${session.user.name}` : "Welcome Back!"}
+      </p>
+      <p className="text-red-600 text-xs">
+        {session?.user?.email ? session.user.email : "Manage your workspace"}
+      </p>
             </div>
           </div>
         </div>
