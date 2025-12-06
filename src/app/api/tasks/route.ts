@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { emitEvent } from "@/lib/socketServer.ts"; 
+import { emitEvent } from "@/lib/socketServer.ts";
+// import { io } from "@/lib/socket";
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { logger } from "@/lib/logger";
@@ -131,6 +132,7 @@ export async function POST(req: NextRequest) {
   userAgent,
 });
 
+    // io.emit("taskCreated", task);
 
     emitEvent("taskCreated", task);
 

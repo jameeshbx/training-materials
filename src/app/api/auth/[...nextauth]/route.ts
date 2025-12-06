@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import xss from "xss";
 import { z } from "zod";
 import { limit } from "@/lib/rateLimiter";
-import { emitEvent } from "@/lib/socketServer.ts"; 
+// import { emitEvent } from "@/lib/socketServer.ts"; 
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -84,12 +84,12 @@ export const authOptions: NextAuthOptions = {
 // ---------------------------------------------------
 // 📢 SOCKET EMIT (Login Success)
 // ---------------------------------------------------
-emitEvent("userLoggedIn", {
-  id: user.id,
-  name: user.name,
-  email: user.email,
-  loggedInAt: new Date()
-});
+// emitEvent("userLoggedIn", {
+//   id: user.id,
+//   name: user.name,
+//   email: user.email,
+//   loggedInAt: new Date()
+// });
         // ---------------------------------------------------
         // 🎯 7) Return user to attach to JWT
         // ---------------------------------------------------
