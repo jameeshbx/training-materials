@@ -88,7 +88,7 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-10">
+    <div className="p-6 space-y-10 bg-grey">
       <h1 className="text-3xl font-bold">👨‍💼 Admin Dashboard</h1>
 
       <div className="mt-4">
@@ -102,7 +102,7 @@ export default function AdminDashboard() {
 
 
       {/* Invite Section */}
-      <div className="max-w-xl bg-white p-5 rounded-xl shadow border">
+      <div className="max-w-xl bg-grey p-5 rounded-xl shadow border">
         <h2 className="text-xl font-bold mb-3">📩 Invite a User</h2>
 
         <input
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Users List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 ">
         {users.map((user: any) => (
           <div
             key={user.id}
