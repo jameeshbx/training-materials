@@ -35,8 +35,8 @@ export function ReportsCharts({ barData, doughnutData }: ReportsChartsProps) {
 
   const coloredDoughnutData = {
     ...doughnutData,
-    datasets: doughnutData.datasets.map((dataset: any) => ({
-      ...dataset,
+      datasets: doughnutData?.datasets?.map((dataset: any) => ({
+                  ...dataset,
       backgroundColor: colors,
       borderWidth: 2,
       hoverOffset: 10,
@@ -52,7 +52,7 @@ export function ReportsCharts({ barData, doughnutData }: ReportsChartsProps) {
 
       <div className="border rounded-xl p-4 shadow bg-white">
         <h2 className="font-semibold text-black  mb-2">Task Distribution</h2>
-        <Doughnut data={coloredDoughnutData} />
+         {doughnutData && <Doughnut data={coloredDoughnutData} />}
       </div>
     </div>
   );
