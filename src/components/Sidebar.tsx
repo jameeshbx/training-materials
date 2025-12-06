@@ -14,7 +14,8 @@ import {
   Menu, 
   X,
   Users,
-  Shield
+  Shield,
+  Activity
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -49,7 +50,8 @@ export default function Sidebar() {
     { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
     { href: "/dashboard/tasks", icon: ClipboardList, label: "Tasks" },
     { href: "/dashboard/reports", icon: BarChart3, label: "Reports" },
-    { href: "/dashboard/uploads", icon: Upload, label: "Uploads" }
+    { href: "/dashboard/uploads", icon: Upload, label: "Uploads" },
+    { href: "/dashboard/health", icon: Activity, label: "Healths" },
   ];
 
   // Close sidebar when clicking a link on mobile

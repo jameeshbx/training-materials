@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-
+export const runtime = "nodejs";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import xss from "xss";
 import { z } from "zod";
 import { limit } from "@/lib/rateLimiter";
+import { emitEvent } from "@/lib/socketServer.ts"; 
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -80,7 +81,15 @@ export const authOptions: NextAuthOptions = {
         if (!valid) {
           throw new Error("Invalid email or password");
         }
-
+// ---------------------------------------------------
+// 📢 SOCKET EMIT (Login Success)
+// ---------------------------------------------------
+emitEvent("userLoggedIn", {
+  id: user.id,
+  name: user.name,
+  email: user.email,
+  loggedInAt: new Date()
+});
         // ---------------------------------------------------
         // 🎯 7) Return user to attach to JWT
         // ---------------------------------------------------

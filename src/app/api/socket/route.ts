@@ -1,4 +1,5 @@
 import { initSocket } from "@/socket-server.ts";
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   if (!(global as any)._socketStarted) {

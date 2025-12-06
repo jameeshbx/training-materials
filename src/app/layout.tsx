@@ -6,8 +6,45 @@ import "@/styles/globals.css";
 import Providers from "@/components/Providers";
 import { ReactNode } from "react";
 import { Toaster } from "react-hot-toast";
+import socket from "@/lib/socket";
+import toast from "react-hot-toast";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
+  useEffect(() => {
+    // Ensure socket connection
+    if (!socket.connected) socket.connect();
+
+    // Save notification (if you want DB storage)
+    const saveNotification = async (message: string) => {
+      try {
+        await fetch("/api/notifications", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message }),
+        });
+      } catch (err) {
+        console.error("❌ Failed to save notification", err);
+      }
+    };
+
+    // Real-time event handler
+    const onLogin = (data: { id: number; name: string; email: string }) => {
+      const msg = `👋 ${data.name} logged in`;
+      
+      toast.success(msg);
+      
+      // optional DB save
+      saveNotification(msg);
+
+      console.log("Real-time login:", data);
+    };
+
+    socket.on("userLoggedIn", onLogin);
+
+    return () => {
+      socket.off("userLoggedIn", onLogin);
+    };
+  }, []);
   return (
     <html lang="en">
       <body className="flex flex-col min-h-screen">

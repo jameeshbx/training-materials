@@ -24,6 +24,8 @@ export default function DashboardLayout({
         return "All Reports";
       case "/dashboard/uploads":
         return "All Files";
+          case "/dashboard/health":
+        return "All Heath Reports";
       default:
         return "Dashboard";
     }
