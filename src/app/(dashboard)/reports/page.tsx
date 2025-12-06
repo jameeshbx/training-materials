@@ -79,6 +79,9 @@
 //   );
 // }
 
+
+export const dynamic = "force-dynamic";
+
 import { ReportsCharts } from "@/components/reports/ReportsCharts";
 import { db } from "@/lib/db";
 
