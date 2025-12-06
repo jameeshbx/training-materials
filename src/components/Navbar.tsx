@@ -6,7 +6,7 @@ interface NavbarProps {
 
 export default function Navbar({ onToggleSidebar }: NavbarProps) {
   return (
-    <nav className="bg-gradient-to-r from-blue-600 to-blue-400 text-white shadow-lg p-4">
+    <nav className="bg-gradient-to-r from-grey-700 to-blue-200 text-white shadow-lg p-4">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Left side - menu button and logo/title */}
         <div className="flex items-center space-x-4">
@@ -36,8 +36,8 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
         {/* Right side - links */}
         <ul className="hidden md:flex space-x-6 text-lg">
           <li>
-            <a href="/" className="hover:text-yellow-300 transition-colors">
-              Home
+            <a href="/login" className="hover:text-yellow-300 transition-colors">
+              Logout
             </a>
           </li>
         </ul>

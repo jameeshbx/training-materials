@@ -142,7 +142,6 @@
 
 
 "use client";
-
 import { useEffect, useState } from "react";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { Chart, registerables } from "chart.js";
@@ -411,7 +410,7 @@ export default function ReportsPage() {
         {/* Header */}
         <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-700 to-indigo-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-black to-grey bg-clip-text text-transparent">
               Team Analytics
             </h1>
             <p className="text-slate-600 text-lg max-w-2xl">

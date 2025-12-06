@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
-      <body className="flex flex-col min-h-screen bg-gray-100">
+      <body className="flex flex-col w-full bg-gray-100">
         <AuthSessionProvider>
 
           {/* HIDE NAVBAR & SIDEBAR WHEN hideLayout = true */}
@@ -119,8 +119,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div
                   className={`
                     bg-gray-800 text-white transition-all duration-300 
-                    fixed md:static top-0 left-0 h-full z-40
-                    ${sidebarOpen ? "w-64" : "w-0 md:w-0 overflow-hidden"}
+                    fixed md:static top-0 left-0 h-full z-50
+                    ${sidebarOpen ? "w-64" : "w-0 md:w-64 overflow-hidden"}
                     md:block
                   `}
                 >
@@ -130,7 +130,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {/* BACKDROP FOR MOBILE */}
                 {sidebarOpen && (
                   <div
-                    className="fixed inset-0 bg-black bg-opacity-40 md:hidden z-30"
+                    className="fixed inset-0 bg-black bg-opacity-40 md:hidden z-40"
                     onClick={() => setSidebarOpen(false)}
                   />
                 )}
@@ -139,7 +139,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             {/* MAIN CONTENT */}
             <main
-              className={`flex-1 p-4 sm:p-6 bg-white text-black overflow-y-auto 
+              className={`flex-1 p-6  bg-white text-black overflow-y-auto 
               ${hideLayout ? "ml-0" : "md:ml-0"}`}
             >
               {children}

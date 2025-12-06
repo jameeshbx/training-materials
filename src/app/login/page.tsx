@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import Link from "next/link";
+
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -83,7 +85,12 @@ export default function LoginPage() {
             <p className="text-red-600 text-center text-sm mt-2">{err}</p>
           )}
         </form>
-
+ <p className="text-center text-gray-600 mt-3 text-sm">
+          New One?
+          <Link href="/signup" className="text-gray-900 ml-1 font-semibold hover:underline">
+            Signup
+          </Link>
+        </p>
         {/* Optional footer */}
         <p className="text-center text-gray-500 text-sm mt-6">
           © {new Date().getFullYear()} Your App • Secure Login
