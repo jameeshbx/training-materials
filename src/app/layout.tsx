@@ -103,7 +103,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <html lang="en">
-      <body className="flex flex-col w-full bg-gray-100">
+      <body className="bg-gray-100 text-gray-900">
         <AuthSessionProvider>
 
           {/* HIDE NAVBAR & SIDEBAR WHEN hideLayout = true */}
@@ -111,17 +111,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <Navbar onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
           )}
 
-          <div className="flex flex-1 pt-2">
+          <div className="flex w-full">
 
             {/* SIDEBAR (only show if NOT login/signup) */}
             {!hideLayout && (
               <>
                 <div
                   className={`
-                    bg-gray-800 text-white transition-all duration-300 
-                    fixed md:static top-0 left-0 h-full z-50
-                    ${sidebarOpen ? "w-64" : "w-0 md:w-64 overflow-hidden"}
-                    md:block
+                    fixed lg:static top-0 left-0 z-40
+                    bg-gray-900 text-white h-full
+                    transition-all duration-300
+                    ${sidebarOpen ? "w-64" : "w-0 lg:w-64"}
+                    overflow-hidden
                   `}
                 >
                   {sidebarOpen && <Sidebar />}

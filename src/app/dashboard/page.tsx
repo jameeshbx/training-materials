@@ -91,7 +91,7 @@ export default function DashboardPage() {
   }
 
   return (
-  <div className="p-6 md:ml-[260px] mt-[80px] min-h-screen bg-gradient-to-br from-slate-50 via-teal-50 to-indigo-50">
+<div className="w-full min-h-screen p-6 bg-gradient-to-br from-slate-50 via-teal-50 to-indigo-50">
 
     {/* Welcome Section */}
     <div className="mb-10">

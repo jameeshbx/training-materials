@@ -1,4 +1,5 @@
 "use client";
+import { FiLogOut } from "react-icons/fi";
 
 interface NavbarProps {
   onToggleSidebar?: () => void;
@@ -6,7 +7,7 @@ interface NavbarProps {
 
 export default function Navbar({ onToggleSidebar }: NavbarProps) {
   return (
-    <nav className="bg-gradient-to-r from-grey-700 to-blue-200 text-white shadow-lg p-4">
+<nav className="sticky top-0 z-50 bg-gradient-to-r from-gray-900 to-white text-white shadow-lg py-10 px-6 text-xl">
       <div className="max-w-6xl mx-auto flex justify-between items-center">
         {/* Left side - menu button and logo/title */}
         <div className="flex items-center space-x-4">
@@ -34,11 +35,15 @@ export default function Navbar({ onToggleSidebar }: NavbarProps) {
         </div>
 
         {/* Right side - links */}
-        <ul className="hidden md:flex space-x-6 text-lg">
+        <ul className="hidden md:flex space-x-8 text-lg">
           <li>
-            <a href="/login" className="hover:text-yellow-300 transition-colors">
-              Logout
-            </a>
+           <a
+  href="/login"
+  className="flex items-center text-black gap-2 hover:text-red-300 transition-colors"
+>
+  <FiLogOut className="text-lg" />
+  
+</a>
           </li>
         </ul>
       </div>
