@@ -16,9 +16,11 @@
 
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+export const revalidate = 60;
 
 export async function GET() {
   try {
+     console.log("DB HIT: task-distribution");  
     const distribution = await prisma.task.groupBy({
       by: ["status"],
       _count: {
@@ -26,13 +28,21 @@ export async function GET() {
       },
     });
 
-    // Transform the data to match the expected structure
-    const formattedDistribution = distribution.map(item => ({
+    type DistributionItem = {
+      status: string;
+      _count: { status: number };
+    };
+
+    const formattedDistribution = distribution.map((item: DistributionItem) => ({
       status: item.status,
-      _count: item._count.status
+      _count: item._count.status,
     }));
 
-    return NextResponse.json(formattedDistribution);
+    return NextResponse.json(formattedDistribution, {
+      headers: {
+        "Cache-Control": "s-maxage=60, stale-while-revalidate=30",
+      },
+    });
   } catch (error: any) {
     console.error("❌ Error in distribution report:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

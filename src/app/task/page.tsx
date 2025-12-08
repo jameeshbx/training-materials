@@ -395,7 +395,7 @@ export default function TasksPage() {
   max-w-5xl
 "
     >
-      <h1 className="text-3xl font-bold mb-5 text-center">Task Manager</h1>
+      <h1 className="text-3xl font-bold mb-5 text-center bg-gradient-to-r from-black to-grey bg-clip-text text-transparent ">Task Manager</h1>
 
       {/* CREATE TASK */}
       <div className="w-full px-4 sm:px-10 flex justify-center">
@@ -484,18 +484,20 @@ export default function TasksPage() {
                 key={task.id}
                 className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 hover:shadow-md transition-all duration-200"
               >
+                <div className="mb-4">
                 <h3 className="text-xl font-bold text-gray-800">{task.title}</h3>
                 <p className="text-gray-600 font-semibold">{task.description}</p>
                 {task.dueDate && (
-                  <p className="text-sm text-gray-600 font-semibold">
+                  <p className="text-xs bg-gray-500 text-gray-200 px-2 py-1 rounded-md font-medium">
                     Due: {new Date(task.dueDate).toLocaleDateString()}
                   </p>
                 )}
+                </div>
 
-                <div className="flex items-center gap-2 mb-1">
+                <div className="flex items-center gap-2 mb-4">
                   <span className="text-sm font-semibold text-gray-700">Status:</span>
                   <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold capitalize
+                    className={`px-3 py-1 rounded-full text-xs font-semibold tracking-wide
                     ${
                       task.status === "pending"
                         ? "bg-yellow-100 text-yellow-700"
@@ -510,7 +512,7 @@ export default function TasksPage() {
                 </div>
 
                 {/* BUTTONS */}
-                <div className="flex items-center justify-between mt-1">
+                <div className="flex items-center justify-between gap-2 border-t pt-3">
                   {/* Edit */}
                   <button
                     onClick={() => openEditModal(task)}
@@ -521,7 +523,7 @@ export default function TasksPage() {
 
                   {/* Timer */}
                   {activeEntry?.taskId === task.id ? (
-                    <div className="flex flex-col items-center">
+                    <div className="flex flex-col items-center gap-1">
                       <button
                         onClick={stopTimer}
                         className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
@@ -535,7 +537,7 @@ export default function TasksPage() {
                   ) : (
                     <button
                       onClick={() => startTimer(task.id)}
-                      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-green-600"
+                      className="px-4 py-2 bg-black text-white rounded-lg hover:bg-green-600 transition"
                     >
                       Start
                     </button>
@@ -560,7 +562,7 @@ export default function TasksPage() {
 
                 {/* TIME ENTRIES LIST */}
                 <div className="mt-3 space-y-1">
-                  <p className="font-semibold text-gray-700 text-sm">Time Entries:</p>
+                  <p className="font-semibold text-gray-700 text-sm uppercase tracking-wide">Time Entries:</p>
 
                   {taskEntries.length === 0 && <p className="text-xs text-gray-500">No time entries yet</p>}
 
