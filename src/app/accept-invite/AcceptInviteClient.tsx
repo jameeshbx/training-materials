@@ -49,19 +49,19 @@ export default function AcceptInviteClient() {
         toast.success("Invitation accepted! Redirecting...");
         router.push("/dashboard");
     };
-
     return (
-        <div className="flex items-center justify-center h-screen bg-gray-50">
-            <div className="p-6 bg-white border rounded-lg shadow-md w-full max-w-sm text-center">
+        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+            <div className="p-8 bg-white border rounded-xl shadow-lg w-full max-w-sm text-center">
                 <h1 className="text-xl font-bold mb-4">Accept Invitation</h1>
-                <p className="text-gray-600 mb-4">
+
+                <p className="text-gray-600 mb-6">
                     Click below to accept the invitation and join the app.
                 </p>
 
                 <button
                     onClick={handleAccept}
                     disabled={loading}
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    className="px-5 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
                 >
                     {loading ? "Accepting..." : "Accept Invitation"}
                 </button>
