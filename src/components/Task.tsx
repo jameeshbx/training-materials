@@ -56,9 +56,7 @@ useEffect(() => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),
       });
-    } catch (err) {
-      console.error("❌ Failed to save notification", err);
-    }
+    } catch {}
   };
 
   // 🔹 New Task
@@ -98,16 +96,20 @@ useEffect(() => {
     saveNotification(msg);
   };
 
+  // 👇 Listener attach
   socket.on("taskCreated", onCreated);
   socket.on("taskUpdated", onUpdated);
   socket.on("taskDeleted", onDeleted);
 
+  // 👇 Cleanup
   return () => {
     socket.off("taskCreated", onCreated);
     socket.off("taskUpdated", onUpdated);
     socket.off("taskDeleted", onDeleted);
   };
+
 }, []);
+
 
   // Delete Task Confirmation
   const confirmDelete = (task: Tasks) => {

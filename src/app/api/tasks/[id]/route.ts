@@ -1,8 +1,9 @@
-export const dynamic = "force-dynamic";
+// export const dynamic = "force-dynamic";
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { emitEvent } from "@/lib/socketServer.ts";
+// import { io } from "@/lib/socket";
 import { createAuditLog } from "@/lib/audit";
 import { getRequestMeta } from "@/lib/request-meta";
 import { getServerSession } from "next-auth";
@@ -81,6 +82,8 @@ export async function PUT(
     ip,
     userAgent,
   });
+    // io.emit("taskUpdated", updated);
+
 
   emitEvent("taskUpdated", updated);
 
@@ -101,6 +104,8 @@ export async function DELETE(
   const taskId = Number(id);
 
   await prisma.task.delete({ where: { id: taskId } });
+    // io.emit("taskDeleted", { id: taskId });
+
 
   emitEvent("taskDeleted", { id: taskId });
 
