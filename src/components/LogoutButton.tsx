@@ -38,6 +38,7 @@ export default function LogoutButton() {
 
   return (
     <button
+     aria-label="Logout"
       onClick={handleLogout}
       className="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded"
     >

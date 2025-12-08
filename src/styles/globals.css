@@ -61,3 +61,11 @@ html, body {
   padding: 0;
   margin: 0;
 }
+/* Accessibility focus styles */
+:focus {
+  outline: 3px solid #0ea5e9; /* sky-500 */
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+

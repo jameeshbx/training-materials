@@ -1,0 +1,80 @@
+{
+  "Sidebar": {
+  "title": "Training App",
+  "home": "Home",
+  "dashboard": "Dashboard",
+  "teams": "Teams",
+  "tasks": "Tasks",
+  "reports": "Reports",
+  "documents": "Documents",
+  "logout": "Logout"
+},
+
+ "DashboardPage": {
+  "welcomeTitle": "Hi, {name} 👋",
+  "welcomeSubtitle": "Welcome back! Here’s what’s happening today.",
+  "recentActivity": "Recent Activity",
+  "liveActivityFeed": "Live Activity Feed",
+  "online": "Online",
+  "manageUsers": "Manage Users",
+  "auditLogs": "Audit Logs",
+  "todaysTasks": "Today’s Due Tasks",
+  "noTasks": "No tasks due today. Enjoy your day!",
+  "due": "Due"
+},
+"DocumentsPage": {
+  "heading": "Documents",
+  "title": "Upload Document",
+  "chooseFile": "Choose File",
+  "enterTitle": "Enter title",
+  "uploadButton": "Upload",
+  "uploading": "Uploading...",
+  "uploadedDocs": "Uploaded Documents",
+  "noDocs": "No documents found",
+  "open": "Open",
+  "delete": "Delete"
+},
+"ReportsPage": {
+  "heading": "Reports",
+  "barChartLabel": "Hours this week",
+  "taskDistribution": "Task Distribution",
+  "barTitle": "Weekly Hours per Member",
+  "doughnutTitle": "Task Distribution"
+},
+"TasksPage": {
+  "title": "Tasks",
+  "newTask": "+ New Task",
+  "notAuth": "Not authenticated"
+},
+"LoginPage": {
+  "welcome": "Welcome Back",
+  "subtitle": "Please login to continue",
+  "email": "Email",
+  "password": "Password",
+  "emailPlaceholder": "Enter your email",
+  "passwordPlaceholder": "Enter your password",
+  "loginButton": "Login",
+  "noAccount": "Don't have an account?",
+  "createAccount": "Create Account"
+},
+"SignupPage": {
+  "title": "Create Account",
+  "subtitle": "Signup to continue",
+  "name": "Name",
+  "email": "Email",
+  "password": "Password",
+  "role": "Role",
+  "signupButton": "Signup",
+  "haveAccount": "Already have an account?",
+  "login": "Login"
+}
+
+
+
+
+
+
+
+
+
+}

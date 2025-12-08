@@ -13,7 +13,6 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
   const [error, setError] = useState("");
   const [dueDate, setDueDate] = useState("");
 
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
@@ -27,29 +26,13 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
           title,
           description,
           status,
-          userId, // ← REAL LOGGED-IN USER ID
-          dueDate, 
+          userId,
+          dueDate
         }),
       });
 
       if (!res.ok) {
-        let errorMessage = `Failed to create task (${res.status})`;
-        try {
-          const contentType = res.headers.get("content-type");
-          if (contentType && contentType.includes("application/json")) {
-            const data = await res.json();
-            errorMessage = data.error || errorMessage;
-            console.error("❌ Task creation error:", data);
-          } else {
-            const text = await res.text();
-            console.error("❌ Non-JSON error response:", text.substring(0, 200));
-            errorMessage = `Server error: ${res.status}`;
-          }
-        } catch (parseError) {
-          console.error("❌ Failed to parse error response:", parseError);
-          errorMessage = `Server error: ${res.status}`;
-        }
-        throw new Error(errorMessage);
+        throw new Error("Failed to create task");
       }
 
       router.push("/tasks");
@@ -62,34 +45,41 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-md text-white">
+    <form onSubmit={handleSubmit} aria-label="Create new task form" className="space-y-4 max-w-md text-white">
 
       <div>
-        <label className="block text-sm mb-1">Title</label>
+        <label htmlFor="title" className="block text-sm mb-1">Title</label>
         <input
-          className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+          id="title"
+          aria-required="true"
+          className="w-full rounded-md px-3 py-2 text-white border border-gray-300 focus:outline-blue-400"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          placeholder="Enter task title"
           required
         />
       </div>
 
       <div>
-        <label className="block text-sm mb-1">Description</label>
+        <label htmlFor="description" className="block text-sm mb-1">Description</label>
         <textarea
-          className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+          id="description"
+          className="w-full rounded-md px-3 py-2 text-white border border-gray-300 focus:outline-blue-400"
           rows={3}
           value={description}
+          placeholder="Enter details (optional)"
           onChange={(e) => setDescription(e.target.value)}
         />
       </div>
 
       <div>
-        <label className="block text-sm mb-1">Status</label>
+        <label htmlFor="status" className="block text-sm mb-1">Status</label>
         <select
-          className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+          id="status"
+          className="w-full rounded-md px-3 py-2 text-white border border-gray-300 focus:outline-blue-400"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
+          aria-label="Select task status"
         >
           <option className="text-black" value="pending">Pending</option>
           <option className="text-black" value="in-progress">In progress</option>
@@ -98,21 +88,22 @@ export default function CreateTaskForm({ userId }: { userId: string }) {
       </div>
 
       <div>
-        <label className="block text-sm mb-1">Due Date</label>
+        <label htmlFor="dueDate" className="block text-sm mb-1">Due Date</label>
         <input
+          id="dueDate"
           type="date"
-          className="w-full rounded-md px-3 py-2 text-white border border-gray-300"
+          className="w-full rounded-md px-3 py-2 text-white border border-gray-300 focus:outline-blue-400"
           value={dueDate}
           onChange={(e) => setDueDate(e.target.value)}
+          aria-label="Select due date"
         />
       </div>
 
-      
-
-      {error && <p className="text-red-400 text-sm">{error}</p>}
+      {error && <p className="text-red-400 text-sm" aria-live="assertive">{error}</p>}
 
       <button
         type="submit"
+        aria-label="Create a new task"
         disabled={loading}
         className="bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-4 py-2 rounded-lg"
       >

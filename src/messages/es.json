@@ -1,0 +1,77 @@
+{
+  "Sidebar": {
+    "title": "Aplicación de Entrenamiento",
+    "home": "Inicio",
+    "dashboard": "Panel",
+    "teams": "Equipos",
+    "tasks": "Tareas",
+    "reports": "Informes",
+    "documents": "Documentos",
+    "logout": "Cerrar sesión"
+  },
+  "DashboardPage": {
+    "welcomeTitle": "Hola, {name} 👋",
+    "welcomeSubtitle": "¡Bienvenido de nuevo! Esto es lo que está pasando hoy.",
+    "recentActivity": "Actividad Reciente",
+    "liveActivityFeed": "Actividad en Vivo",
+    "online": "En línea",
+    "manageUsers": "Gestionar Usuarios",
+    "auditLogs": "Registros de Auditoría",
+    "todaysTasks": "Tareas para Hoy",
+    "noTasks": "No hay tareas para hoy. ¡Disfruta tu día!",
+    "due": "Vence"
+  },
+ "DocumentsPage": {
+  "heading": "Documentos",
+  "title": "Subir Documento",
+  "chooseFile": "Elegir archivo",
+  "enterTitle": "Escriba el título",
+  "uploadButton": "Subir",
+  "uploading": "Subiendo...",
+  "uploadedDocs": "Documentos subidos",
+  "noDocs": "No se encontraron documentos",
+  "open": "Abrir",
+  "delete": "Eliminar"
+},
+"ReportsPage": {
+  "heading": "Informes",
+  "barChartLabel": "Horas esta semana",
+  "taskDistribution": "Distribución de tareas",
+  "barTitle": "Horas semanales por miembro",
+  "doughnutTitle": "Distribución de tareas"
+},
+"TasksPage": {
+  "title": "Tareas",
+  "newTask": "+ Nueva tarea",
+  "notAuth": "No autenticado"
+},
+"LoginPage": {
+  "welcome": "Bienvenido de nuevo",
+  "subtitle": "Por favor inicia sesión",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "emailPlaceholder": "Introduce tu correo",
+  "passwordPlaceholder": "Introduce tu contraseña",
+  "loginButton": "Iniciar sesión",
+  "noAccount": "¿No tienes una cuenta?",
+  "createAccount": "Crear cuenta"
+},
+"SignupPage": {
+  "title": "Crear cuenta",
+  "subtitle": "Regístrate para continuar",
+  "name": "Nombre",
+  "email": "Correo electrónico",
+  "password": "Contraseña",
+  "role": "Rol",
+  "signupButton": "Registrar",
+  "haveAccount": "¿Ya tienes una cuenta?",
+  "login": "Iniciar sesión"
+}
+
+
+
+
+
+
+
+}

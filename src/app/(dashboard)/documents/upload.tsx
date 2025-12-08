@@ -5,11 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Trash2, FileIcon, Upload } from "lucide-react";
+import { useTranslations } from "next-intl";
+
 
 export default function DocumentsUpload() {
+  const t = useTranslations("DocumentsPage");  // 🔥 namespace
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState("");
+  
 
   const CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!;
   const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!;
@@ -47,33 +51,43 @@ export default function DocumentsUpload() {
   }
 
   return (
-    <Card className="p-4 max-w-xl">
-      <h1 className="text-xl font-semibold mb-3">Upload Document</h1>
+  <Card className="p-4 max-w-xl">
+    <h1 className="text-xl font-semibold mb-3">{t("title")}</h1>
 
-      <Input type="file" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+    <Input
+      type="file"
+      onChange={(e) => setFile(e.target.files?.[0] || null)}
+    />
 
-      <Input
-        type="text"
-        placeholder="Enter title"
-        className="mt-3"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+    <Input
+      type="text"
+      placeholder={t("enterTitle")}
+      className="mt-3"
+      value={title}
+      onChange={(e) => setTitle(e.target.value)}
+    />
 
-      <Button onClick={handleUpload} className="mt-3">
-        {loading ? "Uploading..." : "Upload"} <Upload className="w-4 h-4 ml-2" />
-      </Button>
+    <Button onClick={handleUpload} className="mt-3">
+      {loading ? t("uploading") : t("uploadButton")}
+      <Upload className="w-4 h-4 ml-2" />
+    </Button>
 
-      <h2 className="text-lg font-semibold mt-6 mb-2">Uploaded Documents</h2>
-      <DocumentsList />
-    </Card>
-  );
+    <h2 className="text-lg font-semibold mt-6 mb-2">
+      {t("uploadedDocs")}
+    </h2>
+
+    <DocumentsList />
+  </Card>
+);
+
 }
 
 // =============================
 // 📌 DOCUMENTS LIST COMPONENT
 // =============================
 function DocumentsList() {
+
+  const t = useTranslations("DocumentsPage");
   interface DocumentType {
     id: string;
     fileName?: string | null;
@@ -121,7 +135,7 @@ function DocumentsList() {
   }
 
   if (docs.length === 0)
-    return <p className="text-sm text-gray-500">No documents found.</p>;
+return <p className="text-sm text-gray-500">{t("noDocs")}</p>;
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-3">
@@ -144,22 +158,23 @@ function DocumentsList() {
           </p>
 
           <div className="flex justify-between mt-2">
-            <Button
-              variant="secondary"
-              className="text-xs"
-              onClick={() => window.open(doc.url, "_blank")}
-            >
-              Open
-            </Button>
+           <Button
+  variant="secondary"
+  className="text-xs"
+  onClick={() => window.open(doc.url, "_blank")}
+>
+  {t("open")}
+</Button>
 
-            <Button
-              variant="secondary"
-              className="text-red-600 border border-red-500 text-xs"
-              onClick={() => handleDelete(doc.id)}
-            >
-              <Trash2 className="w-4 h-4 mr-1" />
-              Delete
-            </Button>
+<Button
+  variant="secondary"
+  className="text-red-600 border border-red-500 text-xs"
+  onClick={() => handleDelete(doc.id)}
+>
+  <Trash2 className="w-4 h-4 mr-1" />
+  {t("delete")}
+</Button>
+
           </div>
         </Card>
       ))}
