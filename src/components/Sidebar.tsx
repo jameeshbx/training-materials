@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSession } from "next-auth/react";
+import { useLocale } from "next-intl";
 
 import { 
   Home, 
@@ -19,6 +20,7 @@ import {
 } from "lucide-react";
 
 export default function Sidebar() {
+  const locale = useLocale();
   const { data: session } = useSession();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -46,14 +48,37 @@ export default function Sidebar() {
   };
 
   const navItems = [
-    { href: "/dashboard", icon: Home, label: "Home" },
-    { href: "/dashboard/notifications", icon: Bell, label: "Notifications" },
-    { href: "/dashboard/tasks", icon: ClipboardList, label: "Tasks" },
-    { href: "/dashboard/reports", icon: BarChart3, label: "Reports" },
-    { href: "/dashboard/uploads", icon: Upload, label: "Uploads" },
-    { href: "/dashboard/health", icon: Activity, label: "Healths" },
-  ];
-
+  { 
+    href: `/${locale}/dashboard`, 
+    icon: Home, 
+    label: "Home" 
+  },
+  { 
+    href: `/${locale}/dashboard/notifications`, 
+    icon: Bell, 
+    label: "Notifications" 
+  },
+  { 
+    href: `/${locale}/dashboard/tasks`, 
+    icon: ClipboardList, 
+    label: "Tasks" 
+  },
+  { 
+    href: `/${locale}/dashboard/reports`, 
+    icon: BarChart3, 
+    label: "Reports" 
+  },
+  { 
+    href: `/${locale}/dashboard/uploads`, 
+    icon: Upload, 
+    label: "Uploads" 
+  },
+  { 
+    href: `/${locale}/dashboard/health`, 
+    icon: Activity, 
+    label: "Health"  // Fixed: "Healths" → "Health"
+  },
+];
   // Close sidebar when clicking a link on mobile
   const handleLinkClick = () => {
     if (isMobile) {

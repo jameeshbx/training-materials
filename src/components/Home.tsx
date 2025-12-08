@@ -4,9 +4,11 @@ import { ServiceCard } from "@/types/user";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-
+import { useTranslations } from "next-intl"; // 👈 Added
 
 export default function Home() {
+  const t = useTranslations("home"); // 👈 Added
+
   const services: ServiceCard[] = [
     { id: 1, title: "Beach Travel", description: "Enjoy the most beautiful beaches with crystal clear water.", imageUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e" },
     { id: 2, title: "Mountain Trekking", description: "Adventure trekking with professional guides.", imageUrl: "https://images.unsplash.com/photo-1501785888041-af3ef285b470" },
@@ -20,7 +22,6 @@ export default function Home() {
 
   const [searchQuery, setSearchQuery] = useState("");
 
-  // 🔍 Search title filter
   const filteredServices = services.filter((s) =>
     s.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -28,21 +29,22 @@ export default function Home() {
   return (
     <>
       <div className="py-10 ">
-        <h2 className="text-center text-3xl font-bold mb-5">Our Services</h2>
+        <h2 className="text-center text-3xl font-bold mb-5">
+          {t("servicesHeading")}
+        </h2>
 
-     {/*  Search Bar */}
-<div className="w-full flex justify-center sm:justify-start mt-10 px-4 sm:px-8 md:px-16">
-  <div className="relative w-full sm:w-[400px] max-w-[400px]">
-    <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
-    <Input
-      placeholder="Search services..."
-      className="pl-10 py-5 text-lg border border-gray-300 focus-visible:ring-blue-600 w-full"
-      value={searchQuery}
-      onChange={(e) => setSearchQuery(e.target.value)}
-    />
-  </div>
-</div>
- {/*  card section*/}
+        <div className="w-full flex justify-center sm:justify-start mt-10 px-4 sm:px-8 md:px-16">
+          <div className="relative w-full sm:w-[400px] max-w-[400px]">
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-500" />
+            <Input
+              placeholder={t("searchPlaceholder")}
+              className="pl-10 py-5 text-lg border border-gray-300 focus-visible:ring-blue-600 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+
         <div className="w-full mt-7">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 px-16">
             {filteredServices.length > 0 ? (
@@ -55,13 +57,15 @@ export default function Home() {
                   <div className="p-6">
                     <h3 className="text-2xl font-semibold">{s.title}</h3>
                     <p className="text-gray-600 mt-3">{s.description}</p>
-                    <Button className="mt-6 w-full h-12 bg-green-300">Book Now</Button>
+                    <Button className="mt-6 w-full h-12 bg-green-300">
+                      {t("bookNow")}
+                    </Button>
                   </div>
                 </div>
               ))
             ) : (
               <p className="text-center text-gray-500 col-span-full text-xl">
-                No services found 
+                {t("noResults")}
               </p>
             )}
           </div>

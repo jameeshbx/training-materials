@@ -1,0 +1,29 @@
+{
+  "home": {
+    "title": "സ്വാഗതം",
+    "description": "ഇത് മലയാളം text ആണ്",
+    "servicesHeading": "ഞങ്ങളുടെ സേവനങ്ങൾ",
+    "searchPlaceholder": "സേവനങ്ങൾ തേടൂ...",
+    "bookNow": "ബുക്ക് ചെയ്യൂ",
+    "noResults": "സേവനങ്ങൾ ലഭ്യമില്ല"
+  },
+  "header": {
+    "dashboard": "ഡാഷ്ബോർഡ്",
+    "logout": "ലോഗൗട്ട്"
+  },
+"Auth": {
+    "loginTitle": "ലോഗിൻ",
+    "welcomeBack": "വീണ്ടും സ്വാഗതം",
+    "loginSubtitle": "നിങ്ങളുടെ അക്കൗണ്ട് ആക്‌സസ് ചെയ്യാൻ ലോഗിൻ ചെയ്യുക",
+    "emailLabel": "ഇമെയിൽ",
+    "emailPlaceholder": "email@example.com",
+    "passwordLabel": "പാസ്‌വേർഡ്",
+    "passwordPlaceholder": "********",
+    "signInButton": "സൈൻ ഇൻ",
+    "signingIn": "സൈൻ ഇൻ ചെയ്യുന്നു...",
+    "noAccount": "അക്കൗണ്ട് ഇല്ലേ?",
+    "createAccount": "ഒന്ന് സൃഷ്ടിക്കുക",
+    "rateLimitError": "വളരെയധികം ലോഗിൻ ശ്രമങ്ങൾ, പിന്നീട് ശ്രമിക്കുക",
+    "invalidCredentials": "അസാധുവായ ഇമെയിൽ അല്ലെങ്കിൽ പാസ്‌വേർഡ്"
+  }
+}

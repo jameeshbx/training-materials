@@ -2,6 +2,8 @@
 import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from 'react'
+import { useLocale } from "next-intl";
+
 import { 
   Users, 
   Settings, 
@@ -46,7 +48,7 @@ export default function AdminClientPage({ session }: any) {
     completedTasks: 0,
     totalTasks: 0
   });
-
+const locale = useLocale();
   const fetchUsers = async () => {
     try {
       const res = await fetch(`/api/users`);
@@ -129,7 +131,7 @@ export default function AdminClientPage({ session }: any) {
     title: "Manage Users",
     description: `Manage ${stats.totalUsers} users`,
     icon: Users,
-    path: '/admin/userlist',
+    path:   `/${locale}/admin/userlist`,
     color: "from-blue-500 to-cyan-500",
     bgColor: "bg-blue-50",
     iconColor: "text-blue-600"
@@ -138,7 +140,7 @@ export default function AdminClientPage({ session }: any) {
     title: "Send Invitations",
     description: "Invite new users to the platform",
     icon: UserPlus,
-    path: '/admin/invite',
+    path: `/${locale}/admin/invite`,
     color: "from-green-500 to-emerald-500",
     bgColor: "bg-green-50",
     iconColor: "text-green-600"
@@ -147,7 +149,7 @@ export default function AdminClientPage({ session }: any) {
     title: "Notifications",
     description: "Manage system notifications",
     icon: Bell,
-    path: '/dashboard/notifications',
+    path: `/${locale}/dashboard/notifications`,
     color: "from-teal-500 to-cyan-500",
     bgColor: "bg-teal-50",
     iconColor: "text-teal-600"
@@ -156,7 +158,7 @@ export default function AdminClientPage({ session }: any) {
     title: "Audit-log",
     description: "All Logs",
     icon: Bell,
-    path: '/admin/audit-logs',
+    path: `/${locale}/admin/audit-logs`,
     color: "from-teal-500 to-cyan-500",
     bgColor: "bg-teal-50",
     iconColor: "text-teal-600"
@@ -214,7 +216,7 @@ export default function AdminClientPage({ session }: any) {
               Refresh
             </button>
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
               className="flex items-center gap-2 px-6 py-3 bg-white text-slate-700 rounded-xl hover:bg-slate-50 border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 font-medium"
             >
               <LogOut className="w-5 h-5" />

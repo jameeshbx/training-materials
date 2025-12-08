@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import UploadModal from "../../../components/FileUploadModal";
-import DeleteConfirmModal from "../../../components/FileDeleteModal";
+import UploadModal from "../../../../components/FileUploadModal";
+import DeleteConfirmModal from "../../../../components/FileDeleteModal";
 
 interface UploadedFile {
   id: string;

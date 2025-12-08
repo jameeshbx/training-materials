@@ -2,6 +2,25 @@ import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
 
+// Define your supported locales
+const locales = ['en', 'ml']; // Add more as needed
+
+/**
+ * Extract locale from pathname
+ */
+function getLocaleFromPath(pathname: string): { locale: string | null, cleanPath: string } {
+  const segments = pathname.split('/').filter(Boolean);
+  
+  if (segments.length > 0 && locales.includes(segments[0])) {
+    return {
+      locale: segments[0],
+      cleanPath: '/' + segments.slice(1).join('/') || '/'
+    };
+  }
+  
+  return { locale: null, cleanPath: pathname };
+}
+
 /**
  * Helmet-style Security Headers Function
  */
@@ -29,7 +48,6 @@ function applySecurityHeaders(response: NextResponse, req: NextRequest) {
   }
 
   // ✅ Content Security Policy (CSP)
-  // Socket.IO WebSocket
   let connectSrc = "'self'";
   
   // Development Socket.IO allow
@@ -43,9 +61,8 @@ function applySecurityHeaders(response: NextResponse, req: NextRequest) {
   }
 
   const cspDirectives = [
-    // Basic directives
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Next.js needs unsafe-eval for dev
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https:",
     "font-src 'self' data:",
@@ -55,8 +72,6 @@ function applySecurityHeaders(response: NextResponse, req: NextRequest) {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-ancestors 'none'",
-    
-    // Additional for Next.js
     "worker-src 'self' blob:",
     "child-src 'self' blob:",
   ];
@@ -68,8 +83,6 @@ function applySecurityHeaders(response: NextResponse, req: NextRequest) {
 
   // ✅ Additional security headers
   response.headers.set('X-XSS-Protection', '1; mode=block');
-  
-  // ✅ Remove server info
   response.headers.set('X-Powered-By', '');
   response.headers.set('Server', '');
 
@@ -77,54 +90,92 @@ function applySecurityHeaders(response: NextResponse, req: NextRequest) {
 }
 
 export async function middleware(req: NextRequest) {
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const token = await getToken({ 
+    req, 
+    secret: process.env.NEXTAUTH_SECRET 
+  });
+  
   const pathname = req.nextUrl.pathname;
+  
+  // Extract locale and clean path
+  const { locale, cleanPath } = getLocaleFromPath(pathname);
+  
+  console.log("🔥 PATH:", pathname, "| LOCALE:", locale, "| CLEAN PATH:", cleanPath, "| TOKEN:", !!token);
 
-  console.log("🔥 TOKEN =>", token, " | PATH =>", pathname);
-
-  // ✅ Socket.IO, API, static files  headers skip 
+  // ✅ Skip for API, static files, monitoring
   if (
     pathname.startsWith('/api/') ||
     pathname.startsWith('/_next/') ||
     pathname.includes('/socket.io/') ||
-    pathname.includes('.') // Files with extensions
+    pathname.includes('.') ||
+    pathname.includes('monitoring') // Skip Sentry monitoring
   ) {
-    // Minimal headers for these routes
     const response = NextResponse.next();
     response.headers.set('X-Content-Type-Options', 'nosniff');
     return response;
   }
 
-  // 1️⃣ Allow invite acceptance without login
-  if (pathname.startsWith("/dashboard/") && pathname.split('/').length === 3) {
-    const potentialToken = pathname.split('/')[2];
-    // Allow if it looks like a token (not a normal dashboard page)
+  // 1️⃣ Handle locale redirection
+  if (!locale && pathname === '/') {
+    // Redirect root to default locale
+    const defaultLocale = 'en';
+    const newUrl = new URL(`/${defaultLocale}`, req.url);
+    const response = NextResponse.redirect(newUrl);
+    return applySecurityHeaders(response, req);
+  }
+
+  // 2️⃣ Validate locale
+  if (locale && !locales.includes(locale)) {
+    // Invalid locale, redirect to default
+    const newUrl = new URL(`/en${cleanPath}`, req.url);
+    const response = NextResponse.redirect(newUrl);
+    return applySecurityHeaders(response, req);
+  }
+
+  // Helper function to create URLs with locale
+  const createUrl = (path: string) => {
+    const basePath = path.startsWith('/') ? path : `/${path}`;
+    if (locale) {
+      return new URL(`/${locale}${basePath}`, req.url);
+    }
+    return new URL(basePath, req.url);
+  };
+
+  // 3️⃣ Allow invite acceptance without login
+  if (cleanPath.startsWith("/dashboard/") && cleanPath.split('/').length === 3) {
+    const potentialToken = cleanPath.split('/')[2];
     if (potentialToken && potentialToken.length > 10) {
       const response = NextResponse.next();
       return applySecurityHeaders(response, req);
     }
   }
 
-  // 2️⃣ Not logged in → protect dashboard (except invite tokens)
-  if (!token && pathname.startsWith("/dashboard")) {
-    const response = NextResponse.redirect(new URL("/login", req.url));
+  // 4️⃣ Not logged in → protect dashboard (except invite tokens)
+  if (!token && cleanPath.startsWith("/dashboard")) {
+    const loginUrl = createUrl("/login");
+    const response = NextResponse.redirect(loginUrl);
     return applySecurityHeaders(response, req);
   }
 
-  // 3️⃣ Rest of your middleware rules...
-  if (!token && pathname.startsWith("/admin")) {
-    const response = NextResponse.redirect(new URL("/login", req.url));
+  // 5️⃣ Not logged in → protect admin
+  if (!token && cleanPath.startsWith("/admin")) {
+    const loginUrl = createUrl("/login");
+    const response = NextResponse.redirect(loginUrl);
     return applySecurityHeaders(response, req);
   }
 
-  if (token && token.role === "USER" && pathname.startsWith("/admin")) {
-    const response = NextResponse.redirect(new URL("/dashboard", req.url));
+  // 6️⃣ User trying to access admin → redirect to dashboard
+  if (token && token.role === "USER" && cleanPath.startsWith("/admin")) {
+    const dashboardUrl = createUrl("/dashboard");
+    const response = NextResponse.redirect(dashboardUrl);
     return applySecurityHeaders(response, req);
   }
 
-  if (token && (pathname === "/login" || pathname === "/signup")) {
+  // 7️⃣ Already logged in → redirect from login/signup
+  if (token && (cleanPath === "/login" || cleanPath === "/signup")) {
     const redirectUrl = token.role === "ADMIN" ? "/admin" : "/dashboard";
-    const response = NextResponse.redirect(new URL(redirectUrl, req.url));
+    const targetUrl = createUrl(redirectUrl);
+    const response = NextResponse.redirect(targetUrl);
     return applySecurityHeaders(response, req);
   }
 
@@ -135,12 +186,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/dashboard/:path*",
-    "/admin/:path*",
-    "/login",
-    "/signup",
-
-    // ✅ DO NOT block API routes, Socket.IO, static files
-    "/((?!api|_next|_static|_vercel|favicon.ico|sitemap.xml|robots.txt).*)",
+    // Match all paths except static files and API
+    "/((?!api|_next|_static|_vercel|favicon.ico|sitemap.xml|robots.txt|monitoring).*)",
   ],
 };
