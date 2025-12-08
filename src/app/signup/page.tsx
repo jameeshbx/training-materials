@@ -1,10 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
+import enMessages from "@/messages/en.json";
+import esMessages from "@/messages/es.json";
+
 export default function Signup() {
+  // ✅ Language state
+  const [locale, setLocale] = useState<"en" | "es">("en");
+  const [messages, setMessages] = useState<any>(null);
+
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -13,6 +20,14 @@ export default function Signup() {
   });
 
   const router = useRouter();
+
+  // ✅ Load messages (same logic as dashboard)
+  useEffect(() => {
+    setMessages(locale === "es" ? esMessages : enMessages);
+  }, [locale]);
+
+  // ✅ Translation helper
+  const t = (key: string) => messages?.auth?.[key] || key;
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -26,121 +41,115 @@ export default function Signup() {
     if (res.ok) router.push("/login");
   };
 
-return (
-  <div className="min-h-screen flex bg-gradient-to-br from-slate-100 via-white to-slate-200 text-black">
-    
-    {/* LEFT: Image / Branding */}
-    <div className="hidden md:flex w-1/2 bg-gray-900 items-center justify-center relative">
-      <img
-        src="/signup-bg.jpg"
-        alt="Signup Background"
-        className="absolute inset-0 w-full h-full object-cover opacity-90"
-      />
-      <div className="relative z-10 text-white text-center px-10">
-        <h1 className="text-4xl font-bold mb-3 tracking-tight">
-          Join Our Platform
-        </h1>
-        <p className="text-gray-200 text-lg">
-          Create your account and get started instantly.
-        </p>
-      </div>
-      <div className="absolute inset-0 bg-black/40"></div>
-    </div>
+  if (!messages) return null;
 
-    {/* RIGHT: Signup Form */}
-    <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-8">
-      <div className="w-full max-w-md bg-white shadow-2xl rounded-2xl p-6 sm:p-8 border border-slate-200">
-        
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight">
-            Create Account
-          </h2>
-          <p className="text-sm text-gray-500 mt-1">
-            Join us and manage your work professionally
+  return (
+    <div className="min-h-screen flex bg-gradient-to-br from-slate-100 via-white to-slate-200 text-black">
+
+      {/* ✅ Language switcher */}
+      <div className="absolute top-4 right-4 flex gap-2">
+        <button
+          onClick={() => setLocale("en")}
+          className={`px-3 py-1 rounded ${
+            locale === "en" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          EN
+        </button>
+        <button
+          onClick={() => setLocale("es")}
+          className={`px-3 py-1 rounded ${
+            locale === "es" ? "bg-blue-600 text-white" : "bg-gray-200"
+          }`}
+        >
+          ES
+        </button>
+      </div>
+
+      {/* Skip Link */}
+      <a href="#signup-form" className="sr-only focus:not-sr-only">
+        Skip to signup form
+      </a>
+
+      {/* LEFT BRANDING */}
+      <div className="hidden md:flex w-1/2 bg-gray-900 items-center justify-center relative">
+        <img
+          src="/signup-bg.jpg"
+          alt={t("signupBannerTitle")}
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+        />
+        <div className="relative z-10 text-white text-center px-10">
+          <h1 className="text-4xl font-bold mb-3 tracking-tight">
+            {t("signupBannerTitle")}
+          </h1>
+          <p className="text-gray-200 text-lg">
+            {t("signupBannerDesc")}
           </p>
         </div>
+        <div className="absolute inset-0 bg-black/40"></div>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Full Name
-            </label>
+      {/* RIGHT FORM */}
+      <div className="w-full md:w-1/2 flex items-center justify-center px-4 sm:px-8">
+        <div className="w-full max-w-md bg-white shadow-2xl rounded-2xl p-6 sm:p-8 border border-slate-200">
+
+          <div className="text-center mb-6">
+            <h2 id="signup-form" className="text-3xl font-bold text-gray-900">
+              {t("createAccount")}
+            </h2>
+            <p className="text-sm text-gray-500 mt-1">
+              {t("signupSubtitle")}
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+
             <input
-              type="text"
+              placeholder={t("fullName")}
               required
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:outline-none"
-              placeholder=""
+              className="w-full rounded-xl border px-4 py-2.5"
             />
-          </div>
 
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email Address
-            </label>
             <input
               type="email"
+              placeholder={t("email")}
               required
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:outline-none"
-              placeholder="you@example.com"
+              className="w-full rounded-xl border px-4 py-2.5"
             />
-          </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
             <input
               type="password"
+              placeholder={t("password")}
               required
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-gray-900 focus:outline-none"
-              placeholder="••••••••"
+              className="w-full rounded-xl border px-4 py-2.5"
             />
-          </div>
 
-          {/* Role */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Account Type
-            </label>
             <select
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm bg-white text-gray-900 focus:ring-2 focus:ring-gray-900 focus:outline-none"
+              className="w-full rounded-xl border px-4 py-2.5"
             >
-              <option value="USER">User</option>
-              <option value="ADMIN">Admin</option>
+              <option value="USER">{t("user")}</option>
+              <option value="ADMIN">{t("admin")}</option>
             </select>
-          </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            className="w-full mt-4 bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition-all shadow-lg"
-          >
-            Create Account
-          </button>
-        </form>
+            <button className="w-full bg-gray-900 text-white py-3 rounded-xl">
+              {t("createAccount")}
+            </button>
+          </form>
 
-        {/* Footer */}
-        <p className="text-center text-gray-600 mt-6 text-sm">
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-gray-900 font-semibold hover:underline"
-          >
-            Login
-          </Link>
-        </p>
+          <p className="text-center text-sm mt-4">
+            {t("alreadyAccount")}{" "}
+            <Link href="/login" className="font-semibold">
+              {t("login")}
+            </Link>
+          </p>
+
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

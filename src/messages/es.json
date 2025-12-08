@@ -1,0 +1,53 @@
+{
+  "siteTitle": "Gestor de Tareas",
+  "nav": {
+    "tasks": "Tareas",
+    "dashboard": "Tablero",
+    "logout": "Cerrar sesión"
+  },
+  "task": {
+    "new": "Nueva tarea",
+    "title": "Título",
+    "description": "Descripción",
+    "save": "Guardar"
+  },
+  "auth": {
+    "signup": "Regístrate",
+    "login": "Iniciar sesión",
+    "email": "Correo",
+    "password": "Contraseña",
+    "signupBannerTitle": "Únete a nuestra plataforma",
+"signupBannerDesc": "Crea tu cuenta y empieza al instante.",
+"createAccount": "Crear cuenta",
+"signupSubtitle": "Únete y gestiona tu trabajo profesionalmente",
+"fullName": "Nombre completo",
+"accountType": "Tipo de cuenta",
+"user": "Usuario",
+"admin": "Administrador",
+"alreadyAccount": "¿Ya tienes una cuenta?",
+"welcomeBack": "Bienvenido de nuevo",
+"loginBannerDesc": "Gestiona tus tareas y flujo de trabajo de forma segura.",
+"secureAccess": "Accede a tu cuenta de forma segura",
+"newHere": "¿Nuevo aquí?",
+"secureLogin": "Inicio de sesión seguro"
+
+  }  ,
+  "dashboard": {
+    "welcomeBack": "Bienvenido de nuevo",
+    "overview": "Esto es lo que está pasando hoy de un vistazo.",
+    "totalActivities": "Actividades totales",
+    "todaysActivities": "Actividades de hoy",
+    "activeUsers": "Usuarios activos",
+    "tasksDueToday": "Tareas para hoy",
+    "noTasksToday": "No hay tareas para hoy 🎉",
+    "liveFeed": "Actividad en vivo",
+    "live": "En vivo",
+    "noActivity": "No hay actividad reciente.",
+    "due": "Vence"
+  },
+  "common": {
+    "loading": "Cargando..."
+  },
+
+  "skipToContent": "Saltar al contenido"
+}
