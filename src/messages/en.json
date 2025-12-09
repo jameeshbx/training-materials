@@ -1,0 +1,31 @@
+{
+    "common": {
+        "login": "Login",
+        "logout": "Logout",
+        "dashboard": "Dashboard",
+        "welcome": "Welcome back",
+        "email": "Email",
+        "password": "Password",
+        "submit": "Submit",
+        "notAuthenticated": "Not authenticated",
+        "dashboardTitle": "Dashboard",
+        "welcomeBack": "Welcome back",
+        "activeTimer": "Active Timer",
+        "timerRunning": "Timer Running...",
+        "noActiveTimer": "No active timer",
+        "todaysTasks": "Today’s Tasks",
+        "noTasks": "No tasks with due date",
+        "weeklyHours": "Weekly Hours",
+        "trackedThisWeek": "Tracked this week",
+        "task": "Task",
+        "due": "Due",
+        "reportsOverview": "Reports Overview",
+        "reportsSubtitle": "Insights from team performance & tasks",
+        "weeklyHoursPerMember": "Weekly Hours Per Team Member",
+        "weeklyHoursDesc": "Productivity comparison across team",
+        "taskDistribution": "Task Distribution",
+        "taskDistributionDesc": "Time spent across tasks",
+        "loadingReports": "Loading reports…",
+        "reportsError": "Could not load reports"
+    }
+}

@@ -1,0 +1,31 @@
+{
+    "common": {
+        "login": "Iniciar sesión",
+        "logout": "Cerrar sesión",
+        "dashboard": "Tablero",
+        "welcome": "Bienvenido de nuevo",
+        "email": "Correo electrónico",
+        "password": "Contraseña",
+        "submit": "Enviar",
+        "notAuthenticated": "No autenticado",
+        "dashboardTitle": "Tablero",
+        "welcomeBack": "Bienvenido de nuevo",
+        "activeTimer": "Temporizador activo",
+        "timerRunning": "Temporizador en ejecución...",
+        "noActiveTimer": "No hay temporizador activo",
+        "todaysTasks": "Tareas de hoy",
+        "noTasks": "No hay tareas con fecha de vencimiento",
+        "weeklyHours": "Horas semanales",
+        "trackedThisWeek": "Registrado esta semana",
+        "task": "Tarea",
+        "due": "Vence",
+        "reportsOverview": "Resumen de informes",
+        "reportsSubtitle": "Información del rendimiento del equipo y tareas",
+        "weeklyHoursPerMember": "Horas semanales por miembro",
+        "weeklyHoursDesc": "Comparación de productividad del equipo",
+        "taskDistribution": "Distribución de tareas",
+        "taskDistributionDesc": "Tiempo dedicado a cada tarea",
+        "loadingReports": "Cargando informes…",
+        "reportsError": "No se pudieron cargar los informes"
+    }
+}

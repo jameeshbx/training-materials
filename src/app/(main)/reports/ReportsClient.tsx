@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -13,8 +14,11 @@ import {
     Pie,
     Cell,
 } from "recharts";
+import { useTranslations } from "next-intl";
 
 export default function ReportsClient() {
+    const t = useTranslations("common");
+
     const [data, setData] = useState({
         weeklyHoursPerMember: [],
         taskDistribution: [],
@@ -31,34 +35,49 @@ export default function ReportsClient() {
                 const json = await res.json();
                 setData(json);
             } catch (err) {
-                setError("Could not load reports");
+                setError(t("reportsError"));
             } finally {
                 setLoading(false);
             }
         }
         loadData();
-    }, []);
+    }, [t]);
 
-    if (loading) return <div className="p-6">Loading…</div>;
-    if (error) return <div className="p-6 text-red-500">{error}</div>;
+    if (loading)
+        return (
+            <div className="p-8 text-center text-gray-400">
+                {t("loadingReports")}
+            </div>
+        );
 
-    const COLORS = ["#4f46e5", "#6366f1", "#818cf8", "#a5b4fc", "#c7d2fe"];
+    if (error)
+        return <div className="p-8 text-center text-red-400">{error}</div>;
+
+    // ✅ Different colors for different tasks
+    const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4"];
 
     return (
-        <div className="p-6 space-y-8">
-            {/* PAGE TITLE */}
-            <h1 className="text-3xl font-bold tracking-tight text-gray-800">
-                Reports Overview
-            </h1>
-            <p className="text-gray-500">Insights from team performance & tasks</p>
+        <div className="px-6 py-10 space-y-10 max-w-7xl mx-auto">
+            {/* ✅ PAGE HEADER */}
+            <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-6 shadow-lg">
+                <h1 className="text-3xl font-bold tracking-tight text-white">
+                    {t("reportsOverview")}
+                </h1>
+                <p className="text-indigo-100 mt-1">
+                    {t("reportsSubtitle")}
+                </p>
+            </div>
 
-            {/* 2-column responsive layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* WEEKLY HOURS CARD */}
-                <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                        Weekly Hours Per Team Member
+            {/* ✅ RESPONSIVE GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* ✅ WEEKLY HOURS CARD */}
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-1">
+                        {t("weeklyHoursPerMember")}
                     </h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        {t("weeklyHoursDesc")}
+                    </p>
 
                     <div className="w-full h-80">
                         <ResponsiveContainer>
@@ -69,19 +88,22 @@ export default function ReportsClient() {
                                 <Legend />
                                 <Bar
                                     dataKey="totalHours"
-                                    fill="#4f46e5"
-                                    radius={[4, 4, 0, 0]}
+                                    fill="#6366f1"
+                                    radius={[8, 8, 0, 0]}
                                 />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
-                {/* TASK DISTRIBUTION CARD */}
-                <div className="bg-white shadow-md rounded-2xl p-6 border border-gray-100">
-                    <h2 className="text-xl font-semibold text-gray-700 mb-4">
-                        Task Distribution
+                {/* ✅ TASK DISTRIBUTION CARD */}
+                <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
+                    <h2 className="text-xl font-semibold text-gray-800 mb-1">
+                        {t("taskDistribution")}
                     </h2>
+                    <p className="text-sm text-gray-500 mb-4">
+                        {t("taskDistributionDesc")}
+                    </p>
 
                     <div className="w-full h-80 flex justify-center items-center">
                         <ResponsiveContainer width="100%">
@@ -91,6 +113,7 @@ export default function ReportsClient() {
                                     dataKey="totalHours"
                                     nameKey="taskName"
                                     outerRadius={120}
+                                    innerRadius={50}
                                     label
                                 >
                                     {data.taskDistribution.map((_, index) => (

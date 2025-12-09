@@ -110,7 +110,7 @@ export default function AdminDashboard() {
           placeholder="Enter email address..."
           value={inviteEmail}
           onChange={(e) => setInviteEmail(e.target.value)}
-          className="w-full border-black p-2 rounded-lg mb-3 text-black"
+          className="w-full border-black p-2 rounded-lg mb-3 text-white"
         />
 
         <button

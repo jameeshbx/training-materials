@@ -1,4 +1,8 @@
 
+const createNextIntlPlugin = require("next-intl/plugin");
+const { withSentryConfig } = require("@sentry/nextjs");
+
+const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -18,22 +22,17 @@ const nextConfig = {
           // IMPORTANT:
           // We are NOT adding Content-Security-Policy here because it breaks
           // NextAuth, Live Activity, and dynamic internal scripts.
-          // We will build a custom CSP later only if needed.
         ],
       },
     ];
   },
 };
 
-module.exports = nextConfig;
+// ✅ Wrap FIRST with next-intl
+const intlConfig = withNextIntl(nextConfig);
 
-// ---------------------------------------------------
-// Injected content via Sentry wizard below
-// ---------------------------------------------------
-
-const { withSentryConfig } = require("@sentry/nextjs");
-
-module.exports = withSentryConfig(module.exports, {
+// ✅ Then wrap with Sentry
+module.exports = withSentryConfig(intlConfig, {
   org: "buyexchange-an",
   project: "javascript-nextjs",
   silent: !process.env.CI,
