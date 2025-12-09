@@ -1,0 +1,31 @@
+{
+  "home": {
+    "title": "Welcome",
+    "description": "This is English text",
+    "servicesHeading": "Our Services",
+    "searchPlaceholder": "Search services...",
+    "bookNow": "Book Now",
+    "noResults": "No services found"
+  },
+  "header": {
+    "dashboard": "Dashboard",
+    "logout": "Logout"
+  }
+,
+
+  "Auth": {
+    "loginTitle": "Login",
+    "welcomeBack": "Welcome Back",
+    "loginSubtitle": "Login to access your account",
+    "emailLabel": "Email",
+    "emailPlaceholder": "email@example.com",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "********",
+    "signInButton": "Sign In",
+    "signingIn": "Signing in...",
+    "noAccount": "Don't have an account?",
+    "createAccount": "Create one",
+    "rateLimitError": "Too many login attempts, try again later",
+    "invalidCredentials": "Invalid email or password"
+  }
+}

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { LogOut, Home } from "lucide-react";
+import { useLocale } from "next-intl";
 
 export default function DashboardLayout({
   children,
@@ -12,7 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-
+const locale = useLocale();
   // Function to get page title based on pathname
   const getPageTitle = () => {
     switch (pathname) {
@@ -32,7 +33,7 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50 mt-0.5">
+    <div className="flex min-h-screen bg-gray-50 ">
       {/* Left Sidebar */}
       <Sidebar />
 
@@ -67,7 +68,7 @@ export default function DashboardLayout({
 
               {/* Enhanced Logout Button */}
               <Button 
-                onClick={() => signOut({ callbackUrl: "/login" })}
+                onClick={() => signOut({ callbackUrl: `/${locale}/login` })}
                 variant="outline"
                 className="group relative bg-white hover:bg-red-50 border border-red-200 text-red-600 hover:text-red-700 font-medium py-2.5 px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:border-red-300 flex items-center space-x-2"
               >

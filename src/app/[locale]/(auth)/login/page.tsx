@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn, getSession } from "next-auth/react";
 import toast from "react-hot-toast";
+import { useTranslations, useLocale } from 'next-intl';
+
 interface LoginForm {
   email: string;
   password: string;
@@ -12,6 +14,9 @@ interface LoginForm {
 
 export default function Login() {
   const router = useRouter();
+  const locale = useLocale(); // Get current locale
+  const t = useTranslations('Auth'); // ✅ Correct way
+  
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
@@ -36,33 +41,37 @@ export default function Login() {
       redirect: false,
       email: formData.email,
       password: formData.password,
+      callbackUrl: `/${locale}/dashboard`, // Add locale to callback
     });
-// 🔥 Rate limit
-if (res?.error?.includes("Too many login attempts")) {
-  toast.error("Too many login attempts, try again later");
-  setLoading(false);
-  return;
-}
-  // 🔥 Invalid credentials
-  if (res?.error) {
-    setError("Invalid email or password");
-    setLoading(false);
-    return;
-  }
 
-  const session = await getSession();
-  setLoading(false);
+    // 🔥 Rate limit
+    if (res?.error?.includes("Too many login attempts")) {
+      toast.error(t('rateLimitError') || "Too many login attempts, try again later");
+      setLoading(false);
+      return;
+    }
+    
+    // 🔥 Invalid credentials
+    if (res?.error) {
+      setError(t('invalidCredentials') || "Invalid email or password");
+      setLoading(false);
+      return;
+    }
+
+    const session = await getSession();
+    setLoading(false);
+    
     if (session?.user?.role === "ADMIN") {
-      router.push("/admin");
+      router.push(`/${locale}/admin`);
     } else {
-      router.push("/dashboard");
+      router.push(`/${locale}/dashboard`);
     }
   };
 
   return (
     <>
       <Head>
-        <title>Login | App</title>
+        <title>{t('loginTitle')} | App</title>
       </Head>
 
       <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
@@ -73,9 +82,9 @@ if (res?.error?.includes("Too many login attempts")) {
               <span className="text-white font-bold text-2xl">L</span>
             </div>
             <h2 className="mt-4 text-2xl font-bold text-gray-900">
-              Welcome Back
+              {t('welcomeBack')}
             </h2>
-            <p className="text-gray-500 text-sm">Login to access your account</p>
+            <p className="text-gray-500 text-sm">{t('loginSubtitle')}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -86,27 +95,31 @@ if (res?.error?.includes("Too many login attempts")) {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Email</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {t('emailLabel')}
+              </label>
               <input
                 type="email"
                 name="email"
                 required
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="email@example.com"
+                placeholder={t('emailPlaceholder')}
                 className="mt-1 w-full px-3 py-2 border rounded-md focus:ring-blue-500 text-black focus:border-blue-500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <label className="block text-sm font-medium text-gray-700">
+                {t('passwordLabel')}
+              </label>
               <input
                 type="password"
                 name="password"
                 required
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="********"
+                placeholder={t('passwordPlaceholder')}
                 className="mt-1 w-full px-3 py-2 border rounded-md focus:ring-blue-500 text-black focus:border-blue-500"
               />
             </div>
@@ -120,14 +133,14 @@ if (res?.error?.includes("Too many login attempts")) {
                   : "bg-black hover:bg-green-400 hover:text-black text-green-300"
               }`}
             >
-              {loading ? "Signing in..." : "Sign In"}
+              {loading ? t('signingIn') : t('signInButton')}
             </button>
           </form>
 
           <div className="text-center text-sm mt-4">
-            Don't have an account?{" "}
-            <Link href="/signup" className="text-blue-600 font-semibold">
-              Create one
+            {t('noAccount')}{" "}
+            <Link href={`/${locale}/signup`} className="text-blue-600 font-semibold">
+              {t('createAccount')}
             </Link>
           </div>
         </div>
