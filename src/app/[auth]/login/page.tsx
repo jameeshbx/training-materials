@@ -3,185 +3,125 @@
 import { useState, useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
+  const t = useTranslations("LoginPage");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Global error handler for uncaught errors (like URL construction errors)
+  // Rate limit error handler
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      // Check if it's a URL construction error (likely from rate limiting)
-      if (event.error?.message?.includes("Failed to construct 'URL'") || 
-          event.error?.message?.includes("Invalid URL")) {
-        event.preventDefault(); // Prevent the error from showing in console
-        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
+      if (event.error?.message?.includes("429")) {
+        event.preventDefault();
+        setErrorMsg(t("rateLimited"));
       }
     };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      // Check if it's a URL construction error
-      if (event.reason?.message?.includes("Failed to construct 'URL'") || 
-          event.reason?.message?.includes("Invalid URL") ||
-          event.reason?.message?.includes("429")) {
-        event.preventDefault(); // Prevent the error from showing in console
-        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
-      }
-    };
-
     window.addEventListener("error", handleError);
-    window.addEventListener("unhandledrejection", handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener("error", handleError);
-      window.removeEventListener("unhandledrejection", handleUnhandledRejection);
-    };
+    return () => window.removeEventListener("error", handleError);
   }, []);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setErrorMsg(""); // Clear previous errors
+    setErrorMsg("");
 
-    try {
-      const res = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-        callbackUrl: "/dashboard",
-      });
+    const res = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+      callbackUrl: "/dashboard",
+    });
 
-      if (res?.error) {
-        // Check if it's a rate limit error
-        if (res.error === "Too many requests" || 
-            res.error.includes("rate limit") || 
-            res.error.includes("429")) {
-          setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
-        } else {
-          setErrorMsg("Invalid email or password");
-        }
-        return;
-      }
-
-      if (res?.ok) {
-        router.push("/dashboard");
-      }
-    } catch (error: any) {
-      // Handle network errors or other exceptions
-      console.error("Login error:", error);
-      
-      // Check if it's a rate limit error
-      if (error?.message?.includes("429") || 
-          error?.message?.includes("rate limit") || 
-          error?.message?.includes("Too many requests") ||
-          error?.message?.includes("Failed to construct 'URL'") || 
-          error?.message?.includes("Invalid URL")) {
-        setErrorMsg("Too many login attempts. Please wait a minute before trying again.");
-      } else {
-        setErrorMsg("An error occurred. Please try again.");
-      }
+    if (res?.error) {
+      setErrorMsg(t("invalid"));
+      return;
     }
+
+    router.push("/dashboard");
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-center p-4">
-      <div className="p-8 w-80 md:w-96 bg-white rounded-2xl shadow-lg border border-gray-200">
+    
+  <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-[#0A0F1F] to-gray-900 text-white">
 
-        {/* Title */}
-        <h2 className="text-center text-2xl font-semibold text-gray-800 mb-1">
-          Welcome Back
-        </h2>
-        <p className="text-center text-gray-500 text-sm mb-8">
-          Please login to continue
-        </p>
+    {/* Language Switcher */}
+    <div className="absolute top-4 right-4">
+      <LanguageSwitcher />
+    </div>
 
-        <form onSubmit={handleLogin}>
-          {/* Email */}
-        
-            {/* <label className="block  text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full  rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
-            /> */}
-         
+    <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-10 w-full max-w-md">
 
-          {/* Password */}
-          
-            {/* <label className="block  text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              className="w-full p-6 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
-            />
-           */}
+      <h2 className="text-4xl font-extrabold text-center mb-2 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+        {t("welcome")}
+      </h2>
+      <p className="text-center text-gray-300 text-sm mb-8">
+        {t("subtitle")}
+      </p>
 
+      <form onSubmit={handleLogin} className="space-y-4">
+        {/* Email */}
+        <div>
+          <label htmlFor="email" className="text-sm">{t("email")}</label>
+          <input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full mt-1 p-3 rounded-lg bg-white/15 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            placeholder={t("emailPlaceholder")}
+          />
+        </div>
 
-          {/* Email */}
-<label
-  htmlFor="email"
-  className="block text-sm font-medium text-gray-700"
->
-  Email
-</label>
-<input
-  id="email"
-  type="email"
-  value={email}
-  onChange={(e) => setEmail(e.target.value)}
-  required
-  className="w-full rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
-/>
+        {/* Password */}
+        <div>
+          <label htmlFor="password" className="text-sm">{t("password")}</label>
+          <input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="w-full mt-1 p-3 rounded-lg bg-white/15 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-400"
+            placeholder={t("passwordPlaceholder")}
+          />
+        </div>
 
-{/* Password */}
-<label
-  htmlFor="password"
-  className="block text-sm font-medium text-gray-700"
->
-  Password
-</label>
-<input
-  id="password"
-  type="password"
-  value={password}
-  onChange={(e) => setPassword(e.target.value)}
-  required
-  className="w-full p-6 rounded-lg border border-gray-300 bg-gray-100 text-gray-800 focus:outline-none focus:ring-2 focus:ring-teal-600"
-/>
+        {/* Error */}
+        {errorMsg && (
+          <div className="bg-red-500/20 border border-red-400 p-2 rounded text-center text-red-300 text-sm">
+            {errorMsg}
+          </div>
+        )}
 
+        {/* Login Button */}
+        <button
+          type="submit"
+          className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 transition-all py-3 rounded-lg font-semibold shadow-lg"
+        >
+          {t("loginButton")}
+        </button>
 
-
-          {/* Error Message */}
-          {errorMsg && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-              <p className="text-red-700 text-center text-sm font-medium">
-                {errorMsg}
-              </p>
-            </div>
-          )}
-
-          {/* Button */}
-          <button
-            type="submit"
-            className="w-full bg-teal-700 hover:bg-teal-800 transition text-white py-3 rounded-lg font-semibold text-sm mt-4"
+        {/* NEW Sign Up Button */}
+        <div className="text-center mt-4">
+          <p className="text-gray-300 text-sm mb-1">{t("noAccount")}</p>
+          <a
+            href="/auth/signup"
+            className="inline-block bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-all shadow-md"
           >
-            Login
-          </button>
+            {t("createAccount")}
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+);
 
   
-        </form>
-      </div>
-    </div>
-  );
 }

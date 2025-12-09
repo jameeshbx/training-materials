@@ -80,14 +80,15 @@
 // }
 
 
-export const dynamic = "force-dynamic";
-
 import { ReportsCharts } from "@/components/reports/ReportsCharts";
 import { db } from "@/lib/db";
+import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 
+
+export const dynamic = "force-dynamic";
 export const revalidate = 60;
 
-// Fetch reports from API (cached for 60s)
 async function getReports() {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
   const res = await fetch(`${baseUrl}/api/reports`, {
@@ -97,58 +98,49 @@ async function getReports() {
 }
 
 export default async function ReportsPage() {
+ const t = await getTranslations("ReportsPage");
 
-  // 🟣 Fetch tasks from DB
   const tasks = await db.task.findMany({
     select: { id: true, title: true },
   });
 
-  // 🟣 Fetch report dataset
-  const { reports,taskDistribution  } = await getReports();
+  const { reports, taskDistribution } = await getReports();
 
+  const users = await db.user.findMany({
+    select: { id: true, name: true },
+  });
 
-  // Fetch all users for mapping ID → Name
-const users = await db.user.findMany({
-  select: { id: true, name: true },
-});
+  const userNameMap = Object.fromEntries(
+    users.map((u) => [u.id, u.name])
+  );
 
-// Create mapping object: { userId: "User Name" }
-const userNameMap = Object.fromEntries(
-  users.map((u) => [u.id, u.name])
-);
-
-
-  // 🟣 Convert report to bar chart data
   const barData = {
     labels: reports.map((r: any) => userNameMap[r.userId] || "Unknown"),
     datasets: [
       {
-        label: "Hours this week",
+        label: t("barChartLabel"),
         data: reports.map((r: any) => r._sum.hours || 0),
         backgroundColor: "#6366F1",
       },
     ],
   };
 
-  // 🟣 Convert to doughnut chart format
- const doughnutData = {
-  labels: taskDistribution.map((row: any) => {
-    const taskName = tasks.find((t) => t.id === row.taskId)?.title || "Unknown";
-    const userName = userNameMap[row.userId] || "Unknown";
-    return `${taskName} (${userName})`;
-  }),
-  datasets: [
-    {
-      data: taskDistribution.map((row: any) => row._sum.hours || 0),
-    },
-  ],
-};
-
-
+  const doughnutData = {
+    labels: taskDistribution.map((row: any) => {
+      const taskName = tasks.find((t) => t.id === row.taskId)?.title || "Unknown";
+      const userName = userNameMap[row.userId] || "Unknown";
+      return `${taskName} (${userName})`;
+    }),
+    datasets: [
+      {
+        data: taskDistribution.map((row: any) => row._sum.hours || 0),
+      },
+    ],
+  };
 
   return (
     <div className="p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Reports</h1>
+      <h1 className="text-2xl font-bold">{t("heading")}</h1>
       <ReportsCharts barData={barData} doughnutData={doughnutData} />
     </div>
   );

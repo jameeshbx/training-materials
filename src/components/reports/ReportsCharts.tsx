@@ -1,6 +1,7 @@
 "use client";
 
 import { Bar, Doughnut } from "react-chartjs-2";
+import { useTranslations } from "next-intl";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,6 +20,9 @@ type ReportsChartsProps = {
 };
 
 export function ReportsCharts({ barData, doughnutData }: ReportsChartsProps) {
+
+  const t = useTranslations("ReportsPage");  // Translation namespace
+
 
   // Chart color palette
   const colors = ["#4F46E5", "#06B6D4", "#F97316", "#16A34A", "#DC2626", "#D946EF"];
@@ -46,12 +50,12 @@ export function ReportsCharts({ barData, doughnutData }: ReportsChartsProps) {
   return (
     <div className="grid gap-8 md:grid-cols-2">
       <div className="border rounded-xl p-4 shadow bg-white">
-        <h2 className="font-semibold text-black mb-2">Weekly Hours per Member</h2>
-        <Bar data={coloredBarData} />
+         <h2 className="font-semibold text-black mb-2">{t("barTitle")}</h2>
+                 <Bar data={coloredBarData} />
       </div>
 
       <div className="border rounded-xl p-4 shadow bg-white">
-        <h2 className="font-semibold text-black  mb-2">Task Distribution</h2>
+        <h2 className="font-semibold text-black  mb-2">{t("taskDistribution")}</h2>
          {doughnutData && <Doughnut data={coloredDoughnutData} />}
       </div>
     </div>

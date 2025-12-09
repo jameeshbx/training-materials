@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useTranslations } from "next-intl";
 
 export default function SignupPage() {
   const router = useRouter();
+  const t = useTranslations("SignupPage");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("USER");     // 👈 ADD THIS
+  const [role, setRole] = useState("USER");
   const [errorMsg, setErrorMsg] = useState("");
 
   async function handleSignup(e: React.FormEvent) {
@@ -23,100 +26,104 @@ export default function SignupPage() {
         body: JSON.stringify({ name, email, password, role }),
       });
 
-      // Check if response is JSON
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        const text = await res.text();
-        console.error("Non-JSON response:", text);
-        setErrorMsg("Server error: Please check your database connection");
-        return;
-      }
-
       const data = await res.json();
 
       if (!res.ok) {
-        setErrorMsg(data.error || "Something went wrong");
+        setErrorMsg(data.error || "Failed to register");
         return;
       }
 
-      router.push("/auth/login"); // redirect to login
-    } catch (error) {
-      console.error("Signup error:", error);
-      setErrorMsg("Network error: Please try again");
+      router.push("/auth/login");
+    } catch (err) {
+      setErrorMsg("Network error, try again");
     }
   }
 
   return (
-    <div className="min-h-screen flex justify-center items-center">
-      <div className="w-80 md:w-88 bg-white rounded-2xl shadow-lg border border-gray-200 px-6 py-6">
-        <h2 className="text-center text-xl font-semibold text-gray-800 mb-2">
-          Create Account
+    <div className="relative min-h-screen flex justify-center items-center bg-gradient-to-br from-black via-[#0A0F1F] to-gray-900 text-white">
+      
+      {/* Language Switcher */}
+      <div className="absolute top-4 right-4">
+        <LanguageSwitcher />
+      </div>
+
+       <div className="backdrop-blur-xl bg-white/10 border border-white/20 shadow-xl rounded-2xl p-6 w-full max-w-md">
+
+        <h2 className="text-4xl font-extrabold text-center mb-2 bg-gradient-to-r from-teal-400 to-blue-500 bg-clip-text text-transparent">
+          {t("title")}
         </h2>
-        <p className="text-center text-gray-500 text-sm mb-4">
-          Signup to continue
+        <p className="text-center text-gray-300 text-sm mb-6">
+          {t("subtitle")}
         </p>
 
-        <form onSubmit={handleSignup} className="space-y-3">
-
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-700">Name</label>
+        <form onSubmit={handleSignup} className="space-y-1">
+          
+          <div>
+            <label className="text-sm">{t("name")}</label>
             <input
               type="text"
-              required
               value={name}
+              required
               onChange={(e) => setName(e.target.value)}
-              className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 text-gray-700"
+              className="w-full mt-1 p-2.5 rounded-lg bg-white/15 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-700">Email</label>
+          <div>
+            <label className="text-sm">{t("email")}</label>
             <input
               type="email"
-              required
               value={email}
+              required
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 text-gray-700"
+              className="w-full mt-1 p-2.5 rounded-lg bg-white/15 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-700">Password</label>
+          <div>
+            <label className="text-sm">{t("password")}</label>
             <input
               type="password"
-              required
               value={password}
+              required
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 rounded-md border border-gray-300 bg-gray-50 text-gray-700"
+              className="w-full mt-1 p-2.5 rounded-lg bg-white/15 text-white placeholder-gray-300 border border-white/30 focus:outline-none focus:ring-2 focus:ring-teal-400"
             />
           </div>
 
-          {/* ROLE DROPDOWN (moved BEFORE submit button) */}
-          <div className="flex flex-col gap-1">
-            <label className="text-sm text-gray-700">Role</label>
+          <div>
+            <label className="text-sm">{t("role")}</label>
             <select
-              name="role"
               value={role}
-              onChange={(e) => setRole(e.target.value)}    // 👈 STORE ROLE
-              className="w-full p-2 border rounded bg-white text-black"
-              required
+              onChange={(e) => setRole(e.target.value)}
+              className="w-full mt-1 p-2.5 rounded-lg bg-white text-black border"
             >
               <option value="USER">USER</option>
               <option value="ADMIN">ADMIN</option>
             </select>
           </div>
 
-          {errorMsg && <p className="text-red-600 text-sm">{errorMsg}</p>}
+          {errorMsg && (
+            <p className="text-red-400 text-sm text-center">{errorMsg}</p>
+          )}
 
           <button
             type="submit"
-            className="w-full bg-teal-700 hover:bg-teal-800 text-white py-2 rounded-md font-semibold mt-4"
+            className="w-full bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-500 hover:to-blue-500 transition-all py-3 rounded-lg font-semibold shadow-lg"
           >
-            Signup
+            {t("signupButton")}
           </button>
 
+          <div className="text-center mt-4">
+            <p className="text-gray-300 text-sm">{t("haveAccount")}</p>
+            <a
+              href="/auth/login"
+              className="inline-block bg-white text-black px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-all shadow-md mt-2"
+            >
+              {t("login")}
+            </a>
+          </div>
         </form>
-
       </div>
     </div>
   );
