@@ -100,47 +100,63 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-
+      
       {/* Invite Section */}
-      <div className="max-w-xl bg-grey p-5 rounded-xl shadow border">
-        <h2 className="text-xl font-bold mb-3">📩 Invite a User</h2>
+      <div className="max-w-xl bg-white p-5 rounded-xl shadow border relative z-10">
+        <h2 className="text-xl font-bold mb-3 text-gray-800">
+          📩 Invite a User
+        </h2>
 
         <input
           type="email"
           placeholder="Enter email address..."
           value={inviteEmail}
           onChange={(e) => setInviteEmail(e.target.value)}
-          className="w-full border-black p-2 rounded-lg mb-3 text-white"
+          className="w-full px-4 py-2 rounded-lg 
+      border border-gray-300 
+      bg-white text-gray-800 
+      placeholder-gray-400
+      focus:outline-none 
+      focus:border-blue-500
+      focus:ring-1 focus:ring-blue-500
+      transition"
         />
 
         <button
           onClick={sendInvite}
           disabled={inviteLoading}
-          className={`px-4 py-2 rounded-lg text-white 
-            ${inviteLoading ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"}
-          `}
+          className={`px-4 py-2 mt-3 rounded-lg text-white 
+      ${inviteLoading
+              ? "bg-gray-400"
+              : "bg-blue-600 hover:bg-blue-700"
+            }
+    `}
         >
           {inviteLoading ? "Sending email..." : "Send Invite"}
         </button>
       </div>
 
-      {/* Users List */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 ">
+
+      {/* ✅ USERS LIST (SAFE + NO GHOST TEXT) */}
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
         {users.map((user: any) => (
           <div
             key={user.id}
-            className="border rounded-xl p-5 bg-white shadow hover:shadow-lg transition"
+            className="relative z-10 border rounded-xl p-5 bg-white shadow hover:shadow-lg transition"
           >
-            <h2 className="text-2xl font-bold">{user.name}</h2>
-            <p className="text-gray-600 mb-3">{user.email}</p>
+            <h2 className="text-2xl font-bold break-all">
+              {String(user.name)}
+            </h2>
+
+            <p className="text-gray-600 mb-3 break-all">
+              {String(user.email)}
+            </p>
 
             <div className="flex items-center gap-3 mb-4">
               <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
                 {user.tasks.length} Tasks
               </span>
-              <span className="text-sm bg-gray-100 text-gray-600 px-3 py-1 rounded-full">
-                ID: {user.id.slice(0, 6)}...
-              </span>
+              
             </div>
 
             <h3 className="text-lg font-semibold mb-2">Tasks:</h3>
@@ -154,10 +170,14 @@ export default function AdminDashboard() {
                     key={task.id}
                     className="border rounded-lg p-3 bg-gray-50 shadow-sm"
                   >
-                    <h4 className="font-semibold">{task.title}</h4>
+                    <h4 className="font-semibold break-all">
+                      {String(task.title)}
+                    </h4>
 
-                    <p className="text-sm text-gray-600">
-                      {task.description || "No description"}
+                    <p className="text-sm text-gray-600 break-all">
+                      {task.description
+                        ? String(task.description)
+                        : "No description"}
                     </p>
 
                     <div className="flex flex-wrap gap-2 mt-2">
@@ -189,4 +209,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-

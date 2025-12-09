@@ -1,13 +1,22 @@
 
+
 const createNextIntlPlugin = require("next-intl/plugin");
 const { withSentryConfig } = require("@sentry/nextjs");
+const withPWA = require("next-pwa")({
+  dest: "public",
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === "development",
+});
 
 const withNextIntl = createNextIntlPlugin();
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Empty turbopack config to silence the warning
-  turbopack: {},
+  // ✅ Webpack mode REQUIRED for next-pwa (does NOT remove features)
+  webpack: (config) => {
+    return config;
+  },
 
   async headers() {
     return [
@@ -28,11 +37,11 @@ const nextConfig = {
   },
 };
 
-// ✅ Wrap FIRST with next-intl
+// ✅ 1. Wrap with next-intl
 const intlConfig = withNextIntl(nextConfig);
 
-// ✅ Then wrap with Sentry
-module.exports = withSentryConfig(intlConfig, {
+// ✅ 2. Wrap with Sentry (keeps your monitoring)
+const sentryConfig = withSentryConfig(intlConfig, {
   org: "buyexchange-an",
   project: "javascript-nextjs",
   silent: !process.env.CI,
@@ -40,3 +49,6 @@ module.exports = withSentryConfig(intlConfig, {
   disableLogger: true,
   automaticVercelMonitors: true,
 });
+
+// ✅ 3. Wrap with PWA LAST (THIS ENABLES sw.js)
+module.exports = withPWA(sentryConfig);
