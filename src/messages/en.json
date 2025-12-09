@@ -1,0 +1,55 @@
+{
+  "siteTitle": "Task Manager",
+  "nav": {
+    "tasks": "Tasks",
+    "dashboard": "Dashboard",
+    "logout": "Log out"
+  },
+  "task": {
+    "new": "New Task",
+    "title": "Title",
+    "description": "Description",
+    "save": "Save"
+  },
+  "auth": {
+    "signup": "Sign up",
+    "login": "Log in",
+    "email": "Email",
+    "password": "Password",
+    "bannerTitle": "Join Our Platform",
+"signupBannerTitle": "Join Our Platform",
+"signupBannerDesc": "Create your account and get started instantly.",
+"createAccount": "Create Account",
+"signupSubtitle": "Join us and manage your work professionally",
+"fullName": "Full Name",
+"accountType": "Account Type",
+"user": "User",
+"admin": "Admin",
+"alreadyAccount": "Already have an account?",
+"welcomeBack": "Welcome Back",
+"loginBannerDesc": "Securely manage your tasks and workflow.",
+"secureAccess": "Access your account securely",
+"newHere": "New here?",
+"secureLogin": "Secure Login"
+
+  }  ,
+  "dashboard": {
+    "welcomeBack": "Welcome back",
+    "overview": "Here's what's happening today at a glance.",
+    "totalActivities": "Total Activities",
+    "todaysActivities": "Today's Activities",
+    "activeUsers": "Active Users",
+    "tasksDueToday": "Tasks Due Today",
+    "noTasksToday": "No tasks due today 🎉",
+    "liveFeed": "Live Activity Feed",
+    "live": "Live",
+    "noActivity": "No recent activity recorded.",
+    "due": "Due"
+  },
+  "common": {
+    "loading": "Loading..."
+  },
+
+  
+  "skipToContent": "Skip to content"
+}
