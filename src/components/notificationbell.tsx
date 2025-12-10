@@ -34,8 +34,9 @@ export default function NotificationBell() {
   return (
     <div className="relative">
       <button onClick={() => setOpen(!open)} className="p-2 rounded-full bg-white shadow">
-        🔔
+        
       </button>
+
 
       {open && (
         <div className="absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg z-50 p-3">

@@ -8,6 +8,9 @@ import AuthSessionProvider from "@/components/SessionProviderWrapper";
 import { Toaster } from "react-hot-toast";
 import { usePathname } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
+import PWAHead from "@/components/PWAHead";
+import RegisterSW from "@/components/RegisterSW";
+import InjectManifest from "@/components/InjectManifest";
 
 // ✅ Import messages
 import enMessages from "@/messages/en.json";
@@ -42,6 +45,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang={locale}>
       <body className="bg-gray-100 text-gray-900">
+        <PWAHead />
+        <RegisterSW />
+    <InjectManifest />
+
         <NextIntlClientProvider
           locale={locale}
           messages={messages}
