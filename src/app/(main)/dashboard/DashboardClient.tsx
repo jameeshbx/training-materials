@@ -1,3 +1,4 @@
+
 "use client";
 
 import ActivityFeedWrapper from "@/components/ActivityFeedWrapper";
@@ -12,7 +13,7 @@ export default function DashboardClient({
     const t = useTranslations("common");
 
     return (
-        <div className="px-6 py-10 text-white space-y-10 max-w-6xl mx-auto">
+        <div className="px-6 py-10 text-white space-y-10 max-w-7xl mx-auto">
             {/* ✅ HEADER */}
             <div>
                 <h1 className="text-3xl font-bold">{t("dashboardTitle")}</h1>
@@ -21,10 +22,11 @@ export default function DashboardClient({
                 </p>
             </div>
 
-            {/* ✅ CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* ✅ PERFECTLY CENTERED RESPONSIVE CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 w-full">
+
                 {/* ✅ ACTIVE TIMER */}
-                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
+                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md h-full min-h-[150px]">
                     <h2 className="text-lg font-semibold mb-2">
                         ⏱ {t("activeTimer")}
                     </h2>
@@ -47,7 +49,7 @@ export default function DashboardClient({
                 </div>
 
                 {/* ✅ TODAY'S TASKS */}
-                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
+                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md h-full min-h-[150px]">
                     <h2 className="text-lg font-semibold mb-3">
                         📅 {t("todaysTasks")}
                     </h2>
@@ -73,7 +75,7 @@ export default function DashboardClient({
                 </div>
 
                 {/* ✅ WEEKLY HOURS */}
-                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md">
+                <div className="bg-[#1b1c1f] border border-gray-700 p-5 rounded-xl shadow-md h-full min-h-[150px]">
                     <h2 className="text-lg font-semibold mb-3">
                         ⏳ {t("weeklyHours")}
                     </h2>
@@ -84,8 +86,10 @@ export default function DashboardClient({
                         {t("trackedThisWeek")}
                     </p>
                 </div>
+
             </div>
 
+            {/* ✅ TEAM ACTIVITY */}
             <div className="mt-10">
                 <ActivityFeedWrapper teamId="default-team" />
             </div>
