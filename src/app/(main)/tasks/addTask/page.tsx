@@ -2,11 +2,14 @@
 
 import { useState } from "react";
 import { createTask } from "@/lib/services/taskservice";
+import { useRouter } from "next/navigation";
 
 export default function TaskForm({ onSuccess }: any) {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
     const [dueDate, setDueDate] = useState("");
+
+    const router = useRouter();
 
     async function handleSubmit(e: any) {
         e.preventDefault();
@@ -23,6 +26,7 @@ export default function TaskForm({ onSuccess }: any) {
         setDueDate("");
 
         if (onSuccess) onSuccess();
+        router.push("/tasks");
     }
 
     return (
@@ -32,7 +36,7 @@ export default function TaskForm({ onSuccess }: any) {
         >
             <h2 className="font-semibold text-gray-800">Create New Task</h2>
 
-            
+
             <input
                 className="border w-full p-2 rounded"
                 placeholder="Task title"
@@ -41,7 +45,7 @@ export default function TaskForm({ onSuccess }: any) {
                 required
             />
 
-            
+
             <textarea
                 className="border w-full p-2 rounded"
                 placeholder="Description"
@@ -49,7 +53,7 @@ export default function TaskForm({ onSuccess }: any) {
                 onChange={(e) => setDescription(e.target.value)}
             />
 
-           
+
             <div>
                 <label className="block mb-1 text-gray-700 font-medium">Due Date</label>
                 <input

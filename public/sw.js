@@ -1,6 +1,5 @@
 
-
-const CACHE_NAME = "gokuls-world-v7";
+const CACHE_NAME = "gokuls-world-v8"; // ⬅️ bumped version
 
 const CORE_ASSETS = [
     "/",
@@ -40,11 +39,22 @@ self.addEventListener("activate", (event) => {
     self.clients.claim();
 });
 
-// ✅ FETCH — GUARANTEED RESPONSE ALWAYS
+// ✅ FETCH
 self.addEventListener("fetch", (event) => {
     const request = event.request;
 
-    // ✅ Always allow Next.js static assets to load normally
+    /* --------------------------------------------------
+       🚨 ABSOLUTE BYPASS FOR ACCEPT-INVITE (EMAIL CLICKS)
+       IMPORTANT: do NOTHING, let browser handle it
+    -------------------------------------------------- */
+    if (
+        request.mode === "navigate" &&
+        request.url.includes("/accept-invite")
+    ) {
+        return;
+    }
+
+    // ✅ Always allow Next.js static assets
     if (
         request.url.includes("/_next/static/") ||
         request.url.includes("/icons/") ||
@@ -60,7 +70,7 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
-    // ✅ PAGE NAVIGATION (THIS IS THE FIX FOR /register, /dashboard)
+    // ✅ PAGE NAVIGATION (dashboard, register, etc.)
     if (request.mode === "navigate") {
         event.respondWith(
             fetch(request).catch(() => {

@@ -1,12 +1,12 @@
-
 @import "tailwindcss";
 
+/* your theme variables remain unchanged */
 @theme {
-  --color-background: 0 0% 100%;
+  --color-background: 197 71% 73%;
   --color-foreground: 222.2 84% 4.9%;
-  --color-card: 0 0% 100%;
+  --color-card: 255 255 255;
   --color-card-foreground: 222.2 84% 4.9%;
-  --color-popover: 0 0% 100%;
+  --color-popover: 255 255 255;
   --color-popover-foreground: 222.2 84% 4.9%;
   --color-primary: 222.2 47.4% 11.2%;
   --color-primary-foreground: 210 40% 98%;
@@ -26,39 +26,48 @@
 
 @media (prefers-color-scheme: dark) {
   @theme {
-    --color-background: 222.2 84% 4.9%;
+    --color-background: 197 71% 73%;
     --color-foreground: 210 40% 98%;
-    --color-card: 222.2 84% 4.9%;
+    --color-card: 197 71% 73%;
     --color-card-foreground: 210 40% 98%;
-    --color-popover: 222.2 84% 4.9%;
+    --color-popover: 197 71% 73%;
     --color-popover-foreground: 210 40% 98%;
     --color-primary: 210 40% 98%;
     --color-primary-foreground: 222.2 47.4% 11.2%;
-    --color-secondary: 217.2 32.6% 17.5%;
+    --color-secondary: 200 60% 60%;
     --color-secondary-foreground: 210 40% 98%;
-    --color-muted: 217.2 32.6% 17.5%;
+    --color-muted: 200 60% 60%;
     --color-muted-foreground: 215 20.2% 65.1%;
-    --color-accent: 217.2 32.6% 17.5%;
+    --color-accent: 200 60% 60%;
     --color-accent-foreground: 210 40% 98%;
     --color-destructive: 0 62.8% 30.6%;
     --color-destructive-foreground: 210 40% 98%;
-    --color-border: 217.2 32.6% 17.5%;
-    --color-input: 217.2 32.6% 17.5%;
+    --color-border: 200 60% 60%;
+    --color-input: 200 60% 60%;
     --color-ring: 212.7 26.8% 83.9%;
   }
 }
 
 body {
   color: hsl(var(--color-foreground));
-  background: hsl(var(--color-background));
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Add the global gradient background */
+@layer base {
+
+  html,
+  body {
+    @apply min-h-screen bg-gradient-to-b from-[#dff2ff] via-[#b8e2f5] to-[#a7d8f0];
+  }
 }
 
 * {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   padding: 0;
   margin: 0;
 }

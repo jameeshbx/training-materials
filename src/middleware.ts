@@ -30,7 +30,7 @@ function authorizationLogic({ token, req }: any) {
     }
 
     // Admin blocked from user-only pages
-    const blockForAdmin = ["/tasks", "/reports", "/teams"];
+    const blockForAdmin = ["/tasks", "/teams"];
     if (token.role === "admin") {
         if (blockForAdmin.some((route) => pathname.startsWith(route))) {
             console.log("🚫 ADMIN BLOCKED:", pathname);
@@ -53,12 +53,12 @@ export default withAuth(
         callbacks: {
             authorized: authorizationLogic,
         },
-        pages: { signIn: "/" },
+        pages: { signIn: "/login" },
     }
 );
 
 /* -------------------------------------------------------
-   ⭐ MATCHERS (unchanged)
+   ⭐ MATCHERS 
 ------------------------------------------------------- */
 export const config = {
     matcher: [
@@ -67,8 +67,8 @@ export const config = {
         "/tasks/:path*",
         "/reports/:path*",
         "/teams/:path*",
+        "/api/auth/:path*",
         "/accept-invite/:path*",
         "/api/accept-invite/:path*",
-        "/api/auth/:path*",
     ],
 };

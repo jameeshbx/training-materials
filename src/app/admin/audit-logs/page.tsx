@@ -29,7 +29,7 @@ export default function AuditLogsPage() {
 
     if (loading) {
         return (
-            <div className="p-6 text-center text-xl font-semibold animate-pulse">
+            <div className="p-6 text-center text-xl font-semibold animate-pulse text-gray-700">
                 Loading Logs...
             </div>
         );
@@ -37,7 +37,7 @@ export default function AuditLogsPage() {
 
     return (
         <div className="p-6 space-y-8">
-            <h1 className="text-4xl font-extrabold text-white">
+            <h1 className="text-4xl font-extrabold text-black">
                 📜 Audit Logs
             </h1>
 

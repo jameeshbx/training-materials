@@ -2,51 +2,69 @@
 
 "use client";
 
+import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
+import MobileNav from "./MobileNav";
 
-export default function Header({
-    setLocale,
-}: {
-    setLocale: (lang: "en" | "es") => void;
-}) {
+export default function Header({ setLocale }: any) {
     const { data: session } = useSession();
 
     return (
-        <div className="w-full h-16 flex items-center justify-between bg-white px-4 sm:px-6">
-            {/* Title */}
-            <h1 className="text-xl font-semibold text-gray-800">Header</h1>
+        <header
+            className="
+                w-full h-16
+                bg-white
+                shadow-sm border-b border-gray-200
+                flex items-center
+                px-3 sm:px-6
+            "
+        >
+            {/* LEFT */}
+            <div className="flex items-center gap-2">
+                {/* ☰ Mobile toggle */}
+                <div className="lg:hidden">
+                    <MobileNav />
+                </div>
 
-            {/* Right Side: Language + Logout */}
-            <div className="flex items-center gap-3">
-                {/* ✅ Language Switch Buttons */}
-                <button
-                    onClick={() => setLocale("en")}
-                    className="px-3 py-1.5 text-xs rounded-full 
-          bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                >
-                    EN
-                </button>
+                <Image
+                    src="/task logo.png"
+                    alt="logo"
+                    width={28}
+                    height={28}
+                />
 
-                <button
-                    onClick={() => setLocale("es")}
-                    className="px-3 py-1.5 text-xs rounded-full 
-          bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
-                >
-                    ES
-                </button>
+                <h1 className="text-sm sm:text-lg font-semibold text-blue-800">
+                    Task Manager
+                </h1>
+            </div>
 
-                {/* ✅ Logout */}
+            {/* RIGHT */}
+            <div className="ml-auto flex items-center gap-2">
+                {/* Hide language on mobile */}
+                <div className="hidden sm:flex gap-1">
+                    <button
+                        onClick={() => setLocale("en")}
+                        className="px-2 py-1 text-xs rounded-full bg-gray-400"
+                    >
+                        EN
+                    </button>
+                    <button
+                        onClick={() => setLocale("es")}
+                        className="px-2 py-1 text-xs rounded-full bg-gray-400"
+                    >
+                        ES
+                    </button>
+                </div>
+
                 {session?.user && (
                     <button
                         onClick={() => signOut({ callbackUrl: "/" })}
-                        className="ml-2 px-4 py-2 rounded-xl 
-            bg-red-500 hover:bg-red-600 transition 
-            text-white text-sm font-medium shadow"
+                        className="px-3 py-1.5 rounded-lg bg-red-500 text-white text-xs"
                     >
                         Logout
                     </button>
                 )}
             </div>
-        </div>
+        </header>
     );
 }

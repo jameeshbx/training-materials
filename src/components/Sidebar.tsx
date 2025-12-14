@@ -22,7 +22,7 @@ export default function Sidebar() {
     return (
         <aside
             className="w-64 h-[calc(100vh-4rem)] 
-      bg-white border-r border-gray-200 
+      bg-white  border-gray-200 
       fixed left-0 top-16 
       flex flex-col justify-between"
         >

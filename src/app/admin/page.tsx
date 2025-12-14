@@ -81,7 +81,7 @@ export default function AdminDashboard() {
   // -----------------------------------------------------
   if (loadingUsers) {
     return (
-      <div className="p-6 text-center text-xl font-semibold">
+      <div className="p-6 text-center text-xl font-semibold text-gray-700">
         Loading admin dashboard...
       </div>
     );
@@ -89,7 +89,7 @@ export default function AdminDashboard() {
 
   return (
     <div className="p-6 space-y-10 bg-grey">
-      <h1 className="text-3xl font-bold">👨‍💼 Admin Dashboard</h1>
+      <h1 className="text-3xl font-bold text-black">👨‍💼 Admin Dashboard</h1>
 
       <div className="mt-4">
         <button
@@ -100,7 +100,7 @@ export default function AdminDashboard() {
         </button>
       </div>
 
-      
+
       {/* Invite Section */}
       <div className="max-w-xl bg-white p-5 rounded-xl shadow border relative z-10">
         <h2 className="text-xl font-bold mb-3 text-gray-800">
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
           value={inviteEmail}
           onChange={(e) => setInviteEmail(e.target.value)}
           className="w-full px-4 py-2 rounded-lg 
-      border border-gray-300 
+      border border-gray-500 
       bg-white text-gray-800 
       placeholder-gray-400
       focus:outline-none 
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
               <span className="text-sm bg-blue-100 text-blue-600 px-3 py-1 rounded-full">
                 {user.tasks.length} Tasks
               </span>
-              
+
             </div>
 
             <h3 className="text-lg font-semibold mb-2">Tasks:</h3>

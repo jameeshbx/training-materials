@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
                     throw { message: "RATE_LIMIT" };
                 }
 
-                // ⭐ EXISTING LOGIN LOGIC (unchanged)
+                // ⭐  LOGIN LOGIC 
                 if (!credentials?.email || !credentials?.password) return null;
 
                 const user = await prisma.user.findUnique({
@@ -67,7 +67,7 @@ export const authOptions: NextAuthOptions = {
     },
 
     pages: {
-        signIn: "/",
+        signIn: "/login",
     },
 
     secret: process.env.NEXTAUTH_SECRET,

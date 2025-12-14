@@ -16,12 +16,32 @@ import {
 } from "recharts";
 import { useTranslations } from "next-intl";
 
+/* =======================
+   🔧 Helper functions
+======================= */
+
+function formatHours(hours: number) {
+    const h = Math.floor(hours);
+    const m = Math.round((hours - h) * 60);
+
+    if (h === 0 && m === 0) return "0m";
+    if (h === 0) return `${m}m`;
+    if (m === 0) return `${h}h`;
+
+    return `${h}h ${m}m`;
+}
+
+function toPercentage(value: number, total: number) {
+    if (!total) return 0;
+    return Math.round((value / total) * 100);
+}
+
 export default function ReportsClient() {
     const t = useTranslations("common");
 
     const [data, setData] = useState({
-        weeklyHoursPerMember: [],
-        taskDistribution: [],
+        weeklyHoursPerMember: [] as any[],
+        taskDistribution: [] as any[],
     });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -53,7 +73,20 @@ export default function ReportsClient() {
     if (error)
         return <div className="p-8 text-center text-red-400">{error}</div>;
 
-    // ✅ Different colors for different tasks
+    /* =======================
+       📊 Task distribution %
+    ======================= */
+
+    const totalTaskHours = data.taskDistribution.reduce(
+        (sum, item) => sum + item.totalHours,
+        0
+    );
+
+    const taskDistributionPercent = data.taskDistribution.map((item) => ({
+        ...item,
+        percent: toPercentage(item.totalHours, totalTaskHours),
+    }));
+
     const COLORS = ["#6366f1", "#22c55e", "#f59e0b", "#ef4444", "#06b6d4"];
 
     return (
@@ -70,7 +103,9 @@ export default function ReportsClient() {
 
             {/* ✅ RESPONSIVE GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* ✅ WEEKLY HOURS CARD */}
+                {/* =======================
+                   WEEKLY HOURS CARD
+                ======================= */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                     <h2 className="text-xl font-semibold text-gray-800 mb-1">
                         {t("weeklyHoursPerMember")}
@@ -83,8 +118,19 @@ export default function ReportsClient() {
                         <ResponsiveContainer>
                             <BarChart data={data.weeklyHoursPerMember}>
                                 <XAxis dataKey="userName" />
-                                <YAxis />
-                                <Tooltip />
+                                <YAxis
+                                    tickFormatter={(v) =>
+                                        formatHours(Number(v))
+                                    }
+                                />
+                                <Tooltip
+                                    formatter={(value: number) =>
+                                        formatHours(value)
+                                    }
+                                    labelFormatter={(label) =>
+                                        `Member: ${label}`
+                                    }
+                                />
                                 <Legend />
                                 <Bar
                                     dataKey="totalHours"
@@ -96,7 +142,9 @@ export default function ReportsClient() {
                     </div>
                 </div>
 
-                {/* ✅ TASK DISTRIBUTION CARD */}
+                {/* =======================
+                   TASK DISTRIBUTION CARD
+                ======================= */}
                 <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100">
                     <h2 className="text-xl font-semibold text-gray-800 mb-1">
                         {t("taskDistribution")}
@@ -109,14 +157,14 @@ export default function ReportsClient() {
                         <ResponsiveContainer width="100%">
                             <PieChart>
                                 <Pie
-                                    data={data.taskDistribution}
-                                    dataKey="totalHours"
+                                    data={taskDistributionPercent}
+                                    dataKey="percent"
                                     nameKey="taskName"
                                     outerRadius={120}
                                     innerRadius={50}
-                                    label
+                                    label={false}
                                 >
-                                    {data.taskDistribution.map((_, index) => (
+                                    {taskDistributionPercent.map((_, index) => (
                                         <Cell
                                             key={index}
                                             fill={COLORS[index % COLORS.length]}
@@ -125,9 +173,21 @@ export default function ReportsClient() {
                                         />
                                     ))}
                                 </Pie>
-                                <Tooltip />
-                                <Legend />
+
+                                <Tooltip
+                                    formatter={(value: number, _name, props: any) => [
+                                        `${value}%`,
+                                        props.payload.taskName,
+                                    ]}
+                                />
+
+                                <Legend
+                                    formatter={(value) =>
+                                        value.length > 16 ? value.slice(0, 16) + "…" : value
+                                    }
+                                />
                             </PieChart>
+
                         </ResponsiveContainer>
                     </div>
                 </div>
