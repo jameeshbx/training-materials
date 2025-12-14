@@ -23,7 +23,7 @@ export default function FileDetailPage() {
     }, [id]);
 
     if (!file) {
-        return <p className="text-gray-500">Loading...</p>;
+        return <p className="text-gray-800">Loading...</p>;
     }
 
     return (
@@ -77,7 +77,7 @@ export default function FileDetailPage() {
             </div>
 
             {/* Created Date */}
-            <div className="text-gray-500 text-sm">
+            <div className="text-gray-800 text-sm">
                 Created: {new Date(file.createdAt).toLocaleString()}
             </div>
 

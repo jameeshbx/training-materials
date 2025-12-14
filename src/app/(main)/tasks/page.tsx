@@ -49,7 +49,7 @@ export default function TasksPage() {
 
       {/* HEADER + ADD TASK */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl sm:text-3xl font-bold">Tasks</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-black">Tasks</h1>
 
         <Link
           href="/tasks/addTask"
@@ -63,7 +63,7 @@ export default function TasksPage() {
       <input
         type="text"
         placeholder="Search tasks..."
-        className="w-full p-2 border rounded-lg text-sm"
+        className="w-full bg-white text-gray-900 placeholder-gray-400 border border-gray-300 rounded-lg px-4 py-2 shadow focus:outline-none focus:ring-2 focus:ring-blue-500"
         value={search}
         onChange={(e) => {
           setPage(1);  // Reset to page 1 when searching
@@ -73,7 +73,7 @@ export default function TasksPage() {
 
       {/* LOADING */}
       {loading && (
-        <p className="text-gray-500 text-center py-4 text-sm">
+        <p className="text-gray-800 text-center py-4 text-sm">
           Loading tasks...
         </p>
       )}
@@ -111,29 +111,45 @@ export default function TasksPage() {
                     </p>
                   )}
                 </div>
-
-                {/* LATEST TIME ENTRY */}
                 {latestEntry && (
-                  <div className="bg-gray-50 p-2 rounded border border-gray-100 text-xs mb-3">
+                  <div className="bg-gray-100 p-2 rounded-lg border border-gray-300 text-xs mb-3 space-y-1">
                     {latestEntry.startAt && (
-                      <p className="text-gray-700">
-                        <strong>Start:</strong>{" "}
-                        {new Date(latestEntry.startAt).toLocaleString()}
-                      </p>
+                      <div className="flex justify-between text-gray-700">
+                        <span className="font-semibold">Start:</span>
+                        <span>{new Date(latestEntry.startAt).toLocaleString()}</span>
+                      </div>
                     )}
+
                     {latestEntry.endAt && (
-                      <p className="text-gray-700">
-                        <strong>End:</strong>{" "}
-                        {new Date(latestEntry.endAt).toLocaleString()}
-                      </p>
+                      <div className="flex justify-between text-gray-700">
+                        <span className="font-semibold">End:</span>
+                        <span>{new Date(latestEntry.endAt).toLocaleString()}</span>
+                      </div>
                     )}
                   </div>
                 )}
 
-                {/* TIMER */}
                 <div className="bg-gray-50 p-2 rounded border border-gray-100 text-xs mb-3">
-                  <Timer taskId={task.id} />
+                  <Timer
+                    taskId={task.id}
+                    onUpdate={(updatedEntry) => {
+                      setTasks((prev) =>
+                        prev.map((t) =>
+                          t.id === task.id
+                            ? {
+                              ...t,
+                              timeEntries: [
+                                updatedEntry,
+                                ...(t.timeEntries || []),
+                              ],
+                            }
+                            : t
+                        )
+                      );
+                    }}
+                  />
                 </div>
+
 
                 {/* EDIT / DELETE */}
                 <div className="flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
@@ -163,8 +179,11 @@ export default function TasksPage() {
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1}
-            className={`px-3 py-1.5 text-sm rounded-md border transition 
-        ${page === 1 ? "opacity-40 cursor-not-allowed" : "hover:bg-gray-100"}
+            className={`px-4 py-1.5 text-sm rounded-md border shadow transition 
+        ${page === 1
+                ? "opacity-40 cursor-not-allowed bg-white text-gray-500"
+                : "bg-white text-gray-900 hover:bg-blue-100"
+              }
       `}
           >
             Prev
@@ -180,10 +199,10 @@ export default function TasksPage() {
               <button
                 key={p}
                 onClick={() => setPage(p)}
-                className={`px-3 py-1.5 text-sm rounded-md border transition 
+                className={`px-4 py-1.5 text-sm rounded-md border shadow transition 
             ${page === p
                     ? "bg-blue-600 text-white border-blue-600"
-                    : "hover:bg-gray-100"
+                    : "bg-white text-gray-900 hover:bg-blue-100"
                   }
           `}
               >
@@ -195,15 +214,16 @@ export default function TasksPage() {
           <button
             onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
-            className={`px-3 py-1.5 text-sm rounded-md border transition 
+            className={`px-4 py-1.5 text-sm rounded-md border shadow transition 
         ${page === totalPages
-                ? "opacity-40 cursor-not-allowed"
-                : "hover:bg-gray-100"
+                ? "opacity-40 cursor-not-allowed bg-white text-gray-500"
+                : "bg-white text-gray-900 hover:bg-blue-100"
               }
       `}
           >
             Next
           </button>
+
         </div>
       )}
 

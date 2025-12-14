@@ -2,8 +2,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function FilesPage() {
+    const router = useRouter();
+
     const [showForm, setShowForm] = useState(false);
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
@@ -40,6 +43,7 @@ export default function FilesPage() {
         setFile(null);
 
         loadFiles();
+        router.replace("/files");
     };
 
     return (
@@ -47,7 +51,7 @@ export default function FilesPage() {
 
             {/* Header */}
             <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-bold text-white">Documents</h1>
+                <h1 className="text-3xl font-bold text-black">Documents</h1>
 
                 <button
                     onClick={() => setShowForm(true)}
@@ -58,7 +62,7 @@ export default function FilesPage() {
             </div>
 
             {/* Saved Documents */}
-            <h2 className="text-lg font-semibold text-white">Saved Documents</h2>
+            <h2 className="text-lg font-semibold text-black">Saved Documents</h2>
 
             {uploadedFiles.length === 0 ? (
                 <p className="text-gray-500 italic">No documents found.</p>
